@@ -1,36 +1,289 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rep Ledger — gym & personal training tracker
 
-## Getting Started
+A personal app for someone who goes to the gym regularly and pays for personal-training (PT)
+packages in advance. It tracks the gym membership, PT packages and payments, daily attendance,
+a ledger of PT sessions, workouts and strength progress — and, most importantly, the **value of
+prepaid PT sessions lost to confirmed chargeable absences**.
 
-First, run the development server:
+Live: see *Deployment* below. Data lives in Supabase; the app is deployed on Vercel.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## What it does
+
+| Area | Highlights |
+|---|---|
+| **Today** (dashboard) | One-tap “I went / I missed”, reminders, PT balance and prepaid value, missed-session value (this month and all-time), membership status, week strip, money snapshot, data-backed insights |
+| **Calendar** | Month view with 11 distinct day states (icon + colour + label), day editor with impact preview and per-day change history, planned breaks |
+| **Review days** | Queue of past training days that are still unconfirmed, with one-tap or bulk confirmation |
+| **PT Packages** | Create, renew, edit, close (roll over / forfeit / refund / keep usable), payments (paid, pending, partial, refunds), credits/refunds/adjustments, forecast of next and last session |
+| **Workouts** | “Describe it in a sentence” draft (offline, rule-based), templates, repeat a previous workout, sets × reps × kg, cardio, notes, edit / duplicate / delete |
+| **Progress** | Weekly attendance and workouts, minutes, muscle groups, strength progression and PRs, body measurements, goals, private progress photos |
+| **Money** | Cash spent vs pending, prepaid value split (completed / missed / remaining / cancelled / refunded / credited), effective cost per session, missed value by month, definitions |
+| **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
+| **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
+
+---
+
+## Architecture
+
+```
+Browser (Next.js client components, React Query)
+   │  publishable key + user session (JWT)
+   ▼
+Supabase
+   ├─ Auth (email + password)
+   ├─ Postgres  ── RLS on every user table
+   │     ├─ triggers: attendance → PT ledger (one entry per day, never twice)
+   │     ├─ guards:   package price lock, balance never < 0, future/expired packages
+   │     ├─ RPCs:     create_package, close_package, record_session_adjustment,
+   │     │            void_session_adjustment, save_workout, initialize_account, restore_archive
+   │     ├─ view:     package_summary (all balances derived from the ledger)
+   │     └─ audit_log written by triggers on every important table
+   └─ Storage: private bucket `progress-photos` (per-user folder policy, signed URLs)
+Vercel: hosts the Next.js app (proxy.ts refreshes the session and redirects signed-out users)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Why this design**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Correctness lives in the database.** Session accounting, duplicate prevention, ownership and
+  price locks are enforced by constraints, triggers and `SECURITY DEFINER` functions, so no client
+  (or bug in the UI) can create a double deduction or edit another user's records.
+- **Balances are derived, never stored.** `package_summary` computes every count from the ledger,
+  payments and attendance; there are no counters to drift.
+- **Money is integer paise.** No floating-point arithmetic touches amounts; per-session values are
+  `round(n × price ÷ sessions)` so totals always reconcile.
+- **Client-rendered app shell.** All data is per-user and fetched with the user's session, so the
+  UI renders in the browser (no hydration mismatches with dates), while `proxy.ts` gates routes.
+- **No external AI dependency.** Natural-language logging is a deterministic parser that runs in
+  the browser and never auto-confirms a paid PT session.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Stack: Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS 4, TanStack Query,
+Recharts, Supabase (`@supabase/ssr`), Vitest, Zod.
 
-## Learn More
+### Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    (app)/            authenticated pages: dashboard, calendar, review, packages, workouts,
+                      progress, finance, history, settings
+    login/            sign-in / sign-up / password reset
+    auth/callback     email confirmation & reset links
+    layout.tsx, globals.css (design tokens, light/dark)
+  components/         ui kit, shell/navigation, quick-log, day editor, package sheets,
+                      workout editor, charts
+  lib/
+    domain/           pure, unit-tested business logic: money, dates, attendance rules,
+                      forecast, finance, stats, parser, insights, reminders, csv
+    data/             React Query hooks, derived state, export/restore
+    supabase/         browser + server clients
+  proxy.ts            session refresh + auth redirect (Next 16 "proxy", formerly middleware)
+supabase/
+  migrations/         schema, RLS, triggers, RPCs, views, seed function, storage
+  tests/integration.sql   72 database checks run as a real `authenticated` user (rolled back)
+tests/unit/           Vitest unit tests for the domain layer
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Business rules
 
-## Deploy on Vercel
+### Attendance
+Each calendar date has at most one record with two independent fields:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Gym:** attended · missed · rest · unconfirmed
+- **PT:** completed · missed–chargeable · missed–not sure · trainer cancelled · rescheduled · no PT scheduled · unconfirmed
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A day with no record is **unconfirmed**. Unconfirmed days are never counted as attended,
+completed, missed or lost.
+
+### How the PT balance is calculated
+```
+remaining = sessions purchased + Σ(non-voided ledger entries)
+
+ledger entry                    sessions   created by
+completed                         −1       attendance PT = completed
+forfeited (chargeable absence)    −1       attendance PT = missed–chargeable
+credit                            +n       manual (trainer gave free/make-up sessions)
+refund                            −n       manual or package closure (money returned)
+expired                           −n       package closure: unused sessions forfeited
+transfer_out / transfer_in        ∓n       package closure: explicit rollover to another package
+adjustment                        ±n       manual correction, note required
+```
+- Only `completed` and `missed–chargeable` attendance touch the balance. A gym absence alone never does.
+- A partial unique index allows **one** active completed/forfeited entry per date and per
+  attendance record, so nothing can be deducted twice (including by concurrent requests).
+- Changing or clearing a day **voids** its entry (kept, crossed out, with a reason) and, if needed,
+  creates a new one — corrections are reversible and audited.
+- The balance can never go below zero; a session can't be recorded before a package starts, after
+  it expires (unless extensions are allowed) or on a cancelled package.
+- Sessions are taken from the **oldest active package that covers the date and still has sessions**,
+  unless you pick a package explicitly.
+
+### Cost per session and missed-session value
+- `cost per session = package price ÷ sessions purchased` — per package, fixed forever. A renewal at a
+  new price never changes older packages; their price and session count are locked once used.
+- `missed-session value = confirmed chargeable absences × that package's rate`. This is the value of
+  prepaid sessions you didn't use, **not new money spent** that day.
+- “Possible misses to confirm” (scheduled PT days you missed the gym but haven't confirmed) is shown
+  as an upper bound only and is never added to any loss.
+
+### Trainer cancellations, reschedules, refunds and credits
+- **Trainer cancelled:** no deduction, never a loss.
+- **Rescheduled:** the original day records the move; only the make-up day (logged as completed)
+  uses a session — counted once.
+- **Credits** add sessions (not cash). **Refunded sessions** remove sessions; the money is recorded
+  as a refund payment, which reduces “spent”.
+
+### Payments
+Payments are separate from session value. `paid` payments count as spent; `pending` ones are listed
+as owed. “Not yet paid” = package price − paid payments. A package with no payment recorded is shown
+as entirely not-yet-paid — never as spent.
+
+### Membership expiry
+`estimated end = start + duration months − 1 day` (e.g. 29 Sep 2026 + 3 months → **28 Dec 2026**),
+labelled *Estimated*. The **confirmed** contractual end date is a separate field you fill in; when
+present it is used everywhere and labelled *Confirmed*.
+
+### Forecasts
+Next session and estimated last session walk forward from today (or tomorrow if today's PT outcome
+is already logged) over the package's training days, skipping Sundays when excluded and any planned
+breaks (vacation, rest, trainer unavailable, holiday, package pause). They assume every remaining
+planned session happens and are always labelled as estimates. With an expiry date, the app also
+shows how many sessions are possible before expiry and how many could go unused.
+
+### Time zones
+Dates are stored as plain calendar dates. “Today” is computed in the profile's time zone
+(default Asia/Kolkata), so late-night logging never lands on the wrong day.
+
+---
+
+## Initial data
+
+`initialize_account()` runs once per account on first sign-in (and is safe to call any number of
+times). Every account gets the exercise library and workout templates. **Only the owner account**
+(the email in `private.app_config.owner_email`, which is not stored in this repository) also gets:
+
+- 19Fitness membership from 29 Sep 2026, 3 months, ≈ ₹5,000 — price flagged approximate, payment
+  *not confirmed*, confirmed end date empty (estimate: 28 Dec 2026)
+- Trainer Soham; package ₹6,000 / 30 sessions (₹200 each) from 29 Sep 2026, Mon–Sat, Sundays excluded;
+  **no payment recorded** (you confirm it)
+- Ten confirmed gym absences (1, 3, 11, 12, 13, 15, 17, 19, 23, 24 Oct 2026). Their PT outcome is
+  **unconfirmed**, except 11 Oct (a Sunday), which is *no PT scheduled*.
+
+No workouts, attendance on other dates, or financial transactions are invented.
+
+---
+
+## Local development
+
+Requirements: Node.js 20.9+ (tested on 24), npm. A Supabase project.
+
+```bash
+npm install
+cp .env.example .env.local   # fill in your Supabase URL and publishable key
+npm run dev                  # http://localhost:3000
+```
+
+### Environment variables
+
+| Variable | Where | Notes |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | browser + server | `https://<ref>.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | browser + server | publishable/anon key — safe to expose; RLS protects data |
+| `NEXT_PUBLIC_ALLOW_SIGNUP` | optional | `false` hides the sign-up tab |
+| `SUPABASE_DB_URL` | your shell only | only for `npm run test:db`; never commit or deploy it |
+
+The app never uses the `service_role` key.
+
+### Supabase setup (new project)
+
+1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
+2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`.
+3. Set the owner email (who receives the personal seed):
+   ```sql
+   insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
+   on conflict (key) do update set value = excluded.value;
+   ```
+4. **Authentication → URL configuration:** set *Site URL* to your deployed URL and add
+   `https://<your-domain>/auth/callback` (and `http://localhost:3000/auth/callback`) to *Redirect URLs*.
+   Email + password is enabled by default; keep “Confirm email” on.
+
+### Tests and checks
+
+```bash
+npm test            # 36 unit tests (money, dates/time zones, rules, finance, forecast, parser)
+npm run typecheck
+npm run lint
+npm run build
+SUPABASE_DB_URL='postgresql://…' npm run test:db   # 72 database checks, all rolled back
+```
+`supabase/tests/integration.sql` can also be pasted into the Supabase SQL editor. A successful run
+ends with the error message `ALL INTEGRATION TESTS PASSED (72 checks)` — the exception is
+intentional: it rolls back everything the test created.
+
+---
+
+## Deploying to Vercel
+
+The Vercel project is connected to the GitHub repository, so every push to `main` deploys to
+production. Required project environment variables: `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Production, Preview, Development). Manual alternative:
+
+```bash
+npx vercel --prod
+```
+
+After the first deploy, update Supabase *Site URL* / *Redirect URLs* (step 4 above) to the Vercel domain.
+
+---
+
+## Backup and restore
+
+- **Full archive (JSON)** — Settings → Export & backup. Contains every table with IDs and
+  relationships: profile, memberships, trainers, packages, payments, attendance, the complete PT
+  ledger (including voided entries), planned breaks, exercises, templates, workouts, exercises and
+  sets, measurements, goals, photo metadata and the audit log. Amounts in paise, dates ISO.
+- **CSV** — attendance, packages, payments, session ledger, workouts, memberships, measurements,
+  and per-set exercise history.
+- **Restore** — Settings → *Choose archive file*. The file is validated in the browser, then
+  `restore_archive()` inserts it into *your* account in one transaction. It never overwrites; rows
+  that already exist (same ID, same date, same exercise/trainer name) are skipped, so restoring twice
+  creates no duplicates. Completed/missed ledger entries are rebuilt from attendance.
+
+**Limitations:** progress-photo image files are not inside the archive (download them separately);
+voided ledger entries and the audit log are exported for reference but not re-imported. For
+disaster recovery of the whole database, use Supabase's own backups (daily on paid plans) or
+`pg_dump` with your database URL.
+
+## Security
+
+- RLS on every user table: owners can read/write only their own rows; the ledger and audit log are
+  read-only to clients. Composite foreign keys `(id, user_id)` make cross-user references impossible.
+- Privileged functions validate `auth.uid()` ownership and run with an empty `search_path`.
+  (Supabase's advisor flags the five intentionally callable RPCs — that is expected.)
+- Photos are in a private bucket under `<user_id>/…`, read through 10-minute signed URLs.
+- No secrets in the repository or the browser bundle; `.env*` is git-ignored.
+- Every account starts empty except the configured owner, so other sign-ups never see personal data.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| Confirmation email link opens `localhost` | Set Supabase *Site URL* and *Redirect URLs* to the deployed domain (setup step 4). Your email is still confirmed — sign in on the deployed site. |
+| “No active PT package covers …” | Add or renew a package whose start date is on/before that day, or allow expiry extension. |
+| “Price and session count are locked” | Sessions are recorded; use a credit, refund or adjustment instead. |
+| “This change would leave the package with -1 sessions” | The package is used up — renew or record a credit. |
+| Dashboard shows nothing after sign-in | Check the two `NEXT_PUBLIC_*` variables and that migrations were applied. |
+| Wrong “today” | Settings → Time zone. |
+
+## Known limitations
+
+- Reminders are shown in the app only; no email/push notifications or scheduled jobs (would need
+  an email provider or Vercel Cron + a server key).
+- One PT session per calendar day is assumed (a second one can be recorded as an adjustment).
+- Natural-language logging is rule-based: it recognises common exercises, sets/reps/kg, durations
+  and dates, and asks you to choose when it is unsure.
+- Supabase's built-in email sender is rate-limited; configure custom SMTP for heavier use.

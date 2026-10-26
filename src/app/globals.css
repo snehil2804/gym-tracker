@@ -1,26 +1,252 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Rep Ledger — "ink & ember".
+  Warm paper surfaces, near-black ink for primary actions, and one ember accent
+  reserved for money lost and things that need attention. Status colours are
+  always paired with an icon or label so meaning never relies on colour alone.
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --surface-2: #efece5;
+  --surface-3: #e6e2d8;
+  --ink: #18160f;
+  --ink-2: #3a372f;
+  --muted: #6b665b;
+  --faint: #9a9488;
+  --line: #e2ddd2;
+  --line-strong: #cfc8b9;
+  --accent: #d9481f;
+  --accent-soft: #fbe6dc;
+  --accent-ink: #ffffff;
+  --good: #2f7d4f;
+  --good-soft: #e1f0e5;
+  --warn: #a8670f;
+  --warn-soft: #f8ecd7;
+  --info: #2f63a1;
+  --info-soft: #e1eaf6;
+  --violet: #6e4fa0;
+  --violet-soft: #ece4f6;
+  --rest: #8a7445;
+  --rest-soft: #efe8d6;
+  --unknown: #8c877c;
+  --unknown-soft: #ecebe6;
+  --primary: #18160f;
+  --primary-ink: #ffffff;
+  --ring: #d9481f;
+  --shadow: 0 1px 2px rgb(24 22 15 / 0.04), 0 4px 16px rgb(24 22 15 / 0.05);
+  --shadow-lg: 0 10px 40px rgb(24 22 15 / 0.16);
+  --chart-good: #2f7d4f;
+  --chart-loss: #d9481f;
+  --chart-ink: #4a463d;
+  --chart-grid: #ebe7de;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --bg: #11100d;
+    --surface: #1a1915;
+    --surface-2: #23211c;
+    --surface-3: #2d2a24;
+    --ink: #f3f0e8;
+    --ink-2: #d8d3c7;
+    --muted: #a39e92;
+    --faint: #757064;
+    --line: #2e2b25;
+    --line-strong: #3d3a32;
+    --accent: #ff6a3d;
+    --accent-soft: #3a1d12;
+    --accent-ink: #1a0d07;
+    --good: #5cbf83;
+    --good-soft: #15291c;
+    --warn: #e0a548;
+    --warn-soft: #33270f;
+    --info: #78a8e6;
+    --info-soft: #152338;
+    --violet: #b195dd;
+    --violet-soft: #271d36;
+    --rest: #c9ad74;
+    --rest-soft: #2c2616;
+    --unknown: #8f8a7e;
+    --unknown-soft: #24231f;
+    --primary: #f3f0e8;
+    --primary-ink: #14130f;
+    --ring: #ff6a3d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.5);
+    --chart-good: #3d9e66;
+    --chart-loss: #e8592c;
+    --chart-ink: #c9c3b6;
+    --chart-grid: #2a2823;
+    color-scheme: dark;
   }
 }
 
+:root[data-theme="dark"] {
+  --bg: #11100d;
+  --surface: #1a1915;
+  --surface-2: #23211c;
+  --surface-3: #2d2a24;
+  --ink: #f3f0e8;
+  --ink-2: #d8d3c7;
+  --muted: #a39e92;
+  --faint: #757064;
+  --line: #2e2b25;
+  --line-strong: #3d3a32;
+  --accent: #ff6a3d;
+  --accent-soft: #3a1d12;
+  --accent-ink: #1a0d07;
+  --good: #5cbf83;
+  --good-soft: #15291c;
+  --warn: #e0a548;
+  --warn-soft: #33270f;
+  --info: #78a8e6;
+  --info-soft: #152338;
+  --violet: #b195dd;
+  --violet-soft: #271d36;
+  --rest: #c9ad74;
+  --rest-soft: #2c2616;
+  --unknown: #8f8a7e;
+  --unknown-soft: #24231f;
+  --primary: #f3f0e8;
+  --primary-ink: #14130f;
+  --ring: #ff6a3d;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.5);
+  --chart-good: #3d9e66;
+  --chart-loss: #e8592c;
+  --chart-ink: #c9c3b6;
+  --chart-grid: #2a2823;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-violet: var(--violet);
+  --color-violet-soft: var(--violet-soft);
+  --color-rest: var(--rest);
+  --color-rest-soft: var(--rest-soft);
+  --color-unknown: var(--unknown);
+  --color-unknown-soft: var(--unknown-soft);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Hatched fill for "not confirmed" states (distinguishable without colour). */
+.hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    color-mix(in oklab, var(--unknown) 28%, transparent) 4px 5px
+  );
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.anim-rise {
+  animation: rise 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.anim-sheet {
+  animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-fade {
+  animation: fade 0.18s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Hide number input spinners — amounts are typed, not nudged. */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
