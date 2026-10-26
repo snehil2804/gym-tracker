@@ -228,17 +228,22 @@ intentional: it rolls back everything the test created.
 
 ## Deploying to Vercel
 
-The Vercel project is connected to the GitHub repository, so every push to `main` deploys to
-production. Required project environment variables: `NEXT_PUBLIC_SUPABASE_URL`,
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Production, Preview, Development). Manual alternative:
+Vercel project: `gym-tracker` (team "Snehil's projects", functions region `bom1` / Mumbai, close to
+the Supabase project in `ap-south-1`). Project environment variables (Production, Preview,
+Development): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
+Deploy from this folder with the Vercel CLI:
 
 ```bash
-npx vercel --prod
+npx vercel login          # once per machine
+npx vercel link --project gym-tracker --yes
+npx vercel deploy --prod
 ```
 
-After the first deploy, update Supabase *Site URL* / *Redirect URLs* (step 4 above) to the Vercel domain.
+To deploy on every push instead, connect a Git repository to the project in the Vercel dashboard
+(Project → Settings → Git).
 
----
+After the first deploy, update Supabase *Site URL* / *Redirect URLs* (setup step 4) to the Vercel domain.
 
 ## Backup and restore
 
