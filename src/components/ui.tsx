@@ -14,6 +14,7 @@ import {
   useState,
   useSyncExternalStore,
   type ButtonHTMLAttributes,
+  type CSSProperties,
   type InputHTMLAttributes,
   type ReactNode,
   type SelectHTMLAttributes,
@@ -112,24 +113,31 @@ export function LinkButton({
 // ---------------------------------------------------------------------------
 // Surfaces
 // ---------------------------------------------------------------------------
+export type CardGlow = "accent" | "warn" | "good" | "info" | "violet" | "pink" | "teal";
+
 export function Card({
   children,
   className,
   as: As = "section",
   tone,
+  glow,
 }: {
   children: ReactNode;
   className?: string;
   as?: "section" | "div" | "article";
   tone?: "accent" | "warn" | "plain";
+  /** Soft colour wash in the card's corner; also tints the card header's eyebrow. */
+  glow?: CardGlow;
 }) {
   return (
     <As
       className={cx(
         "rounded-2xl border bg-surface shadow-card",
+        glow && "card-glow",
         tone === "accent" ? "border-accent/35" : tone === "warn" ? "border-warn/35" : "border-line",
         className,
       )}
+      style={glow ? ({ "--card-tone": `var(--${glow})` } as CSSProperties) : undefined}
     >
       {children}
     </As>
@@ -150,7 +158,7 @@ export function CardHeader({
   return (
     <div className={cx("flex items-start justify-between gap-3 px-5 pt-4", className)}>
       <div className="min-w-0">
-        {eyebrow && <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{eyebrow}</p>}
+        {eyebrow && <p className="text-[11px] font-semibold tracking-[0.08em] text-(--card-tone,var(--muted)) uppercase">{eyebrow}</p>}
         <h2 className="truncate text-[15px] font-semibold text-ink">{title}</h2>
       </div>
       {action && <div className="shrink-0">{action}</div>}

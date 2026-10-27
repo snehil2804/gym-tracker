@@ -19,6 +19,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Avatar } from "@/components/avatar";
+import { LIFT_DROP_MS, LiftLogo } from "@/components/logo";
 import { FeaturesProvider, PrivacyProvider } from "@/components/preferences";
 import { PageFallback } from "@/components/page-fallback";
 import { QuickLogProvider, useQuickLog } from "@/components/quick-log";
@@ -26,16 +27,25 @@ import { Sheet, cx } from "@/components/ui";
 import { useProfile } from "@/lib/data/hooks";
 import { getSupabase } from "@/lib/supabase/client";
 
+/**
+ * Each destination has its own colour (`tone`: text + soft chip) and its own icon move (`anim`,
+ * see `.ico-*` in globals.css) that plays on hover and when the page opens.
+ */
 const NAV = [
-  { href: "/", label: "Today", icon: Sun },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/workouts", label: "Workouts", icon: Dumbbell },
-  { href: "/progress", label: "Progress", icon: BarChart3 },
-  { href: "/packages", label: "PT Packages", icon: Package },
-  { href: "/finance", label: "Money", icon: IndianRupee },
-  { href: "/history", label: "History", icon: History },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/", label: "Today", icon: Sun, anim: "ico-sun", tone: "text-warn", chip: "bg-warn-soft", hover: "group-hover:bg-warn-soft group-hover:text-warn" },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays, anim: "ico-cal", tone: "text-info", chip: "bg-info-soft", hover: "group-hover:bg-info-soft group-hover:text-info" },
+  { href: "/workouts", label: "Workouts", icon: Dumbbell, anim: "ico-lift", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
+  { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-violet", chip: "bg-violet-soft", hover: "group-hover:bg-violet-soft group-hover:text-violet" },
+  { href: "/packages", label: "PT Packages", icon: Package, anim: "ico-pop", tone: "text-pink", chip: "bg-pink-soft", hover: "group-hover:bg-pink-soft group-hover:text-pink" },
+  { href: "/finance", label: "Money", icon: IndianRupee, anim: "ico-coin", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
+  { href: "/history", label: "History", icon: History, anim: "ico-rewind", tone: "text-teal", chip: "bg-teal-soft", hover: "group-hover:bg-teal-soft group-hover:text-teal" },
+  { href: "/settings", label: "Settings", icon: Settings, anim: "ico-gear", tone: "text-ink-2", chip: "bg-surface-3", hover: "group-hover:bg-surface-3 group-hover:text-ink-2" },
 ];
+const MORE_EXTRA = {
+  "/review": { label: "Review days", icon: ListChecks, anim: "ico-pop", tone: "text-warn", chip: "bg-warn-soft", hover: "group-hover:bg-warn-soft group-hover:text-warn" },
+  "/workouts/library": { label: "Exercises", icon: LayoutGrid, anim: "ico-pop", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
+};
+const navItem = (href: string) => NAV.find((n) => n.href === href)!;
 
 function isActive(path: string, href: string) {
   return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
@@ -101,19 +111,37 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 px-2">
-      <span className="grid size-8 place-items-center rounded-[10px] bg-primary text-primary-ink">
-        <svg viewBox="0 0 64 64" className="size-6" aria-hidden>
-          <rect x="14" y="27" width="6" height="10" rx="2" fill="currentColor" />
-          <rect x="44" y="27" width="6" height="10" rx="2" fill="currentColor" />
-          <rect x="20" y="22" width="5" height="20" rx="2" fill="currentColor" />
-          <rect x="39" y="22" width="5" height="20" rx="2" fill="currentColor" />
-          <rect x="25" y="30" width="14" height="4" rx="2" fill="var(--accent)" />
-        </svg>
-      </span>
+    <Link href="/" className="group flex items-center gap-2.5 px-2" aria-label="Rep Ledger — Today">
+      <LiftLogo size={34} className="shadow-brand" />
       <span className="font-display text-[17px] font-semibold tracking-tight">Rep Ledger</span>
     </Link>
   );
+}
+
+/** Once per browser session (i.e. right after signing in) the page jolts when the lifter drops the bar. */
+function useIntroQuake() {
+  const [quake, setQuake] = useState(false);
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("rl-intro-quake")) return;
+    } catch {
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // The flag is written only when the quake actually plays, so a cancelled run can retry.
+    const start = setTimeout(() => {
+      try {
+        sessionStorage.setItem("rl-intro-quake", "1");
+      } catch {}
+      setQuake(true);
+    }, LIFT_DROP_MS);
+    const stop = setTimeout(() => setQuake(false), LIFT_DROP_MS + 650);
+    return () => {
+      clearTimeout(start);
+      clearTimeout(stop);
+    };
+  }, []);
+  return quake;
 }
 
 async function signOut() {
@@ -126,17 +154,18 @@ function Frame({ children }: { children: ReactNode }) {
   const quick = useQuickLog();
   const [more, setMore] = useState(false);
   const { data: profile } = useProfile();
+  const quake = useIntroQuake();
 
   return (
-    <div className="min-h-dvh">
+    <div className={cx("min-h-dvh", quake && "anim-quake")}>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-bg px-3 py-5 md:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line/70 bg-bg/70 px-3 py-5 backdrop-blur-xl md:flex">
         <Brand />
         <button
           onClick={() => quick.open()}
-          className="mt-6 flex h-11 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-ink transition-opacity hover:opacity-90"
+          className="group bg-brand shadow-brand mt-6 flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-[transform,filter] hover:brightness-110 active:scale-[0.98]"
         >
-          <Plus className="size-4" /> Log training
+          <Plus className="size-4 transition-transform duration-300 group-hover:rotate-90" /> Log training
         </button>
         <nav className="mt-6 flex flex-col gap-0.5" aria-label="Main">
           {NAV.filter((n) => profile?.pt_enabled || n.href !== "/packages").map((n) => (
@@ -145,11 +174,18 @@ function Frame({ children }: { children: ReactNode }) {
               href={n.href}
               aria-current={isActive(path, n.href) ? "page" : undefined}
               className={cx(
-                "flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors",
-                isActive(path, n.href) ? "bg-surface text-ink shadow-card" : "text-muted hover:bg-surface-2 hover:text-ink",
+                "group flex h-11 items-center gap-3 rounded-xl px-2 text-sm font-medium transition-colors",
+                isActive(path, n.href) ? "bg-surface text-ink shadow-card" : "text-muted hover:bg-surface/70 hover:text-ink",
               )}
             >
-              <n.icon className="size-[18px]" />
+              <span
+                className={cx(
+                  "grid size-8 place-items-center rounded-lg transition-colors",
+                  isActive(path, n.href) ? cx(n.chip, n.tone) : n.hover,
+                )}
+              >
+                <n.icon className={cx("ico size-[18px]", n.anim)} />
+              </span>
               {n.label}
             </Link>
           ))}
@@ -169,7 +205,7 @@ function Frame({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line/70 bg-bg/85 px-4 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line/60 bg-bg/75 px-4 backdrop-blur-xl md:hidden">
         <Brand />
         <Link href="/settings" aria-label="Profile and settings" className="grid size-10 place-items-center rounded-full hover:bg-surface-2">
           <Avatar size={32} />
@@ -183,21 +219,21 @@ function Frame({ children }: { children: ReactNode }) {
       {/* Mobile bottom navigation: the five most-used destinations, Log in the thumb zone. */}
       <nav
         aria-label="Main"
-        className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur md:hidden"
+        className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-surface/80 backdrop-blur-xl md:hidden"
       >
         <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center">
-          <TabLink href="/" label="Today" icon={<Sun className="size-5" />} active={isActive(path, "/")} />
-          <TabLink href="/calendar" label="Calendar" icon={<CalendarDays className="size-5" />} active={isActive(path, "/calendar")} />
+          <TabLink item={navItem("/")} active={isActive(path, "/")} />
+          <TabLink item={navItem("/calendar")} active={isActive(path, "/calendar")} />
           <div className="grid place-items-center">
             <button
               onClick={() => quick.open()}
               aria-label="Log training"
-              className="grid size-13 -translate-y-3 place-items-center rounded-2xl bg-primary text-primary-ink shadow-pop transition-transform active:scale-95"
+              className="bg-brand shadow-brand grid size-13 -translate-y-3 place-items-center rounded-2xl transition-transform active:scale-95"
             >
               <Plus className="size-6" />
             </button>
           </div>
-          <TabLink href="/workouts" label="Workouts" icon={<Dumbbell className="size-5" />} active={isActive(path, "/workouts")} />
+          <TabLink item={navItem("/workouts")} active={isActive(path, "/workouts")} />
           <button
             onClick={() => setMore(true)}
             className={cx(
@@ -214,21 +250,23 @@ function Frame({ children }: { children: ReactNode }) {
       <Sheet open={more} onClose={() => setMore(false)} title="More">
         <div className="grid grid-cols-2 gap-2 pb-2">
           {[
-            ...(profile?.pt_enabled ? [{ href: "/packages", label: "PT Packages", icon: Package }] : []),
-            { href: "/finance", label: "Money", icon: IndianRupee },
-            { href: "/progress", label: "Progress", icon: BarChart3 },
-            ...(profile?.pt_enabled ? [{ href: "/review", label: "Review days", icon: ListChecks }] : []),
-            { href: "/history", label: "History", icon: History },
-            { href: "/settings", label: "Settings", icon: Settings },
-            { href: "/workouts/library", label: "Exercises", icon: LayoutGrid },
+            ...(profile?.pt_enabled ? [navItem("/packages")] : []),
+            navItem("/finance"),
+            navItem("/progress"),
+            ...(profile?.pt_enabled ? [{ href: "/review", ...MORE_EXTRA["/review"] }] : []),
+            navItem("/history"),
+            navItem("/settings"),
+            { href: "/workouts/library", ...MORE_EXTRA["/workouts/library"] },
           ].map((n) => (
             <Link
               key={n.href}
               href={n.href}
               onClick={() => setMore(false)}
-              className="flex h-16 items-center gap-3 rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-surface-2"
+              className="group flex h-16 items-center gap-3 rounded-2xl border border-line bg-surface px-3 text-sm font-semibold text-ink transition-colors hover:bg-surface-2 active:scale-[0.98]"
             >
-              <n.icon className="size-5 text-muted" />
+              <span className={cx("grid size-10 shrink-0 place-items-center rounded-xl", n.chip, n.tone)}>
+                <n.icon className={cx("ico size-5", n.anim)} />
+              </span>
               {n.label}
             </Link>
           ))}
@@ -244,15 +282,17 @@ function Frame({ children }: { children: ReactNode }) {
   );
 }
 
-function TabLink({ href, label, icon, active }: { href: string; label: string; icon: ReactNode; active: boolean }) {
+function TabLink({ item, active }: { item: (typeof NAV)[number]; active: boolean }) {
   return (
     <Link
-      href={href}
+      href={item.href}
       aria-current={active ? "page" : undefined}
-      className={cx("flex flex-col items-center gap-0.5 text-[11px] font-medium", active ? "text-ink" : "text-muted")}
+      className={cx("group flex flex-col items-center gap-0.5 text-[11px] font-medium", active ? "text-ink" : "text-muted")}
     >
-      {icon}
-      {label}
+      <span className={cx("grid h-7 w-12 place-items-center rounded-full transition-colors", active && cx(item.chip, item.tone))}>
+        <item.icon className={cx("ico size-5", item.anim)} />
+      </span>
+      {item.label}
     </Link>
   );
 }

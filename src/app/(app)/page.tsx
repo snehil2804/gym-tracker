@@ -91,7 +91,7 @@ function Dashboard({ d }: { d: Core }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <RecentWorkouts d={d} />
-        <Card className="pb-2">
+        <Card glow="warn" className="pb-2">
           <CardHeader title="Insights" eyebrow="From your records" action={insights.length ? <EyeToggle id="dash-insights" /> : undefined} />
           {insights.length === 0 ? (
             <p className="px-5 py-4 text-sm text-muted">Insights appear once there are enough confirmed records to support them.</p>
@@ -215,7 +215,7 @@ function PackageCard({ d }: { d: Core }) {
   const p = d.current;
   if (!p) {
     return (
-      <Card className="lg:col-span-2">
+      <Card glow="violet" className="lg:col-span-2">
         <EmptyState
           icon={<Dumbbell className="size-5" />}
           title="No PT package yet"
@@ -234,7 +234,7 @@ function PackageCard({ d }: { d: Core }) {
   const pct = total > 0 ? Math.round((used / total) * 100) : 0;
 
   return (
-    <Card className="lg:col-span-2">
+    <Card glow="violet" className="lg:col-span-2">
       <CardHeader
         eyebrow={upcoming ? "Upcoming PT package" : "PT package"}
         title={
@@ -318,7 +318,7 @@ function MissedValueCard({ d }: { d: Core }) {
   const f = d.finance;
   const month = monthName(d.today);
   return (
-    <Card tone={f.missedValueThisMonth > 0 ? "accent" : undefined} className="flex flex-col">
+    <Card glow="accent" tone={f.missedValueThisMonth > 0 ? "accent" : undefined} className="flex flex-col">
       <CardHeader eyebrow="Missed PT value" title={`${month}, confirmed`} action={<EyeToggle id="dash-missed" />} />
       <div className="flex flex-1 flex-col px-5 pt-3 pb-5">
         <p className={cx("num font-display text-[40px] leading-none font-semibold tracking-tight", f.missedValueThisMonth > 0 ? "text-accent" : "text-ink")}>
@@ -370,7 +370,7 @@ function WeekCard({ d }: { d: Core }) {
   const streak = currentStreak(d.attendance, d.today, [1, 2, 3, 4, 5, 6, 7].filter((x) => !d.scheduleDays.includes(x)));
 
   return (
-    <Card>
+    <Card glow="info">
       <CardHeader eyebrow="This week" title={`${trainedDays} of ${goal} training days`} />
       <div className="px-5 pt-4 pb-5">
         <div className="grid grid-cols-7 gap-1.5">
@@ -433,7 +433,7 @@ function MembershipCard({ d }: { d: Core }) {
   const m = d.membership;
   if (!m) {
     return (
-      <Card>
+      <Card glow="teal">
         <EmptyState icon={<CalendarClock className="size-5" />} title="No gym membership" action={<LinkButton href="/settings#membership">Add membership</LinkButton>}>
           Add your membership to track its expiry.
         </EmptyState>
@@ -445,7 +445,7 @@ function MembershipCard({ d }: { d: Core }) {
   const total = Math.max(daysBetween(m.start_date, end.date) + 1, 1);
   const elapsed = Math.min(Math.max(daysBetween(m.start_date, d.today) + 1, 0), total);
   return (
-    <Card>
+    <Card glow="teal">
       <CardHeader
         eyebrow="Gym membership"
         title={m.gym_name}
@@ -495,7 +495,7 @@ function MembershipCard({ d }: { d: Core }) {
 function MoneyCard({ d }: { d: Core }) {
   const f = d.finance;
   return (
-    <Card>
+    <Card glow="good">
       <CardHeader
         eyebrow="Money"
         title="Spent so far"
@@ -541,7 +541,7 @@ function MoneyCard({ d }: { d: Core }) {
 function RecentWorkouts({ d }: { d: Core }) {
   const recent = d.workouts.slice(0, 4);
   return (
-    <Card className="lg:col-span-2">
+    <Card glow="pink" className="lg:col-span-2">
       <CardHeader
         eyebrow="Workouts"
         title="Recent"

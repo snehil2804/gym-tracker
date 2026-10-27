@@ -52,7 +52,7 @@ function Finance({ d }: { d: Core }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         {d.ptEnabled && (
-        <Card tone={f.missedValueThisMonth > 0 ? "accent" : undefined} className="p-5 lg:col-span-2">
+        <Card glow="accent" tone={f.missedValueThisMonth > 0 ? "accent" : undefined} className="p-5 lg:col-span-2">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Missed PT value · {monthName(d.today)}</p>
             <EyeToggle id="fin-missed" />
@@ -76,7 +76,7 @@ function Finance({ d }: { d: Core }) {
           </div>
         </Card>
         )}
-        <Card className={cx("p-5", !d.ptEnabled && "lg:col-span-3")}>
+        <Card glow="violet" className={cx("p-5", !d.ptEnabled && "lg:col-span-3")}>
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Spent (paid)</p>
             <EyeToggle id="fin-spent" />
@@ -97,7 +97,7 @@ function Finance({ d }: { d: Core }) {
 
       {d.ptEnabled && (
       <>
-      <Card className="p-5">
+      <Card glow="good" className="p-5">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-[15px] font-semibold">Where the prepaid PT value went</h2>
           <EyeToggle id="fin-value" />

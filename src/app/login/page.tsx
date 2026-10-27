@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { LiftLogo } from "@/components/logo";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -8,21 +9,21 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative hidden overflow-hidden bg-[#18160f] p-12 text-[#f5f3ee] lg:flex lg:flex-col">
-        <div className="flex items-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-[11px] bg-[#f5f3ee] text-[#18160f]">
-            <svg viewBox="0 0 64 64" className="size-6" aria-hidden>
-              <rect x="14" y="27" width="6" height="10" rx="2" fill="currentColor" />
-              <rect x="44" y="27" width="6" height="10" rx="2" fill="currentColor" />
-              <rect x="20" y="22" width="5" height="20" rx="2" fill="currentColor" />
-              <rect x="39" y="22" width="5" height="20" rx="2" fill="currentColor" />
-              <rect x="25" y="30" width="14" height="4" rx="2" fill="#d9481f" />
-            </svg>
-          </span>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 0% 0%, rgb(255 122 69 / 0.28), transparent 70%), radial-gradient(55% 50% at 100% 100%, rgb(122 92 255 / 0.30), transparent 70%), radial-gradient(40% 35% at 85% 20%, rgb(242 69 107 / 0.18), transparent 70%)",
+          }}
+        />
+        <div className="relative flex items-center gap-3">
+          <LiftLogo size={40} className="shadow-brand" />
           <span className="font-display text-lg font-semibold">Rep Ledger</span>
         </div>
-        <div className="mt-auto max-w-md">
+        <div className="relative mt-auto max-w-md">
           <p className="font-display text-4xl leading-[1.1] font-semibold tracking-tight">
-            Every session you paid for, <span className="text-[#ff6a3d]">accounted for.</span>
+            Every session you paid for, <span className="text-brand">accounted for.</span>
           </p>
           <p className="mt-4 text-[15px] leading-relaxed text-[#bdb7aa]">
             Membership, PT packages, attendance and workouts in one honest ledger — completed sessions, missed sessions and the

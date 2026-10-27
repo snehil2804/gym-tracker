@@ -107,3 +107,13 @@ Estimates always carry the `<Estimate />` tag; confirmed values use a `Confirmed
 - Money: Indian format via `formatMoney` (₹6,000, ₹1,23,456, ₹333.33).
 - Dates: `formatDate` / `formatShort` ("Tue, 27 Oct"); relative words for near dates ("Tomorrow").
 - Say "unconfirmed", never imply unknown days were missed or attended.
+
+## Motion & colour (added Oct 2026)
+- Brand mark: `<LiftLogo size={…} />` from `src/components/logo.tsx`. Don't hand-draw the old
+  barbell SVG. Use `still` where motion would distract.
+- Nav icons get `ico ico-<move>` classes; add new moves in `globals.css` next to the others and
+  keep them under ~1 s.
+- Main call-to-action uses `bg-brand shadow-brand`; everything else stays on the token palette.
+- Cards that summarise one topic may take `glow` (`accent | warn | good | info | violet | pink | teal`);
+  the card header's eyebrow picks up the same colour. Don't use more than one glow colour per card.
+- Every animation must be disabled under `prefers-reduced-motion` (see the block in `globals.css`).

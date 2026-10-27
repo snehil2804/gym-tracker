@@ -1,5 +1,6 @@
 "use client";
 
+import { LiftLogo } from "@/components/logo";
 import { ChevronDown, Mail } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -126,6 +127,10 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
+      <div className="mb-6 flex items-center gap-3 lg:hidden">
+        <LiftLogo size={44} className="shadow-brand" />
+        <span className="font-display text-xl font-semibold tracking-tight">Rep Ledger</span>
+      </div>
       <h1 className="font-display text-3xl font-semibold tracking-tight">
         {mode === "reset" ? "Reset password" : "Welcome back"}
       </h1>

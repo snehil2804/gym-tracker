@@ -124,7 +124,7 @@ export default function CalendarPage() {
       </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Card className="p-5 lg:col-span-2">
+        <Card glow="info" className="p-5 lg:col-span-2">
           <h3 className="mb-3 text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Legend</h3>
           <DayLegend />
           <p className="mt-3 text-xs text-muted">
@@ -132,7 +132,7 @@ export default function CalendarPage() {
             <i className="mx-1 inline-block size-1.5 rounded-full bg-rest align-middle" /> planned break (vacation, pause, holiday)
           </p>
         </Card>
-        <Card className="p-5">
+        <Card glow="info" className="p-5">
           <h3 className="mb-3 text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">{monthName(month)} summary</h3>
           <dl className="space-y-1.5 text-sm">
             {(["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "rest", "unverified"] as DayKind[])

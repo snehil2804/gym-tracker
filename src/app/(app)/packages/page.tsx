@@ -47,7 +47,7 @@ export default function PackagesPage() {
             const total = p.sessions_purchased + p.credited + p.transferred_in + p.adjusted;
             return (
               <Link key={p.id} href={`/packages/${p.id}`} className="group">
-                <Card className="h-full p-5 transition-colors group-hover:border-line-strong">
+                <Card glow="pink" className="h-full p-5 transition-colors group-hover:border-line-strong">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs text-muted">

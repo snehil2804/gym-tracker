@@ -5,6 +5,23 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — motion & colour
+- Animated brand mark (`src/components/logo.tsx`): a little lifter presses the barbell overhead,
+  drops it and picks it up again. The first time the app opens in a browser session (right after
+  signing in) the page jolts once as the bar lands. Shown in the sidebar, mobile header, login and
+  onboarding.
+- Every navigation icon has its own move on hover and when its page opens (sun spins, calendar
+  wobbles, dumbbell curls, bars grow, coin flips, history rewinds, gear turns) plus its own colour.
+- Colour pass: soft colour glow behind every screen, brand gradient on "Log training" and the
+  mobile + button, glassy sidebar / header / tab bar, and per-card colour washes with tinted labels
+  (`<Card glow="…">`). New `pink` and `teal` tokens.
+- All motion stops for people who turn on "reduce motion".
+
+### Fixed
+- Date text on iPhone now sits in the vertical middle of its field instead of at the top.
+- Automatic dark mode had stopped working (a broken `@media (prefers-color-scheme: dark)` block);
+  restored.
+
 ### Fixed — mobile & layout polish
 - Date fields no longer spill out of their cards on iPhone Safari (global reset of the iOS date/time
   input's intrinsic width and centred text); History From/To and Settings birth date fit at 375 px.

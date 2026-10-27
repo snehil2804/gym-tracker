@@ -29,6 +29,13 @@
   --info-soft: #e1eaf6;
   --violet: #6e4fa0;
   --violet-soft: #ece4f6;
+  --pink: #d63a72;
+  --pink-soft: #fbe2ec;
+  --teal: #0e8a82;
+  --teal-soft: #d9f1ee;
+  --mesh-1: rgb(255 122 69 / 0.2);
+  --mesh-2: rgb(122 92 255 / 0.16);
+  --mesh-3: rgb(14 138 130 / 0.12);
   --rest: #8a7445;
   --rest-soft: #efe8d6;
   --unknown: #8c877c;
@@ -46,9 +53,9 @@
   color-scheme: light;
 }
 
+@media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --photo-glow: 0.4;
-  :root:not([data-theme="light"]) {
     --bg: #11100d;
     --surface: #1a1915;
     --surface-2: #23211c;
@@ -70,6 +77,13 @@
     --info-soft: #152338;
     --violet: #b195dd;
     --violet-soft: #271d36;
+    --pink: #f27ba6;
+    --pink-soft: #35161f;
+    --teal: #4ccabf;
+    --teal-soft: #0f2f2c;
+    --mesh-1: rgb(255 122 69 / 0.10);
+    --mesh-2: rgb(122 92 255 / 0.12);
+    --mesh-3: rgb(76 202 191 / 0.06);
     --rest: #c9ad74;
     --rest-soft: #2c2616;
     --unknown: #8f8a7e;
@@ -110,6 +124,13 @@
   --info-soft: #152338;
   --violet: #b195dd;
   --violet-soft: #271d36;
+  --pink: #f27ba6;
+  --pink-soft: #35161f;
+  --teal: #4ccabf;
+  --teal-soft: #0f2f2c;
+  --mesh-1: rgb(255 122 69 / 0.10);
+  --mesh-2: rgb(122 92 255 / 0.12);
+  --mesh-3: rgb(76 202 191 / 0.06);
   --rest: #c9ad74;
   --rest-soft: #2c2616;
   --unknown: #8f8a7e;
@@ -148,6 +169,10 @@
   --color-info-soft: var(--info-soft);
   --color-violet: var(--violet);
   --color-violet-soft: var(--violet-soft);
+  --color-pink: var(--pink);
+  --color-pink-soft: var(--pink-soft);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
   --color-rest: var(--rest);
   --color-rest-soft: var(--rest-soft);
   --color-unknown: var(--unknown);
@@ -170,6 +195,41 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
   font-feature-settings: "ss01", "cv11";
+}
+
+/* Soft colour glow behind every screen (stays put while the page scrolls). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 0% 0%, var(--mesh-1), transparent 70%),
+    radial-gradient(50% 45% at 100% 8%, var(--mesh-2), transparent 70%),
+    radial-gradient(60% 45% at 70% 100%, var(--mesh-3), transparent 70%);
+}
+
+/* Brand gradient (logo, main call-to-action). */
+.bg-brand {
+  background: linear-gradient(135deg, #ff7a45 0%, #f2456b 55%, #7a5cff 100%);
+  color: #fff;
+}
+/* Card with a soft colour wash in its top-right corner (Card glow prop). */
+.card-glow {
+  background-image:
+    radial-gradient(70% 90% at 100% 0%, color-mix(in oklab, var(--card-tone) 13%, transparent), transparent 70%),
+    linear-gradient(to bottom, color-mix(in oklab, var(--card-tone) 4%, transparent), transparent 40%);
+  border-color: color-mix(in oklab, var(--card-tone) 18%, var(--line));
+}
+.shadow-brand {
+  box-shadow: 0 8px 24px -8px rgb(242 69 107 / 0.55), 0 2px 6px -2px rgb(122 92 255 / 0.35);
+}
+.text-brand {
+  background: linear-gradient(135deg, #ff7a45, #f2456b 55%, #7a5cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .num {
@@ -271,13 +331,40 @@ input[type="date"]:not(.w-auto),
 input[type="time"]:not(.w-auto),
 input[type="datetime-local"]:not(.w-auto),
 input[type="month"]:not(.w-auto) {
-  display: block;
   width: 100%;
 }
+/*
+  iPhone Safari draws the date text in an inner box pinned to the top of the field. Making the
+  field a flex box and centring that box keeps the text in the vertical middle, like other inputs.
+*/
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: normal;
+}
+input[type="date"].w-auto,
+input[type="time"].w-auto {
+  display: inline-flex;
+}
 input[type="date"]::-webkit-date-and-time-value,
-input[type="time"]::-webkit-date-and-time-value {
+input[type="time"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value {
   text-align: left;
   margin: 0;
+  padding: 0;
+  line-height: 1.25;
+  min-height: 1.25em;
+}
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit {
+  padding: 0;
+  line-height: 1.25;
 }
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
@@ -296,4 +383,182 @@ input[type="time"]:not(.h-8):not(.h-9) {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Brand mark: the little lifter (src/components/logo.tsx). One 5 s cycle:
+   press overhead → hold → drop (bar lands at 41%) → bend and pick it up → rest.
+   --------------------------------------------------------------------------- */
+.lifter-arm {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lifter-arm 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.lifter-bar {
+  animation: lifter-bar 5s infinite;
+}
+.lifter-body {
+  animation: lifter-body 5s ease-in-out infinite;
+}
+.lifter-eyes {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: lifter-eyes 5s infinite;
+}
+.lifter-shadow {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: lifter-shadow 5s infinite;
+}
+.lifter-still .lifter-arm,
+.lifter-still .lifter-bar,
+.lifter-still .lifter-body,
+.lifter-still .lifter-eyes,
+.lifter-still .lifter-shadow {
+  animation: none;
+}
+.lifter-still .lifter-arm {
+  transform: scaleY(0.1);
+}
+@keyframes lifter-arm {
+  0%, 8% { transform: scaleY(0.1); }
+  24%, 36% { transform: scaleY(1); }
+  38.5%, 100% { transform: scaleY(0.1); }
+}
+@keyframes lifter-bar {
+  0%, 8% { transform: translateY(0); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
+  24% { transform: translateY(-26px); }
+  36% { transform: translateY(-26px); animation-timing-function: cubic-bezier(0.6, 0, 1, 1); }
+  41% { transform: translateY(9px); animation-timing-function: ease-out; }
+  44% { transform: translateY(5.5px); animation-timing-function: ease-in; }
+  47%, 64% { transform: translateY(9px); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
+  76%, 100% { transform: translateY(0); }
+}
+@keyframes lifter-body {
+  0%, 10%, 30%, 60%, 76%, 100% { transform: translateY(0); }
+  5% { transform: translateY(1.5px); }
+  20% { transform: translateY(-0.8px); }
+  42% { transform: translateY(1px); }
+  66% { transform: translateY(2.2px); }
+}
+@keyframes lifter-eyes {
+  0%, 14%, 36%, 88%, 92%, 100% { transform: scaleY(1); }
+  18%, 33% { transform: scaleY(0.25); }
+  90% { transform: scaleY(0.1); }
+}
+@keyframes lifter-shadow {
+  0%, 36%, 100% { transform: scaleX(1); opacity: 0.18; }
+  41% { transform: scaleX(1.25); opacity: 0.3; }
+  50% { transform: scaleX(1); opacity: 0.18; }
+}
+
+/* The page jolts once when the bar lands, the first time the app opens after signing in. */
+@keyframes quake {
+  0%, 100% { transform: none; }
+  12% { transform: translate(-4px, 2px) rotate(-0.25deg); }
+  24% { transform: translate(4px, -2px) rotate(0.25deg); }
+  36% { transform: translate(-3px, 1px); }
+  50% { transform: translate(3px, -1px) rotate(0.15deg); }
+  64% { transform: translate(-2px, 1px); }
+  80% { transform: translate(1px, 0); }
+}
+.anim-quake {
+  animation: quake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lifter-arm,
+  .lifter-bar,
+  .lifter-body,
+  .lifter-eyes,
+  .lifter-shadow,
+  .anim-quake,
+  .ico {
+    animation: none !important;
+  }
+  .lifter-arm {
+    transform: scaleY(0.1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Navigation icons: each one does its own little move on hover, and once when its
+   page opens (so touch screens get it too).
+   --------------------------------------------------------------------------- */
+.ico {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.group:hover .ico-sun,
+[aria-current="page"] .ico-sun {
+  animation: ico-sun 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.group:hover .ico-cal,
+[aria-current="page"] .ico-cal {
+  animation: ico-cal 0.7s ease;
+}
+.group:hover .ico-lift,
+[aria-current="page"] .ico-lift {
+  animation: ico-lift 0.9s ease-in-out;
+}
+.group:hover .ico-bars,
+[aria-current="page"] .ico-bars {
+  transform-origin: 50% 100%;
+  animation: ico-bars 0.7s cubic-bezier(0.3, 0.7, 0.3, 1.4);
+}
+.group:hover .ico-pop,
+[aria-current="page"] .ico-pop {
+  animation: ico-pop 0.6s cubic-bezier(0.3, 0.7, 0.3, 1.4);
+}
+.group:hover .ico-coin,
+[aria-current="page"] .ico-coin {
+  animation: ico-coin 0.9s ease-in-out;
+}
+.group:hover .ico-rewind,
+[aria-current="page"] .ico-rewind {
+  animation: ico-rewind 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.group:hover .ico-gear,
+[aria-current="page"] .ico-gear {
+  animation: ico-gear 1.1s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@keyframes ico-sun {
+  from { transform: rotate(0) scale(1); }
+  50% { transform: rotate(120deg) scale(1.2); }
+  to { transform: rotate(180deg) scale(1); }
+}
+@keyframes ico-cal {
+  0%, 100% { transform: none; }
+  25% { transform: translateY(-3px) rotate(-8deg); }
+  55% { transform: translateY(0) rotate(6deg); }
+  80% { transform: rotate(-2deg); }
+}
+@keyframes ico-lift {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(-4px) rotate(-14deg); }
+  40% { transform: translateY(0) rotate(0); }
+  60% { transform: translateY(-4px) rotate(14deg); }
+  80% { transform: translateY(0) rotate(0); }
+}
+@keyframes ico-bars {
+  0% { transform: scaleY(0.4); }
+  60% { transform: scaleY(1.15); }
+  100% { transform: scaleY(1); }
+}
+@keyframes ico-pop {
+  0%, 100% { transform: none; }
+  35% { transform: scale(0.8) rotate(-6deg); }
+  70% { transform: scale(1.15) rotate(4deg); }
+}
+@keyframes ico-coin {
+  0% { transform: perspective(60px) rotateY(0) translateY(0); }
+  50% { transform: perspective(60px) rotateY(180deg) translateY(-4px); }
+  100% { transform: perspective(60px) rotateY(360deg) translateY(0); }
+}
+@keyframes ico-rewind {
+  from { transform: rotate(0); }
+  to { transform: rotate(-360deg); }
+}
+@keyframes ico-gear {
+  from { transform: rotate(0); }
+  to { transform: rotate(180deg); }
 }

@@ -51,7 +51,7 @@ export default function WorkoutsPage() {
           </>
         }
       />
-      <Card className="mb-4 grid grid-cols-3 gap-4 p-5">
+      <Card glow="accent" className="mb-4 grid grid-cols-3 gap-4 p-5">
         <Stat label="This week" value={workoutsBetween(d.workouts, wk.from, wk.to).length} hint={`goal ${d.profile.weekly_workout_goal}`} />
         <Stat label="This month" value={workoutsBetween(d.workouts, mo.from, mo.to).length} />
         <Stat label="All time" value={d.workouts.length} />

@@ -127,7 +127,7 @@ function History({ d }: { d: Core }) {
         />
       </div>
 
-      <Card className="mb-4 grid grid-cols-2 gap-3 p-4 sm:grid-cols-5">
+      <Card glow="teal" className="mb-4 grid grid-cols-2 gap-3 p-4 sm:grid-cols-5">
         <Field label="From">
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         </Field>

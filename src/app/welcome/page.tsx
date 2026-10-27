@@ -1,5 +1,6 @@
 "use client";
 
+import { LiftLogo } from "@/components/logo";
 import { ArrowLeft, ArrowRight, Check, Dumbbell, IdCard, PartyPopper, Target, UserRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -143,9 +144,12 @@ function Onboarding({ onSaving }: { onSaving: () => void }) {
   const canNext = !errors[step];
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col">
       <header className="mx-auto flex w-full max-w-xl items-center justify-between px-5 pt-6">
-        <span className="font-display text-lg font-semibold">Rep Ledger</span>
+        <span className="flex items-center gap-2.5">
+          <LiftLogo size={32} className="shadow-brand" />
+          <span className="font-display text-lg font-semibold">Rep Ledger</span>
+        </span>
         {step < 4 && <span className="text-sm text-muted">Step {step + 1} of 4</span>}
       </header>
 
