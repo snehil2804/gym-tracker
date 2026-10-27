@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "psql \"$SUPABASE_DB_URL\" -v ON_ERROR_STOP=0 -f supabase/tests/integration.sql 2>&1 | grep -E 'PASSED|FAIL'",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "test:db:planner": "psql \"$SUPABASE_DB_URL\" -v ON_ERROR_STOP=0 -f supabase/tests/planner.sql 2>&1 | grep -E 'PASSED|FAIL'"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

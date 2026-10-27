@@ -44,6 +44,10 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
 10. **Security:** RLS on every new table (`user_id = (select auth.uid())`), composite `(id, user_id)`
    foreign keys for ownership, `set search_path = ''` on functions, revoke `EXECUTE` from `anon`.
    Never use or commit the service-role key; only `NEXT_PUBLIC_SUPABASE_*` vars exist.
+11. **Planner templates are shared and read-only.** Never write to `plan_exercises` or
+   `plan_template_*` from the app; per-user changes go to `planner_settings.default_overrides` or a
+   `workout_plans` row. Only map demo videos you have verified (title + channel via oEmbed);
+   otherwise leave `video_status = 'pending'`.
 
 ## Where things live
 - Domain logic (pure, tested): `src/lib/domain/*` — add tests in `tests/unit` for any change.

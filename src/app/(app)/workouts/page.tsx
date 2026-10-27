@@ -2,9 +2,11 @@
 
 import { ChevronRight, Dumbbell, LayoutGrid, Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { WorkoutPlanner } from "@/components/planner/workout-planner";
 import { useMemo, useState } from "react";
 import { MUSCLES } from "@/components/workout-editor";
-import { Badge, Card, Chip, EmptyState, ErrorNote, Input, LinkButton, PageHeader, Skeleton, Stat } from "@/components/ui";
+import { Badge, Card, Chip, EmptyState, ErrorNote, Input, LinkButton, PageHeader, Segmented, Skeleton, Stat } from "@/components/ui";
 import { useCore } from "@/lib/data/derived";
 import { formatShort, monthName } from "@/lib/domain/dates";
 import { monthRange, weekRange, workoutsBetween, workoutVolume } from "@/lib/domain/stats";
@@ -13,6 +15,9 @@ export default function WorkoutsPage() {
   const { data: d, loading, error, workoutsLoading } = useCore();
   const [q, setQ] = useState("");
   const [muscle, setMuscle] = useState<string | null>(null);
+  const params = useSearchParams();
+  const router = useRouter();
+  const tab = params.get("tab") === "history" ? "history" : "plan";
 
   const filtered = useMemo(() => {
     if (!d) return [];
@@ -51,7 +56,21 @@ export default function WorkoutsPage() {
           </>
         }
       />
-      <Card glow="accent" className="mb-4 grid grid-cols-3 gap-4 p-5">
+      <Segmented
+        className="mb-4"
+        ariaLabel="Workouts view"
+        value={tab}
+        onChange={(v) => router.replace(v === "plan" ? "/workouts" : "/workouts?tab=history", { scroll: false })}
+        options={[
+          { value: "plan", label: "Plan" },
+          { value: "history", label: `History · ${d.workouts.length}` },
+        ]}
+      />
+      {tab === "plan" ? (
+        <WorkoutPlanner today={d.today} />
+      ) : (
+      <>
+      <Card glow="good" className="mb-4 grid grid-cols-3 gap-4 p-5">
         <Stat label="This week" value={workoutsBetween(d.workouts, wk.from, wk.to).length} hint={`goal ${d.profile.weekly_workout_goal}`} />
         <Stat label="This month" value={workoutsBetween(d.workouts, mo.from, mo.to).length} />
         <Stat label="All time" value={d.workouts.length} />
@@ -116,6 +135,8 @@ export default function WorkoutsPage() {
             ))}
           </div>
         </>
+      )}
+      </>
       )}
     </div>
   );

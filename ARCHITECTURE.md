@@ -56,7 +56,22 @@ auth.users ─1:1─ profiles (settings, reminders, tracking_start_date, seeded_
            ─1:n─ workouts ─1:n─ workout_exercises ─1:n─ workout_sets
            ─1:n─ body_measurements, goals, progress_photos
            ─1:n─ audit_log (insert/update/delete snapshots, written by triggers)
+           ─1:n─ workout_plans (name, days jsonb = 7 days)        ┐ planner, owner-only
+           ─1:1─ planner_settings (active plan, default overrides, │
+                                   step target, cardio days)      │
+           ─1:n─ daily_activity (unique user+date: steps, cardio, ┘
+                                 warm-up, mobility, movement checklists)
+
+shared, read-only (select for authenticated, no writes):
+  plan_exercises (catalog + verified YouTube Shorts mapping or 'pending')
+  plan_templates ─1:n─ plan_template_days ─1:n─ plan_template_items (prescriptions)
 ```
+
+The planner's default plan is data (migration `20261028000010`), not code. Users never write to the
+template: custom sets/reps on the default live in `planner_settings.default_overrides`
+(`"<weekday>:<position>" → {sets, reps}`), and custom plans are copies with a `base` snapshot per
+exercise so the UI can show what changed. Sections E–H of the coaching PDF (cardio, steps, warm-up,
+mobility) are constants in `src/lib/domain/planner.ts`; completion lives in `daily_activity`.
 
 ### Attendance states
 - `gym_status`: `attended | absent | rest | unverified`
@@ -139,4 +154,6 @@ All functions use `set search_path = ''`; `EXECUTE` is revoked from `anon`/`publ
 - **Database** (`supabase/tests/integration.sql`): one `DO` block that creates users, switches to
   `role authenticated` with JWT claims, asserts 78 behaviours and finally raises
   `ALL INTEGRATION TESTS PASSED` to roll everything back.
+- **Database** (`supabase/tests/planner.sql`, 14 checks): shared template read-only, plan isolation
+  between two users, plan validation, fallback to the default when the active plan is deleted.
 - **Manual/browser**: local dev server against the live DB with throwaway accounts (since deleted).

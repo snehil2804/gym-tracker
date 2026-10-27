@@ -5,6 +5,32 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — workout planner (Workouts → Plan)
+- **Default plan** from the coaching PDF, Section C: Mon Upper A · Tue Lower A · Wed Upper B ·
+  Thu Lower B · Fri Upper C · Sat/Sun rest from lifting. 36 exercises with sets, rep range, RIR,
+  rest, the PDF's notes, target muscles, equipment and instructions. Selected automatically for
+  new users. You can set your own sets/reps per exercise; the prescription is never changed and
+  custom values are clearly marked ("custom · prescribed 3").
+- **Custom plans**: any number of private, named 7-day plans (copy of the default or blank); pick
+  from a dropdown; add (search by name, muscle or equipment, or type your own), remove, reorder and
+  edit sets, reps, RIR and rest; fields changed from the default are marked "edited". Edits are
+  drafts until saved — kept per account in the browser across plan switches, navigation and
+  reloads, with a warning before closing the tab. Validation before saving.
+- **Demos**: verified YouTube Shorts from DeltaBolic and TylerPath for 35 of 36 exercises (title,
+  channel, embeddability and Shorts format checked via YouTube oEmbed), played in a modal with
+  YouTube's official IFrame player; non-embeddable/removed/offline videos fall back to "Watch on
+  YouTube". Pallof press is marked "Demo pending".
+- **Today panels** (expandable): Section G warm-up (general, dynamic moves, ramp-up sets for the
+  first two exercises — never counted as working sets), Section E Zone 2 cardio (Mon & Thu after
+  lifting + Sat or Wed, 20–30 min, ~120–140 bpm; activity, minutes, heart rate, done, 3/week count),
+  Section F steps (daily target, logging, movement-habit checklist, progression guide) and
+  Section H posture/mobility (9 drills with doses and purpose). No week selector anywhere.
+- Database: migration `20261028000010_workout_planner.sql` — shared read-only `plan_exercises`,
+  `plan_templates`, `plan_template_days`, `plan_template_items`; owner-only `workout_plans`,
+  `planner_settings`, `daily_activity`. Tests: `tests/unit/planner.test.ts` (8),
+  `supabase/tests/planner.sql` (14 checks).
+- Workouts page now has **Plan** and **History** tabs.
+
 ### Changed — streak game follows your weekly commitment
 - Streaks now respect your weekly goal: each week has (training days − goal) free off-days, so a
   day off within your goal never breaks the streak. Further misses break it (−15 XP; a missed paid

@@ -103,6 +103,15 @@ to the owner's address. The owner's records are created on their first sign-in.
 
 ## Known issues / risks
 
+- Workout planner: **Pallof press** has no demo yet — neither DeltaBolic nor TylerPath had a
+  Pallof-press Short when all 1,020 + 4,092 Shorts were checked (27 Oct 2026); it shows "Demo
+  pending". To add one later: `update public.plan_exercises set video_id = '<11-char id>',
+  video_url = 'https://www.youtube.com/shorts/<id>', video_title = '<title>', video_creator =
+  'DeltaBolic'|'TylerPath', video_status = 'verified', video_verified_on = current_date where id = 'pallof_press';`
+- Planner demos were matched by verified title + channel (YouTube oEmbed), not by watching every
+  video; if a Short is ever removed or blocks embedding, the modal shows a "Watch on YouTube" fallback.
+- Unsaved custom-plan drafts are kept in this browser (per account) until saved — not synced across devices.
+
 - Supabase's built-in email sender is rate-limited and may only deliver to project team members;
   configure custom SMTP if confirmation emails don't arrive.
 - Supabase advisor shows 5 WARN "security definer function executable by authenticated" — intentional
