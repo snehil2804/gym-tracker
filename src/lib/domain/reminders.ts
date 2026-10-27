@@ -62,7 +62,7 @@ export function buildReminders(args: {
         tone: "warn",
         title: `Confirm ${membership.gym_name}'s expiry date`,
         detail: `Estimated ${formatDate(membership.estimated_end_date)} — your contract may say otherwise.`,
-        href: "/settings#membership",
+        href: "/membership/gym",
       });
     }
     if (st.state === "active" && st.daysLeft <= args.profile.membership_warning_days) {
@@ -72,10 +72,10 @@ export function buildReminders(args: {
         tone: st.daysLeft <= 3 ? "loss" : "warn",
         title: `Membership ends ${relativeDay(membershipEnd(membership).date, today).toLowerCase()}`,
         detail: `${membership.gym_name} · ${st.confirmed ? "confirmed" : "estimated"} end ${formatDate(membershipEnd(membership).date)}`,
-        href: "/settings#membership",
+        href: "/membership/gym",
       });
     } else if (st.state === "expired") {
-      out.push({ id: "membership-expired", kind: "membership_expiry", tone: "loss", title: `${membership.gym_name} membership has ended`, href: "/settings#membership" });
+      out.push({ id: "membership-expired", kind: "membership_expiry", tone: "loss", title: `${membership.gym_name} membership has ended`, href: "/membership/gym" });
     }
   }
   if (pkg && r.upcoming_session && forecast?.nextSession && pkg.remaining > 0) {
@@ -125,7 +125,7 @@ export function buildReminders(args: {
       tone: "info",
       title: `${formatMoney(args.outstandingPaise)} of PT fees not recorded as paid`,
       detail: "Record payments so your spending totals are accurate.",
-      href: pkg ? `/packages/${pkg.id}` : "/membership#personal-training",
+      href: pkg ? `/packages/${pkg.id}` : "/membership/training",
     });
   }
   if (r.weekly_review && [1, 7].includes(isoWeekday(today))) {

@@ -29,13 +29,13 @@
   --info-soft: #e1eaf6;
   --violet: #6e4fa0;
   --violet-soft: #ece4f6;
-  --pink: #d63a72;
-  --pink-soft: #fbe2ec;
+  --gold: #a8750a;
+  --gold-soft: #f6ecd3;
   --teal: #0e8a82;
   --teal-soft: #d9f1ee;
-  --mesh-1: rgb(255 122 69 / 0.2);
-  --mesh-2: rgb(122 92 255 / 0.16);
-  --mesh-3: rgb(14 138 130 / 0.12);
+  --mesh-1: rgb(255 106 26 / 0.16);
+  --mesh-2: rgb(56 109 180 / 0.12);
+  --mesh-3: rgb(214 160 40 / 0.12);
   --rest: #8a7445;
   --rest-soft: #efe8d6;
   --unknown: #8c877c;
@@ -77,13 +77,13 @@
     --info-soft: #152338;
     --violet: #b195dd;
     --violet-soft: #271d36;
-    --pink: #f27ba6;
-    --pink-soft: #35161f;
+    --gold: #e9b44c;
+    --gold-soft: #2c2312;
     --teal: #4ccabf;
     --teal-soft: #0f2f2c;
-    --mesh-1: rgb(255 122 69 / 0.10);
-    --mesh-2: rgb(122 92 255 / 0.12);
-    --mesh-3: rgb(76 202 191 / 0.06);
+    --mesh-1: rgb(255 106 26 / 0.10);
+    --mesh-2: rgb(70 120 200 / 0.12);
+    --mesh-3: rgb(233 180 76 / 0.05);
     --rest: #c9ad74;
     --rest-soft: #2c2616;
     --unknown: #8f8a7e;
@@ -124,13 +124,13 @@
   --info-soft: #152338;
   --violet: #b195dd;
   --violet-soft: #271d36;
-  --pink: #f27ba6;
-  --pink-soft: #35161f;
+  --gold: #e9b44c;
+  --gold-soft: #2c2312;
   --teal: #4ccabf;
   --teal-soft: #0f2f2c;
-  --mesh-1: rgb(255 122 69 / 0.10);
-  --mesh-2: rgb(122 92 255 / 0.12);
-  --mesh-3: rgb(76 202 191 / 0.06);
+  --mesh-1: rgb(255 106 26 / 0.10);
+  --mesh-2: rgb(70 120 200 / 0.12);
+  --mesh-3: rgb(233 180 76 / 0.05);
   --rest: #c9ad74;
   --rest-soft: #2c2616;
   --unknown: #8f8a7e;
@@ -169,8 +169,8 @@
   --color-info-soft: var(--info-soft);
   --color-violet: var(--violet);
   --color-violet-soft: var(--violet-soft);
-  --color-pink: var(--pink);
-  --color-pink-soft: var(--pink-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
   --color-teal: var(--teal);
   --color-teal-soft: var(--teal-soft);
   --color-rest: var(--rest);
@@ -211,8 +211,9 @@ body::before {
 }
 
 /* Brand gradient (logo, main call-to-action). */
+/* "Forge": molten ember into amber — the brand gradient for the logo and the main action. */
 .bg-brand {
-  background: linear-gradient(135deg, #ff7a45 0%, #f2456b 55%, #7a5cff 100%);
+  background: linear-gradient(135deg, #e8430f 0%, #ff6a1a 45%, #ffa526 100%);
   color: #fff;
 }
 /* Card with a soft colour wash in its top-right corner (Card glow prop). */
@@ -223,10 +224,10 @@ body::before {
   border-color: color-mix(in oklab, var(--card-tone) 18%, var(--line));
 }
 .shadow-brand {
-  box-shadow: 0 8px 24px -8px rgb(242 69 107 / 0.55), 0 2px 6px -2px rgb(122 92 255 / 0.35);
+  box-shadow: 0 8px 24px -8px rgb(255 106 26 / 0.55), 0 2px 6px -2px rgb(232 67 15 / 0.35);
 }
 .text-brand {
-  background: linear-gradient(135deg, #ff7a45, #f2456b 55%, #7a5cff);
+  background: linear-gradient(135deg, #ff6a1a, #ffa526);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -386,70 +387,114 @@ input[type="time"]:not(.h-8):not(.h-9) {
 }
 
 /* ---------------------------------------------------------------------------
-   Brand mark: the little lifter (src/components/logo.tsx). One 5 s cycle:
-   press overhead → hold → drop (bar lands at 41%) → bend and pick it up → rest.
+   Brand mark: the lifter (src/components/logo.tsx). One 5 s cycle:
+   dip → press overhead (grit, tremble, sweat) → drop at 41% (dust, flash, tile jolt)
+   → bend and pick it up → rest. `--lift-delay` starts the cycle part-way through.
    --------------------------------------------------------------------------- */
-.lifter-arm {
+.lifter :is(.lifter-arm, .lifter-bar, .lifter-body, .lifter-eyes, .lifter-shadow, .lifter-face,
+  .lifter-grit, .lifter-smirk, .lifter-sweat, .lifter-dust, .lifter-scene, .lifter-flash) {
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-delay: var(--lift-delay, 0s);
+}
+.lifter-arm,
+.lifter-eyes,
+.lifter-shadow,
+.lifter-dust circle {
   transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: lifter-arm 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-.lifter-bar {
-  animation: lifter-bar 5s infinite;
-}
-.lifter-body {
-  animation: lifter-body 5s ease-in-out infinite;
-}
-.lifter-eyes {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  animation: lifter-eyes 5s infinite;
-}
-.lifter-shadow {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  animation: lifter-shadow 5s infinite;
-}
-.lifter-still .lifter-arm,
-.lifter-still .lifter-bar,
-.lifter-still .lifter-body,
-.lifter-still .lifter-eyes,
-.lifter-still .lifter-shadow {
+.lifter-arm { transform-origin: 50% 100%; animation-name: lifter-arm; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+.lifter-bar { animation-name: lifter-bar; }
+.lifter-body { animation-name: lifter-body; animation-timing-function: ease-in-out; }
+.lifter-face { animation-name: lifter-face; }
+.lifter-eyes { transform-origin: 50% 50%; animation-name: lifter-eyes; }
+.lifter-grit { animation-name: lifter-grit; }
+.lifter-smirk { animation-name: lifter-smirk; }
+.lifter-sweat { animation-name: lifter-sweat; }
+.lifter-shadow { transform-origin: 50% 50%; animation-name: lifter-shadow; }
+.lifter-scene { animation-name: lifter-jolt; }
+.lifter-flash { animation-name: lifter-flash; }
+.lifter-dust { animation-name: lifter-dust; opacity: 0; }
+.lifter-dust circle { transform-origin: 50% 50%; }
+.lifter-still :is(.lifter-arm, .lifter-bar, .lifter-body, .lifter-eyes, .lifter-shadow, .lifter-face,
+  .lifter-grit, .lifter-smirk, .lifter-sweat, .lifter-dust, .lifter-scene, .lifter-flash) {
   animation: none;
 }
-.lifter-still .lifter-arm {
-  transform: scaleY(0.1);
-}
+.lifter-still .lifter-arm { transform: scaleY(0.1); }
+
 @keyframes lifter-arm {
-  0%, 8% { transform: scaleY(0.1); }
+  0%, 9% { transform: scaleY(0.1); }
   24%, 36% { transform: scaleY(1); }
   38.5%, 100% { transform: scaleY(0.1); }
 }
 @keyframes lifter-bar {
-  0%, 8% { transform: translateY(0); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
+  0%, 6% { transform: translateY(0); }
+  9% { transform: translateY(1.8px); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
   24% { transform: translateY(-26px); }
+  28% { transform: translate(0.4px, -25.6px); }
+  31% { transform: translate(-0.4px, -26px); }
+  34% { transform: translate(0.3px, -25.7px); }
   36% { transform: translateY(-26px); animation-timing-function: cubic-bezier(0.6, 0, 1, 1); }
-  41% { transform: translateY(9px); animation-timing-function: ease-out; }
-  44% { transform: translateY(5.5px); animation-timing-function: ease-in; }
-  47%, 64% { transform: translateY(9px); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
+  41% { transform: translateY(8.5px); animation-timing-function: ease-out; }
+  44% { transform: translateY(4.5px); animation-timing-function: ease-in; }
+  47%, 64% { transform: translateY(8.5px); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
   76%, 100% { transform: translateY(0); }
 }
 @keyframes lifter-body {
-  0%, 10%, 30%, 60%, 76%, 100% { transform: translateY(0); }
-  5% { transform: translateY(1.5px); }
-  20% { transform: translateY(-0.8px); }
-  42% { transform: translateY(1px); }
-  66% { transform: translateY(2.2px); }
+  0%, 5%, 20%, 40%, 47%, 60%, 76%, 100% { transform: translateY(0); }
+  9% { transform: translateY(2px); }
+  14% { transform: translateY(-0.6px); }
+  43% { transform: translateY(1.2px); }
+  66% { transform: translateY(2.4px); }
+}
+@keyframes lifter-face {
+  0%, 25%, 37%, 100% { transform: none; }
+  27% { transform: translateX(0.35px); }
+  29% { transform: translateX(-0.35px); }
+  31% { transform: translateX(0.35px); }
+  33% { transform: translateX(-0.35px); }
+  35% { transform: translateX(0.2px); }
 }
 @keyframes lifter-eyes {
-  0%, 14%, 36%, 88%, 92%, 100% { transform: scaleY(1); }
-  18%, 33% { transform: scaleY(0.25); }
+  0%, 12%, 38%, 88%, 92%, 100% { transform: scaleY(1); }
+  16%, 35% { transform: scaleY(0.35); }
   90% { transform: scaleY(0.1); }
 }
+@keyframes lifter-grit {
+  0%, 10%, 39%, 100% { opacity: 0; }
+  13%, 37% { opacity: 1; }
+}
+@keyframes lifter-smirk {
+  0%, 10%, 39%, 100% { opacity: 1; }
+  13%, 37% { opacity: 0; }
+}
+@keyframes lifter-sweat {
+  0%, 26% { opacity: 0; transform: none; }
+  29% { opacity: 1; transform: none; }
+  38% { opacity: 0; transform: translate(3px, 9px); }
+  100% { opacity: 0; transform: translate(3px, 9px); }
+}
 @keyframes lifter-shadow {
-  0%, 36%, 100% { transform: scaleX(1); opacity: 0.18; }
-  41% { transform: scaleX(1.25); opacity: 0.3; }
-  50% { transform: scaleX(1); opacity: 0.18; }
+  0%, 36%, 100% { transform: scaleX(1); opacity: 0.45; }
+  41% { transform: scaleX(1.3); opacity: 0.7; }
+  50% { transform: scaleX(1); opacity: 0.45; }
+}
+@keyframes lifter-jolt {
+  0%, 40.5%, 48%, 100% { transform: none; }
+  41.5% { transform: translate(0, 1.8px); }
+  43% { transform: translate(-1.2px, -0.8px); }
+  45% { transform: translate(0.9px, 0.5px); }
+  46.5% { transform: translate(-0.4px, 0); }
+}
+@keyframes lifter-flash {
+  0%, 40.5%, 52%, 100% { opacity: 0; }
+  41.5% { opacity: 1; }
+}
+@keyframes lifter-dust {
+  0%, 40.5% { opacity: 0; transform: none; }
+  41.5% { opacity: 0.95; transform: none; }
+  54% { opacity: 0; transform: translateY(-5px) scale(1.15); }
+  100% { opacity: 0; }
 }
 
 /* The page jolts once when the bar lands, the first time the app opens after signing in. */
@@ -466,17 +511,18 @@ input[type="time"]:not(.h-8):not(.h-9) {
   animation: quake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .lifter-arm,
-  .lifter-bar,
-  .lifter-body,
-  .lifter-eyes,
-  .lifter-shadow,
+  .lifter *,
   .anim-quake,
   .ico {
     animation: none !important;
   }
-  .lifter-arm {
+  .lifter .lifter-arm {
     transform: scaleY(0.1);
+  }
+  .lifter .lifter-grit,
+  .lifter .lifter-sweat,
+  .lifter .lifter-dust {
+    opacity: 0;
   }
 }
 
@@ -561,4 +607,120 @@ input[type="time"]:not(.h-8):not(.h-9) {
 @keyframes ico-gear {
   from { transform: rotate(0); }
   to { transform: rotate(180deg); }
+}
+
+/* ---------------------------------------------------------------------------
+   Streak game (src/components/streak-game.tsx) — a dark "scoreboard" in both themes.
+   --------------------------------------------------------------------------- */
+.scoreboard {
+  background: linear-gradient(140deg, #1d1d23 0%, #121216 55%, #0b0b0e 100%);
+  border: 1px solid rgb(255 255 255 / 0.06);
+}
+.scoreboard-glow {
+  background:
+    radial-gradient(45% 80% at 0% 0%, rgb(255 106 26 / 0.28), transparent 70%),
+    radial-gradient(40% 70% at 100% 100%, rgb(58 123 213 / 0.18), transparent 70%);
+}
+.streak-flame.is-lit {
+  background: linear-gradient(160deg, #ffa526, #ff6a1a 55%, #e8430f);
+  box-shadow: 0 10px 30px -8px rgb(255 106 26 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  color: #fff;
+}
+.streak-flame.is-lit svg {
+  transform-origin: 50% 90%;
+  animation: flame-flicker 1.6s ease-in-out infinite;
+}
+.streak-flame.is-out {
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.35);
+}
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.06, 0.96) rotate(-3deg); }
+  50% { transform: scale(0.97, 1.05) rotate(2deg); }
+  75% { transform: scale(1.04, 0.98) rotate(-1deg); }
+}
+.level-badge {
+  background: linear-gradient(160deg, #3a3d44, #1c1d22);
+  border: 1.5px solid rgb(255 213 107 / 0.55);
+  color: #ffd56b;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+.xp-fill {
+  background: linear-gradient(90deg, #e8430f, #ff6a1a, #ffa526);
+  background-size: 200% 100%;
+  animation: xp-shine 3s linear infinite;
+  transition: width 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes xp-shine {
+  from { background-position: 0% 0; }
+  to { background-position: 200% 0; }
+}
+.badge-earned {
+  background: linear-gradient(135deg, rgb(255 213 107 / 0.22), rgb(255 106 26 / 0.18));
+  border: 1px solid rgb(255 213 107 / 0.45);
+  color: #ffd56b;
+}
+.trophy-pop {
+  animation: trophy-pop 2.4s ease-in-out infinite;
+}
+@keyframes trophy-pop {
+  0%, 100% { transform: scale(1) rotate(0); }
+  50% { transform: scale(1.12) rotate(-6deg); }
+}
+.perfect-banner {
+  background: linear-gradient(120deg, #ffe08a, #ffc83d 50%, #f2a516);
+  box-shadow: 0 10px 30px -10px rgb(242 165 22 / 0.7);
+}
+.confetti i {
+  position: absolute;
+  top: -10px;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall 2.6s ease-in infinite;
+  opacity: 0.85;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translateY(90px) rotate(540deg); opacity: 0; }
+}
+
+/* Calendar trail: winning days joined into a chain. */
+.trail-link {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  height: 6px;
+  width: 12px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--good), color-mix(in oklab, var(--good) 70%, #b6f0c9));
+  box-shadow: 0 0 10px color-mix(in oklab, var(--good) 60%, transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+.trail-win {
+  box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--good) 55%, transparent), 0 6px 16px -6px color-mix(in oklab, var(--good) 70%, transparent);
+}
+.trail-bridge {
+  outline: 2px dashed color-mix(in oklab, var(--good) 55%, transparent);
+  outline-offset: -3px;
+}
+.today-chase {
+  animation: today-chase 1.8s ease-in-out infinite;
+}
+@keyframes today-chase {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(255 106 26 / 0.55); }
+  50% { box-shadow: 0 0 0 6px rgb(255 106 26 / 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .streak-flame.is-lit svg,
+  .xp-fill,
+  .trophy-pop,
+  .confetti i,
+  .today-chase {
+    animation: none !important;
+  }
 }

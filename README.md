@@ -25,10 +25,10 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 
 | Area | Highlights |
 |---|---|
-| **Today** (dashboard) | One-tap “I went / I missed”, reminders, PT balance and prepaid value, missed-session value (this month and all-time), membership status, week strip, money snapshot, data-backed insights |
-| **Calendar** | Month view with 11 distinct day states (icon + colour + label), day editor with impact preview and per-day change history, planned breaks |
+| **Today** (dashboard) | One-tap “I went / I missed”, reminders, this week with streak, recent workouts, data-backed insights. Money and package cards live in Membership insights |
+| **Calendar** | Month view with distinct day states, day editor with impact preview and change history, planned breaks — plus the streak game: streak flame, XP and levels, monthly perfect-month chase, badges, and a trail joining winning days (rest days never break a streak; misses cost XP) |
 | **Review days** | Queue of past training days that are still unconfirmed, with one-tap or bulk confirmation |
-| **Membership** | One page with three sections. **Personal training**: create, renew, edit, close (roll over / forfeit / refund / keep usable), payments (paid, pending, partial, refunds), credits/refunds/adjustments, forecast of next and last session. **Gym membership**: current membership (days left, estimated vs confirmed end, price, payment status), earlier memberships and gym spend. **Spending**: total paid split gym / PT, paid-per-month chart, missed PT value, cost per session and per workout, prepaid value split, all payments, definitions. `/packages` and `/finance` redirect here |
+| **Membership insights** | Overview with three tiles and the package, missed PT value, gym membership and money cards. **Personal training** (`/membership/training`): packages (create, renew, edit, close, payments, credits/refunds/adjustments, forecast), trainers, prepaid value split, missed value by month. **Gym membership** (`/membership/gym`): current membership, earlier ones, gym spend, editing (estimated vs confirmed end). **Spending** (`/membership/spending`): total paid split gym / PT, paid-per-month chart, cost per session / workout, all payments, definitions |
 | **Workouts** | “Describe it in a sentence” draft (offline, rule-based), templates, repeat a previous workout, sets × reps × kg, cardio, notes, edit / duplicate / delete |
 | **Progress** | Weekly attendance and workouts, minutes, muscle groups, strength progression and PRs, body measurements, goals, private progress photos |
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
@@ -36,7 +36,7 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 | **Welcome flow** | First sign-in asks name, photo, birth date (age), height, weight, gym membership, personal trainer and weekly goal — skippable, editable later |
 | **Photos** | Crop, zoom, rotate and straighten before uploading (round crop for the profile photo; 3:4, 4:5, square, 16:9 or original for progress photos), or upload the original — up to 40 MB |
 | **Delete account** | Settings → Delete account: removes photos, every record and the login; only a minimal log entry (email, provider, created/deleted dates, counts) is kept in `private.deleted_accounts` |
-| **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
+| **Settings** | Profile, PT / gym switches, time zone, theme, planned breaks, reminder toggles, CSV/JSON export, archive restore, password, delete account. Gym membership and trainers are edited under Membership |
 
 ---
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileJson, LogOut, Plus, Trash2, Upload } from "lucide-react";
+import { ChevronRight, Download, Dumbbell, FileJson, IdCard, LogOut, Plus, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -9,7 +9,6 @@ import {
   Card,
   ConfirmSheet,
   ErrorNote,
-  Estimate,
   Field,
   Input,
   Segmented,
@@ -17,31 +16,26 @@ import {
   Sheet,
   Skeleton,
   Switch,
-  Textarea,
   useToast,
 } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import {
   useDeleteBlock,
   useSaveBlock,
-  useSaveMembership,
-  useSaveTrainer,
   useDeleteAccount,
   useMeasurements,
   useSaveMeasurement,
-  useTrainers,
   useUpdateProfile,
   useUser,
   useAvatarUrl,
 } from "@/lib/data/hooks";
 import { buildArchive, CSV_EXPORTS, download, exportCSV, exportExerciseHistoryCSV, restoreArchive, validateArchive } from "@/lib/data/export";
 import { BLOCK_KIND } from "@/lib/domain/attendance";
-import { addDays, addMonths, ageOn, daysBetween, formatDate } from "@/lib/domain/dates";
+import { ageOn, formatDate } from "@/lib/domain/dates";
 import { AvatarUploader } from "@/components/avatar";
 import { rgb, usePhotoPalette, type PhotoPalette } from "@/lib/photo/palette";
-import { formatMoney, paiseToInput, parseMoneyToPaise } from "@/lib/domain/money";
 import { getSupabase } from "@/lib/supabase/client";
-import type { BlockKind, Membership, Profile, Reminders } from "@/lib/types";
+import type { BlockKind, Profile, Reminders } from "@/lib/types";
 
 const TIMEZONES = ["Asia/Kolkata", "Asia/Dubai", "Asia/Singapore", "Europe/London", "Europe/Berlin", "America/New_York", "America/Los_Angeles", "Australia/Sydney", "UTC"];
 
@@ -65,8 +59,7 @@ export default function SettingsPage() {
       <AboutYouSection d={d} palette={palette} />
       <TrainingSection profile={d.profile} />
       <ProfileSection profile={d.profile} />
-      <MembershipSection d={d} />
-      {d.ptEnabled && <TrainersSection />}
+      <MovedToMembership ptEnabled={d.ptEnabled} />
       <ScheduleSection d={d} />
       <RemindersSection profile={d.profile} />
       <DataSection />
@@ -84,6 +77,36 @@ function Section({ id, title, description, children }: { id?: string; title: str
       {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       <Card className="mt-3 p-5">{children}</Card>
     </section>
+  );
+}
+
+/** Gym membership and trainer details now live on the Membership pages. */
+function MovedToMembership({ ptEnabled }: { ptEnabled: boolean }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Link href="/membership/gym" className="group flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 shadow-card hover:bg-surface-2">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-teal-soft text-teal">
+          <IdCard className="size-5" />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold">Gym membership</span>
+          <span className="block text-xs text-muted">Dates, price and renewals are in Membership</span>
+        </span>
+        <ChevronRight className="ml-auto size-4 text-faint group-hover:text-ink" />
+      </Link>
+      {ptEnabled && (
+        <Link href="/membership/training" className="group flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 shadow-card hover:bg-surface-2">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gold-soft text-gold">
+            <Dumbbell className="size-5" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold">Trainers & PT packages</span>
+            <span className="block text-xs text-muted">Managed under Membership → Personal training</span>
+          </span>
+          <ChevronRight className="ml-auto size-4 text-faint group-hover:text-ink" />
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -174,201 +197,6 @@ function ProfileSection({ profile }: { profile: Profile }) {
         </Button>
       </div>
     </Section>
-  );
-}
-
-function MembershipSection({ d }: { d: Core }) {
-  const [adding, setAdding] = useState(false);
-  return (
-    <section id="membership" className="scroll-mt-20">
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Gym membership</h2>
-          <p className="mt-1 text-sm text-muted">The estimated end date is calculated; the confirmed date is what your contract says.</p>
-        </div>
-        <Button size="sm" icon={<Plus className="size-4" />} onClick={() => setAdding(true)}>
-          Add / renew
-        </Button>
-      </div>
-      <div className="mt-3 space-y-3">
-        {adding && <MembershipForm today={d.today} onDone={() => setAdding(false)} />}
-        {d.memberships.map((m) => (
-          <MembershipForm key={m.id} m={m} today={d.today} />
-        ))}
-        {d.memberships.length === 0 && !adding && <Card className="p-5 text-sm text-muted">No membership recorded.</Card>}
-      </div>
-    </section>
-  );
-}
-
-function MembershipForm({ m, today, onDone }: { m?: Membership; today: string; onDone?: () => void }) {
-  const toast = useToast();
-  const save = useSaveMembership();
-  const [gym, setGym] = useState(m?.gym_name ?? "");
-  const [start, setStart] = useState(m?.start_date ?? today);
-  const [months, setMonths] = useState(String(m?.duration_months ?? 3));
-  const [confirmed, setConfirmed] = useState(m?.confirmed_end_date ?? "");
-  const [price, setPrice] = useState(m ? paiseToInput(m.price_paise) : "");
-  const [approx, setApprox] = useState(m?.price_is_approximate ?? false);
-  const [status, setStatus] = useState<Membership["payment_status"]>(m?.payment_status ?? "paid");
-  const [paidOn, setPaidOn] = useState(m?.paid_on ?? "");
-  const [notes, setNotes] = useState(m?.notes ?? "");
-  const estimate = Number(months) > 0 ? addDays(addMonths(start, Number(months)), -1) : null;
-  const paise = parseMoneyToPaise(price || "0");
-
-  return (
-    <Card className="space-y-4 p-5">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Gym">
-          <Input value={gym} onChange={(e) => setGym(e.target.value)} />
-        </Field>
-        <Field label="Start date">
-          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-        </Field>
-        <Field label="Duration (months)">
-          <Input inputMode="numeric" value={months} onChange={(e) => setMonths(e.target.value.replace(/\D/g, ""))} />
-        </Field>
-      </div>
-      <div className="grid gap-4 rounded-xl bg-surface-2 p-4 sm:grid-cols-2">
-        <div>
-          <p className="flex items-center gap-2 text-[13px] font-medium text-ink-2">
-            Estimated last day <Estimate />
-          </p>
-          <p className="num mt-1 font-display text-xl font-semibold">{estimate ? formatDate(estimate) : "—"}</p>
-          <p className="text-xs text-muted">Start + {months || "?"} months − 1 day. Your gym may count differently.</p>
-        </div>
-        <Field label="Confirmed contract end date" hint={confirmed ? (estimate && confirmed !== estimate ? `${daysBetween(estimate, confirmed) > 0 ? "+" : ""}${daysBetween(estimate, confirmed)} days vs estimate` : "Matches the estimate") : "Leave empty until you've checked with the gym."}>
-          <div className="flex gap-2">
-            <Input type="date" value={confirmed} min={start} onChange={(e) => setConfirmed(e.target.value)} />
-            {!confirmed && estimate && (
-              <Button size="sm" className="h-11 shrink-0" onClick={() => setConfirmed(estimate)}>
-                Estimate is right
-              </Button>
-            )}
-          </div>
-        </Field>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Price">
-          <Input prefix="₹" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
-        </Field>
-        <Field label="Payment">
-          <Select value={status} onChange={(e) => setStatus(e.target.value as Membership["payment_status"])}>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="unconfirmed">Not confirmed</option>
-          </Select>
-        </Field>
-        {status === "paid" && (
-          <Field label="Paid on (optional)">
-            <Input type="date" value={paidOn} max={today} onChange={(e) => setPaidOn(e.target.value)} />
-          </Field>
-        )}
-      </div>
-      <Switch checked={approx} onChange={setApprox} label="Price is approximate" description="Untick once you've confirmed the exact amount." />
-      <Field label="Notes">
-        <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </Field>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted">
-          {m && (
-            <>
-              <Badge tone={m.confirmed_end_date ? "good" : "warn"}>{m.confirmed_end_date ? "Expiry confirmed" : "Expiry not confirmed"}</Badge>{" "}
-              {m.payment_status === "paid" ? `${formatMoney(m.price_paise)} counted as spent` : "not counted as spent"}
-            </>
-          )}
-        </span>
-        <div className="flex gap-2">
-          {onDone && (
-            <Button variant="ghost" onClick={onDone}>
-              Cancel
-            </Button>
-          )}
-          <Button
-            variant="primary"
-            loading={save.isPending}
-            disabled={!gym.trim() || !(Number(months) > 0) || paise === null}
-            onClick={async () => {
-              try {
-                await save.mutateAsync({
-                  id: m?.id,
-                  gym_name: gym.trim(),
-                  start_date: start,
-                  duration_months: Number(months),
-                  confirmed_end_date: confirmed || null,
-                  price_paise: paise ?? 0,
-                  price_is_approximate: approx,
-                  payment_status: status,
-                  paid_on: status === "paid" ? paidOn || null : null,
-                  notes: notes || null,
-                });
-                toast.success("Membership saved.");
-                onDone?.();
-              } catch (e) {
-                toast.error(e);
-              }
-            }}
-          >
-            Save membership
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function TrainersSection() {
-  const trainers = useTrainers();
-  const save = useSaveTrainer();
-  const toast = useToast();
-  const [name, setName] = useState("");
-  return (
-    <Section title="Trainers" description="PT schedules are set per package (Membership → Personal training → a package → Edit).">
-      <ul className="divide-y divide-line">
-        {(trainers.data ?? []).map((t) => (
-          <TrainerRow key={t.id} id={t.id} name={t.name} phone={t.phone} active={t.is_active} />
-        ))}
-      </ul>
-      <div className="mt-3 flex gap-2">
-        <Input placeholder="Add a trainer" value={name} onChange={(e) => setName(e.target.value)} />
-        <Button
-          disabled={!name.trim()}
-          loading={save.isPending}
-          onClick={async () => {
-            try {
-              await save.mutateAsync({ name: name.trim() });
-              setName("");
-            } catch (e) {
-              toast.error(e);
-            }
-          }}
-        >
-          Add
-        </Button>
-      </div>
-    </Section>
-  );
-}
-
-function TrainerRow({ id, name, phone, active }: { id: string; name: string; phone: string | null; active: boolean }) {
-  const save = useSaveTrainer();
-  const toast = useToast();
-  const [n, setN] = useState(name);
-  const [p, setP] = useState(phone ?? "");
-  const dirty = n !== name || p !== (phone ?? "");
-  return (
-    <li className="flex flex-wrap items-center gap-2 py-2">
-      <Input className="min-w-32 flex-1" value={n} onChange={(e) => setN(e.target.value)} aria-label="Trainer name" />
-      <Input className="w-40" placeholder="Phone" value={p} onChange={(e) => setP(e.target.value)} aria-label="Trainer phone" />
-      <Button size="sm" variant="ghost" onClick={() => save.mutateAsync({ id, is_active: !active }).catch(toast.error)}>
-        {active ? "Active" : "Inactive"}
-      </Button>
-      {dirty && (
-        <Button size="sm" variant="primary" loading={save.isPending} onClick={() => save.mutateAsync({ id, name: n.trim(), phone: p || null }).then(() => toast.success("Trainer saved.")).catch(toast.error)}>
-          Save
-        </Button>
-      )}
-    </li>
   );
 }
 
@@ -535,7 +363,7 @@ function DataSection() {
         <Button icon={<Download className="size-4" />} loading={busy === "sets"} onClick={() => run("sets", async () => download(`rep-ledger-exercise-history-${stamp()}.csv`, await exportExerciseHistoryCSV(), "text/csv"))}>
           Exercise history (CSV)
         </Button>
-        <Link href="/membership#spending" className="flex h-10 items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
+        <Link href="/membership/spending" className="flex h-10 items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
           Financial summary → see Money
         </Link>
       </div>
@@ -757,7 +585,7 @@ function TrainingSection({ profile }: { profile: Profile }) {
         />
       </div>
       {profile.pt_enabled && (
-        <Link href="/membership#personal-training" className="mt-3 inline-block text-sm font-medium text-ink underline-offset-2 hover:underline">
+        <Link href="/membership/training" className="mt-3 inline-block text-sm font-medium text-ink underline-offset-2 hover:underline">
           Manage PT packages →
         </Link>
       )}

@@ -5,6 +5,32 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — streak game on the calendar
+- `src/lib/domain/game.ts` (+ 10 tests): every past day becomes won (gym or PT), double (both),
+  rest (rest weekday, rest mark, planned break — never breaks a streak), excused (trainer
+  cancelled / rescheduled), missed (absent, or you cancelled), or unlogged (stops the chain until
+  logged, no penalty). Today never counts against you until it's over.
+- XP: +10 a day won, +5 for a double, +1 per streak day (up to +10), −15 for a miss (−25 if a paid
+  PT session was lost), +25 perfect week, +100 perfect month. Levels Rookie → Legend. Ten badges.
+- Calendar: dark scoreboard (streak flame, level and XP bar, month progress ring, badges), a green
+  trail joining winning days, dashed bridges over rest days, a pulsing "keep the chain" ring on
+  today, and a gold perfect-month banner with confetti.
+
+### Changed — Membership split, Today decluttered, new look
+- Membership is now **Membership insights** (`/membership`): three tiles that open their own pages
+  — Personal training (`/membership/training`: packages, renew/new, trainers, prepaid value,
+  missed-by-month chart), Gym membership (`/membership/gym`: current membership, history, gym
+  spend, and the membership editor) and Spending (`/membership/spending`) — followed by the PT
+  package, missed PT value, gym membership and money cards that used to be on Today.
+- Today keeps only the check-in, reminders, This week (with streak), recent workouts and insights.
+- Gym membership and trainer editing moved out of Settings (Settings links to them).
+- New brand mark: a tougher lifter on a graphite tile with ember accents; dips, strains (gritted
+  teeth, tremble, sweat), drops the bar with dust and a tile jolt. Clicking the logo replays the
+  drop and shakes the page.
+- Palette: "Forge" — ember → amber brand gradient, steel-blue and amber background glow, gold for
+  personal training. Pink and violet removed from the brand.
+- `/finance` → `/membership/spending`, `/packages` → `/membership/training`.
+
 ### Changed — fewer pages
 - **Money** and **PT Packages** are merged into one **Membership** page (`/membership`) with three
   sections: Personal training (package cards, renew / new), Gym membership (current membership,

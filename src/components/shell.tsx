@@ -34,8 +34,8 @@ const NAV = [
   { href: "/", label: "Today", icon: Sun, anim: "ico-sun", tone: "text-warn", chip: "bg-warn-soft", hover: "group-hover:bg-warn-soft group-hover:text-warn" },
   { href: "/calendar", label: "Calendar", icon: CalendarDays, anim: "ico-cal", tone: "text-info", chip: "bg-info-soft", hover: "group-hover:bg-info-soft group-hover:text-info" },
   { href: "/workouts", label: "Workouts", icon: Dumbbell, anim: "ico-lift", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
-  { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-violet", chip: "bg-violet-soft", hover: "group-hover:bg-violet-soft group-hover:text-violet" },
-  { href: "/membership", label: "Membership", icon: IdCard, anim: "ico-coin", tone: "text-pink", chip: "bg-pink-soft", hover: "group-hover:bg-pink-soft group-hover:text-pink" },
+  { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
+  { href: "/membership", label: "Membership", icon: IdCard, anim: "ico-coin", tone: "text-gold", chip: "bg-gold-soft", hover: "group-hover:bg-gold-soft group-hover:text-gold" },
   { href: "/history", label: "History", icon: History, anim: "ico-rewind", tone: "text-teal", chip: "bg-teal-soft", hover: "group-hover:bg-teal-soft group-hover:text-teal" },
   { href: "/settings", label: "Settings", icon: Settings, anim: "ico-gear", tone: "text-ink-2", chip: "bg-surface-3", hover: "group-hover:bg-surface-3 group-hover:text-ink-2" },
 ];
@@ -108,39 +108,69 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** How long after a click the replayed bar hits the floor (and the page shakes). */
+const CLICK_DROP_MS = 380;
+
+/** Ask the page to shake after `delay` ms (listened to by `useQuake`). */
+function requestQuake(delay = 0) {
+  window.dispatchEvent(new CustomEvent("rl-quake", { detail: { delay } }));
+}
+
 function Brand() {
+  // Each click remounts the logo part-way through its cycle so the bar drops right away.
+  const [replay, setReplay] = useState(0);
   return (
-    <Link href="/" className="group flex items-center gap-2.5 px-2" aria-label="Rep Ledger — Today">
-      <LiftLogo size={34} className="shadow-brand" />
+    <Link
+      href="/"
+      className="group flex items-center gap-2.5 px-2"
+      aria-label="Rep Ledger — Today"
+      onClick={() => {
+        setReplay((n) => n + 1);
+        requestQuake(CLICK_DROP_MS);
+      }}
+    >
+      <LiftLogo key={replay} size={34} className="shadow-brand" startAt={replay ? LIFT_DROP_MS - CLICK_DROP_MS : 0} />
       <span className="font-display text-[17px] font-semibold tracking-tight">Rep Ledger</span>
     </Link>
   );
 }
 
-/** Once per browser session (i.e. right after signing in) the page jolts when the lifter drops the bar. */
-function useIntroQuake() {
-  const [quake, setQuake] = useState(false);
+/**
+ * The page shakes when the lifter drops the bar: once per browser session on first load (right
+ * after signing in), and every time the logo is clicked.
+ */
+function useQuake() {
+  const [n, setN] = useState(0); // >0 while shaking
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("rl-intro-quake")) return;
-    } catch {
-      return;
-    }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // The flag is written only when the quake actually plays, so a cancelled run can retry.
-    const start = setTimeout(() => {
-      try {
-        sessionStorage.setItem("rl-intro-quake", "1");
-      } catch {}
-      setQuake(true);
-    }, LIFT_DROP_MS);
-    const stop = setTimeout(() => setQuake(false), LIFT_DROP_MS + 650);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const shake = (delay: number) => {
+      timers.push(setTimeout(() => setN((x) => (x % 1000) + 1), delay));
+      timers.push(setTimeout(() => setN(0), delay + 600));
+    };
+    const onQuake = (e: Event) => shake((e as CustomEvent<{ delay?: number }>).detail?.delay ?? 0);
+    window.addEventListener("rl-quake", onQuake);
+    let intro = false;
+    try {
+      intro = !sessionStorage.getItem("rl-intro-quake");
+    } catch {}
+    if (intro) {
+      // The flag is written only when the quake actually plays, so a cancelled run can retry.
+      timers.push(
+        setTimeout(() => {
+          try {
+            sessionStorage.setItem("rl-intro-quake", "1");
+          } catch {}
+        }, LIFT_DROP_MS),
+      );
+      shake(LIFT_DROP_MS);
+    }
     return () => {
-      clearTimeout(start);
-      clearTimeout(stop);
+      window.removeEventListener("rl-quake", onQuake);
+      timers.forEach(clearTimeout);
     };
   }, []);
-  return quake;
+  return n;
 }
 
 async function signOut() {
@@ -153,10 +183,10 @@ function Frame({ children }: { children: ReactNode }) {
   const quick = useQuickLog();
   const [more, setMore] = useState(false);
   const { data: profile } = useProfile();
-  const quake = useIntroQuake();
+  const quake = useQuake();
 
   return (
-    <div className={cx("min-h-dvh", quake && "anim-quake")}>
+    <div className={cx("min-h-dvh", quake > 0 && "anim-quake")}>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line/70 bg-bg/70 px-3 py-5 backdrop-blur-xl md:flex">
         <Brand />

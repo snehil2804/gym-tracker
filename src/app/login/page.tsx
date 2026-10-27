@@ -14,7 +14,7 @@ export default function LoginPage() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(60% 50% at 0% 0%, rgb(255 122 69 / 0.28), transparent 70%), radial-gradient(55% 50% at 100% 100%, rgb(122 92 255 / 0.30), transparent 70%), radial-gradient(40% 35% at 85% 20%, rgb(242 69 107 / 0.18), transparent 70%)",
+              "radial-gradient(60% 50% at 0% 0%, rgb(255 106 26 / 0.30), transparent 70%), radial-gradient(55% 50% at 100% 100%, rgb(56 109 180 / 0.28), transparent 70%), radial-gradient(40% 35% at 85% 20%, rgb(255 165 38 / 0.14), transparent 70%)",
           }}
         />
         <div className="relative flex items-center gap-3">

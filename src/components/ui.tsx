@@ -113,7 +113,7 @@ export function LinkButton({
 // ---------------------------------------------------------------------------
 // Surfaces
 // ---------------------------------------------------------------------------
-export type CardGlow = "accent" | "warn" | "good" | "info" | "violet" | "pink" | "teal";
+export type CardGlow = "accent" | "warn" | "good" | "info" | "gold" | "teal";
 
 export function Card({
   children,

@@ -120,7 +120,7 @@ function PackageForm({ d }: { d: Core }) {
 
   return (
     <div className="anim-rise mx-auto max-w-2xl space-y-4 pb-10">
-      <Link href={renewing ? `/packages/${renewing.id}` : "/membership#personal-training"} className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
+      <Link href={renewing ? `/packages/${renewing.id}` : "/membership/training"} className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
         <ArrowLeft className="size-4" /> Back
       </Link>
       <div>

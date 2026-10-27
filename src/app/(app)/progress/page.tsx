@@ -97,7 +97,7 @@ function Training({ d }: { d: Core }) {
 
   return (
     <div className="space-y-4">
-      <Card glow="violet" className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
+      <Card glow="good" className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
         <Stat label="Gym attendance" value={all.rate === null ? "—" : `${Math.round(all.rate * 100)}%`} hint={`${all.attended} attended · ${all.missed} missed (confirmed)`} />
         {d.ptEnabled && <Stat label="PT attendance" value={pt.rate === null ? "—" : `${Math.round(pt.rate * 100)}%`} hint={`${pt.completed} done · ${pt.charged} missed`} />}
         <Stat label="Workouts logged" value={d.workouts.length} />
