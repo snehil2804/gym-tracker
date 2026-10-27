@@ -174,15 +174,17 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
             description="Planned rest. No PT session is deducted."
             onClick={() => commit({ date, gym_status: "rest", pt_status: "not_scheduled" }, `Rest day saved for ${formatShort(date)}.`)}
           />
-          <Choice
-            icon={<NotebookPen className="size-5" />}
-            title="Log workout details"
-            description="Exercises, sets, weights — or just describe it."
-            onClick={() => {
-              onClose();
-              router.push(`/workouts/new?date=${date}`);
-            }}
-          />
+          {date === today && (
+            <Choice
+              icon={<NotebookPen className="size-5" />}
+              title="Log today's exercises"
+              description="Weights and reps for today's planned workout, on the Today page."
+              onClick={() => {
+                onClose();
+                router.push("/#today-workout");
+              }}
+            />
+          )}
         </div>
       </>
     );

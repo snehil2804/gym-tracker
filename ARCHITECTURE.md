@@ -62,7 +62,10 @@ auth.users ─1:1─ profiles (settings, reminders, tracking_start_date, seeded_
            ─1:n─ daily_activity (unique user+date: steps, cardio, ┘
                                  warm-up, mobility, movement checklists)
 
+exercises also carry a YouTube Shorts demo (video_id/url/title/creator) and catalog_id → plan_exercises.
+
 shared, read-only (select for authenticated, no writes):
+  exercise_demos (exercise name → verified Short; trigger fills demos on exercises by name)
   plan_exercises (catalog + verified YouTube Shorts mapping or 'pending')
   plan_templates ─1:n─ plan_template_days ─1:n─ plan_template_items (prescriptions)
 ```
@@ -72,6 +75,11 @@ template: custom sets/reps on the default live in `planner_settings.default_over
 (`"<weekday>:<position>" → {sets, reps}`), and custom plans are copies with a `base` snapshot per
 exercise so the UI can show what changed. Sections E–H of the coaching PDF (cardio, steps, warm-up,
 mobility) are constants in `src/lib/domain/planner.ts`; completion lives in `daily_activity`.
+
+Workouts are logged on the Today page (`src/components/planner/today-workout.tsx`): each plan
+exercise maps to the user's library exercise (by `catalog_id` or name, created on first log) and
+the session is saved through `save_workout` as a workout with `workout_type = 'plan'`; skipped
+exercises are rows with the note "Skipped". Rules live in `src/lib/domain/session.ts`.
 
 ### Attendance states
 - `gym_status`: `attended | absent | rest | unverified`

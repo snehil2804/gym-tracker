@@ -180,6 +180,13 @@ export interface Exercise {
   equipment: string | null;
   notes: string | null;
   is_archived: boolean;
+  /** YouTube Shorts demo (filled from the shared demo list when the name matches). */
+  video_id: string | null;
+  video_url: string | null;
+  video_title: string | null;
+  video_creator: string | null;
+  /** Planner catalog exercise this one stands for, if any. */
+  catalog_id: string | null;
 }
 
 export interface WorkoutTemplate {

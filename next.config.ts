@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/finance", destination: "/membership/spending", permanent: false },
       { source: "/packages", destination: "/membership/training", permanent: false },
+      // Workouts are logged on the Today page now.
+      { source: "/workouts/new", destination: "/#today-workout", permanent: false },
     ];
   },
   async headers() {

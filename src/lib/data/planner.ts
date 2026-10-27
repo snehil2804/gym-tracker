@@ -65,7 +65,7 @@ export const emptyActivity = (date: string): DailyActivity => ({ log_date: date,
 export function usePlanCatalog() {
   return useQuery({
     queryKey: plannerKeys.catalog,
-    queryFn: () => unwrap<CatalogExercise[]>(sb().from("plan_exercises").select("id, name, target_muscles, equipment, instructions, video_id, video_url, video_title, video_creator, video_status").order("name")),
+    queryFn: () => unwrap<CatalogExercise[]>(sb().from("plan_exercises").select("id, name, primary_muscle, target_muscles, equipment, instructions, video_id, video_url, video_title, video_creator, video_status").order("name")),
     staleTime: 60 * 60_000,
   });
 }

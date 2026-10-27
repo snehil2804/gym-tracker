@@ -1,6 +1,7 @@
 "use client";
 
-import { Bike, Check, ChevronDown, Flame, Footprints, HeartPulse, StretchHorizontal } from "lucide-react";
+import { Bike, Check, ChevronDown, Flame, Footprints, HeartPulse, PlayCircle, StretchHorizontal } from "lucide-react";
+import { DemoModal, type Demo } from "@/components/planner/demo-modal";
 import { useState, type ReactNode } from "react";
 import { Input, ProgressBar, Segmented, Select, cx, useToast } from "@/components/ui";
 import {
@@ -24,8 +25,18 @@ import {
   progress,
   rampExercises,
   type CatalogExercise,
+  type DrillVideo,
   type PlanDay,
 } from "@/lib/domain/planner";
+
+const drillDemo = (title: string, v: DrillVideo, instructions?: string): Demo => ({
+  title,
+  videoId: v.id,
+  videoUrl: `https://www.youtube.com/shorts/${v.id}`,
+  videoTitle: v.title,
+  creator: v.creator,
+  instructions,
+});
 
 /** Expandable section; stays compact until opened. */
 export function Panel({
@@ -68,7 +79,38 @@ export function Panel({
   );
 }
 
-function CheckRow({ checked, onToggle, label, hint, right }: { checked: boolean; onToggle: () => void; label: ReactNode; hint?: ReactNode; right?: ReactNode }) {
+function CheckRow({
+  checked,
+  onToggle,
+  label,
+  hint,
+  right,
+  onDemo,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  label: ReactNode;
+  hint?: ReactNode;
+  right?: ReactNode;
+  onDemo?: () => void;
+}) {
+  if (onDemo)
+    return (
+      <div className="flex items-center gap-1">
+        <div className="min-w-0 flex-1">
+          <CheckRow checked={checked} onToggle={onToggle} label={label} hint={hint} right={right} />
+        </div>
+        <button
+          type="button"
+          onClick={onDemo}
+          aria-label={`Demo: ${typeof label === "string" ? label : "drill"}`}
+          className="grid size-9 shrink-0 place-items-center rounded-lg text-teal hover:bg-teal-soft"
+          title="Watch the demo (starts muted)"
+        >
+          <PlayCircle className="size-5" />
+        </button>
+      </div>
+    );
   return (
     <button type="button" role="checkbox" aria-checked={checked} onClick={onToggle} className="flex w-full items-start gap-3 rounded-xl px-2 py-2 text-left hover:bg-surface-2">
       <span className={cx("mt-0.5 grid size-5 shrink-0 place-items-center rounded-md border transition-colors", checked ? "border-good bg-good text-white" : "border-line-strong bg-surface")}>
@@ -104,6 +146,7 @@ function useToggleList(date: string, field: "warmup" | "mobility" | "neat") {
 // ---------------------------------------------------------------------------
 export function WarmupPanel({ date, day, catalog }: { date: string; day: PlanDay; catalog: Map<string, CatalogExercise> }) {
   const { done, toggle } = useToggleList(date, "warmup");
+  const [demo, setDemo] = useState<Demo | null>(null);
   const ramps = rampExercises(day);
   const all = [WARMUP.general, ...WARMUP.dynamic, ...ramps.flatMap((i) => WARMUP.ramp.map((r) => ({ id: `ramp:${i.key}:${r.pct}` })))];
   const p = progress(done, all);
@@ -117,10 +160,15 @@ export function WarmupPanel({ date, day, catalog }: { date: string; day: PlanDay
     >
       <ProgressBar total={1} segments={[{ value: p, className: "bg-warn", label: "Warm-up done" }]} />
       <p className="mt-4 text-xs font-semibold tracking-wide text-muted uppercase">1 · General (4–5 min)</p>
-      <CheckRow checked={done.includes("general")} onToggle={() => toggle("general")} label="Easy bike or incline walk" />
+      <CheckRow
+        checked={done.includes("general")}
+        onToggle={() => toggle("general")}
+        label="Easy bike or incline walk"
+        onDemo={() => setDemo(drillDemo("Easy incline walk", WARMUP.general.video, "4–5 min, easy pace — you should be able to chat."))}
+      />
       <p className="mt-3 text-xs font-semibold tracking-wide text-muted uppercase">2 · Dynamic (3 min)</p>
       {WARMUP.dynamic.map((m) => (
-        <CheckRow key={m.id} checked={done.includes(m.id)} onToggle={() => toggle(m.id)} label={m.label} right={m.dose} />
+        <CheckRow key={m.id} checked={done.includes(m.id)} onToggle={() => toggle(m.id)} label={m.label} right={m.dose} onDemo={() => setDemo(drillDemo(m.label, m.video, `Dose: ${m.dose}`))} />
       ))}
       <p className="mt-3 text-xs font-semibold tracking-wide text-muted uppercase">3 · Ramp-up for the first 1–2 exercises</p>
       <p className="mb-1 px-2 text-xs text-muted">{WARMUP.rampNote}</p>
@@ -142,6 +190,7 @@ export function WarmupPanel({ date, day, catalog }: { date: string; day: PlanDay
         </div>
       ))}
       <p className="mt-3 px-2 text-xs text-muted">Cool-down: {WARMUP.coolDown}</p>
+      <DemoModal demo={demo} onClose={() => setDemo(null)} />
     </Panel>
   );
 }
@@ -331,6 +380,7 @@ export function StepsPanel({ date, settings }: { date: string; settings: Planner
 // ---------------------------------------------------------------------------
 export function MobilityPanel({ date, restDay }: { date: string; restDay: boolean }) {
   const { done, toggle } = useToggleList(date, "mobility");
+  const [demo, setDemo] = useState<Demo | null>(null);
   const p = progress(done, MOBILITY);
   return (
     <Panel
@@ -343,12 +393,21 @@ export function MobilityPanel({ date, restDay }: { date: string; restDay: boolea
       <ProgressBar total={1} segments={[{ value: p, className: "bg-teal", label: "Mobility done" }]} />
       <div className="mt-3">
         {MOBILITY.map((m) => (
-          <CheckRow key={m.id} checked={done.includes(m.id)} onToggle={() => toggle(m.id)} label={m.label} hint={m.purpose} right={m.dose} />
+          <CheckRow
+            key={m.id}
+            checked={done.includes(m.id)}
+            onToggle={() => toggle(m.id)}
+            label={m.label}
+            hint={m.purpose}
+            right={m.dose}
+            onDemo={() => setDemo(drillDemo(m.label, m.video, `${m.dose} — ${m.purpose}.`))}
+          />
         ))}
       </div>
       <p className="mt-3 flex gap-2 rounded-xl bg-surface-2 p-3 text-xs text-muted">
         <HeartPulse className="size-4 shrink-0 text-teal" /> {MOBILITY_NOTE}
       </p>
+      <DemoModal demo={demo} onClose={() => setDemo(null)} />
     </Panel>
   );
 }

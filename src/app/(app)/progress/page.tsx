@@ -51,6 +51,8 @@ import {
   workoutsBetween,
 } from "@/lib/domain/stats";
 import type { Goal, Measurement, ProgressPhoto } from "@/lib/types";
+import { groupLabel, groupOf } from "@/lib/domain/muscles";
+import { setsByGroup, weeklyLoad } from "@/lib/domain/session";
 
 type Tab = "training" | "strength" | "body" | "goals" | "photos";
 const shortDate = (iso: string) => `${Number(iso.slice(8))} ${monthName(iso, false)}`;
@@ -83,6 +85,59 @@ export default function ProgressPage() {
       {tab === "goals" && <Goals d={d} />}
       {tab === "photos" && <Photos d={d} />}
     </div>
+  );
+}
+
+/** Analytics from the weights and reps logged on the Today page (and any other logged workout). */
+function LoggedTraining({ d }: { d: Core }) {
+  const load = weeklyLoad(d.workouts, d.today, 12);
+  const thisWeek = load.at(-1)!;
+  const lastWeek = load.at(-2)!;
+  const muscles = setsByGroup(d.workouts, addDays(d.today, -27), d.today, (m) => groupLabel(groupOf(m)));
+  const done = load.reduce((n, w) => n + w.done, 0);
+  const skipped = load.reduce((n, w) => n + w.skipped, 0);
+  const wk = (iso: string) => `wk ${shortDate(iso)}`;
+  const delta = (a: number, b: number) => (b ? `${a >= b ? "+" : ""}${Math.round(((a - b) / b) * 100)}% vs last week` : "first week logged");
+  return (
+    <>
+      <Card glow="info" className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
+        <Stat label="Volume this week" value={`${thisWeek.volume.toLocaleString("en-IN")} kg`} hint={delta(thisWeek.volume, lastWeek.volume)} />
+        <Stat label="Working sets this week" value={thisWeek.sets} hint={`${thisWeek.reps} reps`} />
+        <Stat label="Plan exercises done" value={thisWeek.done} hint={thisWeek.skipped ? `${thisWeek.skipped} skipped this week` : "none skipped this week"} />
+        <Stat label="Completion (12 wks)" value={done + skipped ? `${Math.round((done / (done + skipped)) * 100)}%` : "—"} hint={`${done} done · ${skipped} skipped`} />
+      </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Volume per week" subtitle="Weight × reps of working sets — warm-ups excluded" table={{ columns: ["Week of", "Volume (kg)", "Sets", "Reps"], rows: load.map((w) => [formatDate(w.week), w.volume, w.sets, w.reps]) }}>
+          <Bars data={load} x="week" xFormat={shortDate} labelFormat={wk} format={(v) => `${v.toLocaleString("en-IN")} kg`} bars={[{ key: "volume", name: "Volume", color: "var(--chart-good)" }]} />
+        </ChartCard>
+        <ChartCard
+          title="Plan exercises completed"
+          subtitle="From the Today logger — done vs skipped"
+          legend={[
+            { label: "Done", color: "var(--chart-good)" },
+            { label: "Skipped", color: "var(--chart-loss)", hatch: true },
+          ]}
+          table={{ columns: ["Week of", "Done", "Skipped"], rows: load.map((w) => [formatDate(w.week), w.done, w.skipped]) }}
+        >
+          <Bars
+            data={load}
+            x="week"
+            xFormat={shortDate}
+            labelFormat={wk}
+            stacked
+            bars={[
+              { key: "done", name: "Done", color: "var(--chart-good)" },
+              { key: "skipped", name: "Skipped", color: "var(--chart-loss)", hatch: true },
+            ]}
+          />
+        </ChartCard>
+      </div>
+      <Card className="p-5">
+        <p className="text-[15px] font-semibold">Working sets per muscle group</p>
+        <p className="mb-4 text-xs text-muted">Last 4 weeks · the plan aims for about 10+ hard sets a week per major muscle</p>
+        {muscles.length ? <RankBars items={muscles.map((m) => ({ label: m.group, value: m.sets }))} /> : <p className="text-sm text-muted">Log sets with reps to see this.</p>}
+      </Card>
+    </>
   );
 }
 
@@ -140,12 +195,14 @@ function Training({ d }: { d: Core }) {
           </ChartCard>
         ) : (
           <Card>
-            <EmptyState icon={<LineIcon className="size-5" />} title="No workouts yet" action={<LinkButton href="/workouts/new">Log a workout</LinkButton>}>
+            <EmptyState icon={<LineIcon className="size-5" />} title="No workouts yet" action={<LinkButton href="/#today-workout">Log today&apos;s workout</LinkButton>}>
               Workout frequency appears after your first logged session.
             </EmptyState>
           </Card>
         )}
       </div>
+
+      {hasWorkouts && <LoggedTraining d={d} />}
 
       {hasWorkouts && (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -170,7 +227,7 @@ function Strength({ d }: { d: Core }) {
   if (prs.length === 0)
     return (
       <Card>
-        <EmptyState icon={<Trophy className="size-5" />} title="No strength data yet" action={<LinkButton href="/workouts/new" variant="primary">Log a workout</LinkButton>}>
+        <EmptyState icon={<Trophy className="size-5" />} title="No strength data yet" action={<LinkButton href="/#today-workout" variant="primary">Log today&apos;s workout</LinkButton>}>
           Log exercises with weights (e.g. bench press 3×10 at 30 kg) and your progression appears here.
         </EmptyState>
       </Card>

@@ -48,10 +48,10 @@ export default function WorkoutsPage() {
         actions={
           <>
             <LinkButton href="/workouts/library" icon={<LayoutGrid className="size-4" />}>
-              Exercises & templates
+              Exercise library
             </LinkButton>
-            <LinkButton href="/workouts/new" variant="primary" icon={<Plus className="size-4" />}>
-              Log workout
+            <LinkButton href="/#today-workout" variant="primary" icon={<Plus className="size-4" />}>
+              Log on Today
             </LinkButton>
           </>
         }
@@ -78,7 +78,7 @@ export default function WorkoutsPage() {
 
       {d.workouts.length === 0 ? (
         <Card>
-          <EmptyState icon={<Dumbbell className="size-5" />} title="Your workout diary is empty" action={<LinkButton href="/workouts/new" variant="primary">Log a workout</LinkButton>}>
+          <EmptyState icon={<Dumbbell className="size-5" />} title="Your workout diary is empty" action={<LinkButton href="/#today-workout" variant="primary">Log today&apos;s workout</LinkButton>}>
             Log what you did — or describe it in a sentence — and your strength and frequency charts will build from real sessions.
           </EmptyState>
         </Card>

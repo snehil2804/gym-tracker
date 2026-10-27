@@ -350,7 +350,7 @@ function Planner({
                   </div>
                 )}
                 {!day.rest && day.weekday === todayWd && (
-                  <LinkButton href={`/workouts/new?date=${today}`} variant="primary" size="sm" icon={<CalendarDays className="size-4" />}>
+                  <LinkButton href="/#today-workout" variant="primary" size="sm" icon={<CalendarDays className="size-4" />}>
                     Log today&apos;s session
                   </LinkButton>
                 )}

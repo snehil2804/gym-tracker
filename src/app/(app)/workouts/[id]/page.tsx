@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Copy, Pencil, Trash2, Trophy } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -79,9 +79,6 @@ function WorkoutView({ d, w, onEdit }: { d: Core; w: Workout; onEdit: () => void
           <Button icon={<Pencil className="size-4" />} onClick={onEdit}>
             Edit
           </Button>
-          <LinkButton href={`/workouts/new?from=${w.id}`} icon={<Copy className="size-4" />}>
-            Repeat
-          </LinkButton>
           <Button variant="ghost" onClick={() => setConfirm(true)} aria-label="Delete workout">
             <Trash2 className="size-4" />
           </Button>

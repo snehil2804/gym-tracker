@@ -25,18 +25,18 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 
 | Area | Highlights |
 |---|---|
-| **Today** (dashboard) | One-tap “I went / I missed”, reminders, this week with streak, recent workouts, data-backed insights. Money and package cards live in Membership insights |
+| **Today** (dashboard) | One-tap “I went / I missed”, reminders, **today's workout from your plan** with muted Shorts demos and a step-by-step logger (did you complete it? weight × reps per set, skip), this week with streak, recent workouts, insights |
 | **Calendar** | Month view with distinct day states, day editor with impact preview and change history, planned breaks — plus the streak game: streak flame, XP and levels, monthly perfect-month chase, badges, and a trail joining winning days (rest days never break a streak; misses cost XP) |
 | **Review days** | Queue of past training days that are still unconfirmed, with one-tap or bulk confirmation |
 | **Membership insights** | Overview with three tiles and the package, missed PT value, gym membership and money cards. **Personal training** (`/membership/training`): packages (create, renew, edit, close, payments, credits/refunds/adjustments, forecast), trainers, prepaid value split, missed value by month. **Gym membership** (`/membership/gym`): current membership, earlier ones, gym spend, editing (estimated vs confirmed end). **Spending** (`/membership/spending`): total paid split gym / PT, paid-per-month chart, cost per session / workout, all payments, definitions |
-| **Workouts** | **Plan** tab: default 5-day split (Mon Upper A · Tue Lower A · Wed Upper B · Thu Lower B · Fri Upper C · weekend rest) with sets, rep ranges, RIR, rest, cues and in-page YouTube Shorts demos (DeltaBolic / TylerPath); your own sets/reps without changing the prescription; private named custom plans (add, remove, reorder, search exercises, edit every field, drafts kept until saved); today's warm-up with ramp-up sets, Zone 2 cardio (Mon/Thu + Sat or Wed), steps and movement checklist, posture/mobility routine. **History** tab: “describe it in a sentence” logging, templates, repeat a workout, sets × reps × kg, edit / duplicate / delete |
+| **Workouts** | **Plan** tab: default 5-day split (Mon Upper A · Tue Lower A · Wed Upper B · Thu Lower B · Fri Upper C · weekend rest) with sets, rep ranges, RIR, rest, cues and in-page YouTube Shorts demos (DeltaBolic / TylerPath); your own sets/reps without changing the prescription; private named custom plans (add, remove, reorder, search exercises, edit every field, drafts kept until saved); today's warm-up with ramp-up sets, Zone 2 cardio (Mon/Thu + Sat or Wed), steps and movement checklist, posture/mobility routine. **History** tab: past workouts (edit / delete). **Exercise library**: muscle-group categories, Shorts demo for every exercise, add (Shorts link required) and edit |
 | **Progress** | Weekly attendance and workouts, minutes, muscle groups, strength progression and PRs, body measurements, goals, private progress photos |
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
 | **Sign-in** | Continue with Google (primary), email + password, password reset |
 | **Welcome flow** | First sign-in asks name, photo, birth date (age), height, weight, gym membership, personal trainer and weekly goal — skippable, editable later |
 | **Photos** | Crop, zoom, rotate and straighten before uploading (round crop for the profile photo; 3:4, 4:5, square, 16:9 or original for progress photos), or upload the original — up to 40 MB |
 | **Delete account** | Settings → Delete account: removes photos, every record and the login; only a minimal log entry (email, provider, created/deleted dates, counts) is kept in `private.deleted_accounts` |
-| **Settings** | Profile, PT / gym switches, time zone, theme, planned breaks, reminder toggles, CSV/JSON export, archive restore, password, delete account. Gym membership and trainers are edited under Membership |
+| **Settings** | Profile, BMI with class and healthy range, target weight, PT / gym switches, time zone, theme, planned breaks, reminder toggles, CSV/JSON export, archive restore, password, delete account. Gym membership and trainers are edited under Membership |
 
 ---
 

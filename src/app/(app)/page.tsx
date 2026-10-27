@@ -18,6 +18,7 @@ import { DAY_STYLE, DayBadge, DayIcon } from "@/components/day-status";
 import { useQuickLog } from "@/components/quick-log";
 import { Button, Card, CardHeader, EmptyState, ErrorNote, LinkButton, Skeleton, Stat, cx } from "@/components/ui";
 import { useGame } from "@/components/streak-game";
+import { TodayWorkout } from "@/components/planner/today-workout";
 import { useCore, type Core } from "@/lib/data/derived";
 import { classifyDay, PT_STATUS } from "@/lib/domain/attendance";
 import { addDays, formatShort, monthName, startOfWeek, weekdayName } from "@/lib/domain/dates";
@@ -61,6 +62,7 @@ function Dashboard({ d }: { d: Core }) {
       </header>
 
       <TodayCard d={d} />
+      <TodayWorkout d={d} />
       <Reminders d={d} />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -133,7 +135,7 @@ function TodayCard({ d }: { d: Core }) {
               <Button onClick={() => quick.open("menu", d.today)} icon={<RefreshCw className="size-4" />}>
                 Change
               </Button>
-              <LinkButton href={`/workouts/new?date=${d.today}`} variant="primary" icon={<Plus className="size-4" />}>
+              <LinkButton href="#today-workout" variant="primary" icon={<Plus className="size-4" />}>
                 Log workout
               </LinkButton>
             </>
@@ -268,13 +270,13 @@ function RecentWorkouts({ d }: { d: Core }) {
         eyebrow="Workouts"
         title="Recent"
         action={
-          <LinkButton href="/workouts/new" size="sm" variant="ghost" icon={<Plus className="size-3.5" />}>
+          <LinkButton href="#today-workout" size="sm" variant="ghost" icon={<Plus className="size-3.5" />}>
             Log
           </LinkButton>
         }
       />
       {recent.length === 0 ? (
-        <EmptyState icon={<Dumbbell className="size-5" />} title="No workouts logged yet" action={<LinkButton href="/workouts/new" variant="primary">Log your first workout</LinkButton>}>
+        <EmptyState icon={<Dumbbell className="size-5" />} title="No workouts logged yet" action={<LinkButton href="#today-workout" variant="primary">Log today&apos;s workout</LinkButton>}>
           Describe a session in a sentence or add exercises, sets and weights. Your charts build from what you log.
         </EmptyState>
       ) : (

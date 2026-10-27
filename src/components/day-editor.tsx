@@ -203,9 +203,9 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
               </ul>
             </div>
           )}
-          {!future && (
-            <Link href={`/workouts/new?date=${date}`} className="inline-block text-sm font-medium text-muted underline-offset-2 hover:text-ink hover:underline">
-              + Log a workout for this day
+          {date === d.today && (
+            <Link href="/#today-workout" className="inline-block text-sm font-medium text-muted underline-offset-2 hover:text-ink hover:underline">
+              + Log today&apos;s exercises
             </Link>
           )}
 

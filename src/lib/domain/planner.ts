@@ -42,6 +42,7 @@ export interface PlanDay {
 export interface CatalogExercise {
   id: string;
   name: string;
+  primary_muscle: string;
   target_muscles: string[];
   equipment: string;
   instructions: string;
@@ -258,16 +259,27 @@ export const NEAT_CHECKLIST = [
   { id: "late_walk", label: "Easy 10-min walk before winding down (if below target)", hint: "After 10 PM, only if you're short on steps" },
 ];
 
+/** A verified YouTube Short for a drill (checked via oEmbed: title, channel, embeddable, 9:16). */
+export interface DrillVideo {
+  id: string;
+  title: string;
+  creator: string;
+}
+
 /** Section G — warm-up (8–10 min, before every lifting session). */
 export const WARMUP = {
-  general: { id: "general", label: "General — 4–5 min easy bike or incline walk" },
+  general: {
+    id: "general",
+    label: "General — 4–5 min easy bike or incline walk",
+    video: { id: "5lL1nTzh8CU", title: "The Best Way to Walk on a Treadmill (To Burn More Calories)", creator: "TylerPath" },
+  },
   dynamic: [
-    { id: "arm_circles", label: "Arm circles", dose: "10/direction" },
-    { id: "band_pull_aparts", label: "Band pull-aparts", dose: "×15" },
-    { id: "cat_camel", label: "Cat–camel", dose: "×8" },
-    { id: "bw_squats", label: "Bodyweight squats", dose: "×10" },
-    { id: "hip_hinge", label: "Hip-hinge drill with a dowel", dose: "×10" },
-    { id: "glute_bridge", label: "Glute bridge", dose: "×10" },
+    { id: "arm_circles", label: "Arm circles", dose: "10/direction", video: { id: "Eak8y05Vrs4", title: "How to Do Arm Circles | Shoulder Mobility & Upper-Body Warm-Up", creator: "GloverActive" } },
+    { id: "band_pull_aparts", label: "Band pull-aparts", dose: "×15", video: { id: "QHy6QzOocbM", title: "Fix Your Band Pull Apart", creator: "Claire DeFitt" } },
+    { id: "cat_camel", label: "Cat–camel", dose: "×8", video: { id: "aHZ2O2lM8Zs", title: "Cat Camel - Spine Mobility Exercise", creator: "Rehab Hero" } },
+    { id: "bw_squats", label: "Bodyweight squats", dose: "×10", video: { id: "I7Nk1RMtcLs", title: "How to bodyweight squat (fix squat form)", creator: "Shawn Adair" } },
+    { id: "hip_hinge", label: "Hip-hinge drill with a dowel", dose: "×10", video: { id: "v_hXJ9IwbfY", title: "Dowel Hip Hinge Drill | Learn Proper Hinge Mechanics", creator: "PRO+ Sports Medicine Education" } },
+    { id: "glute_bridge", label: "Glute bridge", dose: "×10", video: { id: "X_IGw8U_e38", title: "How to do Glute Bridges with Perfect Form", creator: "WeShape" } },
   ],
   ramp: [
     { pct: 50, reps: "10" },
@@ -285,15 +297,15 @@ export function rampExercises(day: PlanDay) {
 
 /** Section H — posture/mobility routine (10 min; daily, or after sessions and on rest days). */
 export const MOBILITY = [
-  { id: "thoracic_ext", label: "Foam-roller thoracic extension", dose: "2 × 8 slow reps", purpose: "Upper-back mobility" },
-  { id: "open_book", label: "Side-lying open book", dose: "8/side", purpose: "Thoracic rotation" },
-  { id: "wall_slides", label: "Wall slides (forearms on the wall)", dose: "2 × 10", purpose: "Scapular upward rotation/control" },
-  { id: "pull_aparts", label: "Band pull-aparts", dose: "2 × 15–20", purpose: "Rear delts and mid-traps" },
-  { id: "chin_tucks", label: "Chin tucks (supine or against a wall)", dose: "10 × 3 s hold", purpose: "Neck positioning after laptop time" },
-  { id: "hip_flexor", label: "Half-kneeling hip-flexor stretch (glute squeezed)", dose: "30–45 s/side", purpose: "Hip extension, offsetting long sitting" },
-  { id: "hip_switch", label: "90/90 hip switches", dose: "8/side", purpose: "Hip rotation" },
-  { id: "dead_bug", label: "Dead bug", dose: "2 × 8/side", purpose: "Core bracing with the ribs down" },
-  { id: "side_plank", label: "Side plank", dose: "2 × 20–40 s/side", purpose: "Lateral core" },
+  { id: "thoracic_ext", label: "Foam-roller thoracic extension", dose: "2 × 8 slow reps", purpose: "Upper-back mobility", video: { id: "594H5DhzyS0", title: "How To Do Thoracic Spine Extensions on a Foam Roller", creator: "livfitkarl" } },
+  { id: "open_book", label: "Side-lying open book", dose: "8/side", purpose: "Thoracic rotation", video: { id: "pf_obkpcpJE", title: "Sidelying open book stretch", creator: "Fit Family Physical Therapy" } },
+  { id: "wall_slides", label: "Wall slides (forearms on the wall)", dose: "2 × 10", purpose: "Scapular upward rotation/control", video: { id: "OtgQDv7u1TM", title: "Scapular Wall Slides", creator: "Testosterone Nation" } },
+  { id: "pull_aparts", label: "Band pull-aparts", dose: "2 × 15–20", purpose: "Rear delts and mid-traps", video: { id: "QHy6QzOocbM", title: "Fix Your Band Pull Apart", creator: "Claire DeFitt" } },
+  { id: "chin_tucks", label: "Chin tucks (supine or against a wall)", dose: "10 × 3 s hold", purpose: "Neck positioning after laptop time", video: { id: "-wrUruAXpbA", title: "How to Chin Tuck", creator: "Ollie Martin" } },
+  { id: "hip_flexor", label: "Half-kneeling hip-flexor stretch (glute squeezed)", dose: "30–45 s/side", purpose: "Hip extension, offsetting long sitting", video: { id: "ktgtEWGhFd8", title: "How to PROPERLY Perform the Kneeling Hip Flexor Stretch With Good Form", creator: "Gerardi Performance" } },
+  { id: "hip_switch", label: "90/90 hip switches", dose: "8/side", purpose: "Hip rotation", video: { id: "GC7YJ217uoU", title: "90/90 Hip Switch", creator: "JSWFitness Personal Training" } },
+  { id: "dead_bug", label: "Dead bug", dose: "2 × 8/side", purpose: "Core bracing with the ribs down", video: { id: "23dfGd8ZWkM", title: "How to do a dead bug correctly", creator: "murph_movement" } },
+  { id: "side_plank", label: "Side plank", dose: "2 × 20–40 s/side", purpose: "Lateral core", video: { id: "BFOyHDlY2UE", title: "Fix Your Side Plank Form", creator: "PS Fit" } },
 ];
 export const MOBILITY_NOTE =
   "Not a treatment for any postural “disorder”. It builds upper-back strength, thoracic mobility and bracing. The best posture is your next posture — change positions often.";

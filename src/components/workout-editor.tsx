@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, Chip, Choice, Field, Input, Select, Switch, Textarea, useToast, cx } from "@/components/ui";
 import type { Core } from "@/lib/data/derived";
-import { useExercises, useSaveAttendance, useSaveWorkout, useTemplates, useTrainers, type WorkoutPayload } from "@/lib/data/hooks";
+import { useExercises, useSaveAttendance, useSaveWorkout, useTrainers, type WorkoutPayload } from "@/lib/data/hooks";
 import { formatShort } from "@/lib/domain/dates";
 import { formatMoney, sessionValue } from "@/lib/domain/money";
 import { parseWorkoutText, type WorkoutDraft } from "@/lib/domain/parser";
@@ -61,7 +61,6 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
   const router = useRouter();
   const toast = useToast();
   const exercises = useExercises();
-  const templates = useTemplates();
   const trainers = useTrainers();
   const saveWorkout = useSaveWorkout();
   const saveAttendance = useSaveAttendance();
@@ -124,15 +123,6 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
     if (!personal) setPersonal(text.trim());
     // A PT deduction is only *suggested* for explicit statements and still needs this choice to be confirmed.
     setPt(d.ptEnabled && dr.ptSuggestion === "completed" && !d.byDate.get(dr.date) ? "pt_done" : dr.attendance === "attended" && !d.byDate.get(dr.date) ? "gym_only" : "keep");
-  }
-
-  function applyTemplate(name: string) {
-    const t = templates.data?.find((x) => x.id === name);
-    if (!t) return;
-    setRows(t.exercise_names.map((n) => ({ key: key(), name: n, notes: "", rest: "", sets: [blankSet(), blankSet(), blankSet()] })));
-    setMuscles(t.muscle_groups);
-    setType(t.workout_type ?? "custom");
-    if (!title) setTitle(t.name);
   }
 
   function repeat(id: string) {
@@ -347,14 +337,6 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">Exercises</h2>
           <div className="flex flex-wrap gap-2">
-            <Select className="h-9 w-auto text-sm" value="" onChange={(e) => e.target.value && applyTemplate(e.target.value)} aria-label="Start from a template">
-              <option value="">Template…</option>
-              {(templates.data ?? []).map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </Select>
             {lastWorkouts.length > 0 && (
               <Select className="h-9 w-auto text-sm" value="" onChange={(e) => e.target.value && repeat(e.target.value)} aria-label="Repeat a previous workout">
                 <option value="">Repeat a workout…</option>
@@ -373,7 +355,7 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
           ))}
         </datalist>
 
-        {rows.length === 0 && <p className="py-4 text-center text-sm text-muted">No exercises yet. Add one, pick a template, or repeat a previous workout.</p>}
+        {rows.length === 0 && <p className="py-4 text-center text-sm text-muted">No exercises yet. Add one or repeat a previous workout.</p>}
 
         <div className="space-y-3">
           {rows.map((r, i) => {

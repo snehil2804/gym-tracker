@@ -5,6 +5,36 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — log on Today, demos everywhere, BMI
+- **Today's workout** on the dashboard: the plan day from your active plan (custom) or the default,
+  with every exercise listed and a muted YouTube Shorts demo. It asks "Did you complete <exercise>?"
+  and records weight × reps per set (pre-filled from last time), or a skip, one exercise at a time;
+  edit any logged exercise afterwards. Saved as a normal workout (type `plan`), so History, PRs and
+  Progress use it; the first logged exercise also marks today as a gym day (PT status untouched).
+- **Exercise library** grouped by muscle (Chest, Back, Shoulders, Biceps, Triceps, Forearms, Legs,
+  Abs & Core, Cardio, Other) with counts, search and archive. Includes the plan's exercises. Edit
+  works for every exercise (editing a plan exercise saves your own copy). **Add exercise** asks for
+  name, target muscle group and a **YouTube Shorts** link (mandatory; regular videos and youtu.be
+  links are rejected; the Short is checked via oEmbed for title, channel and embeddability).
+- **Demos for every exercise**: the 50 built-in library exercises got verified Shorts (44 from
+  DeltaBolic/TylerPath; bike, rower, elliptical and jump rope from other creators), stored per
+  exercise and attached automatically by name to new exercises (`exercise_demos` + trigger).
+  Warm-up and posture/mobility drills each have a verified Short (Demo button per drill).
+  All players start muted.
+- **Progress → Training**: volume this week (vs last), working sets and reps, plan exercises done
+  vs skipped, completion rate, volume-per-week and completion charts, working sets per muscle group.
+- **Settings → BMI** right after the profile fields: BMI with a colour-coded class (Underweight,
+  Normal weight, Overweight, Obesity), a scale, the healthy weight range for your height, and a
+  target weight you can step up/down by 0.5 kg (saved as a Body-weight goal).
+
+### Removed
+- The separate Log Workout page (`/workouts/new` now opens Today's logger) and the "Repeat" button.
+- Workout templates in the library and the editor.
+
+### Database
+- Migration `20261028000011_exercise_demos.sql`: video columns + `catalog_id` on `exercises`,
+  shared read-only `exercise_demos`, `primary_muscle` on `plan_exercises`, demo-fill trigger, backfill.
+
 ### Added — workout planner (Workouts → Plan)
 - **Default plan** from the coaching PDF, Section C: Mon Upper A · Tue Lower A · Wed Upper B ·
   Thu Lower B · Fri Upper C · Sat/Sun rest from lifting. 36 exercises with sets, rep range, RIR,

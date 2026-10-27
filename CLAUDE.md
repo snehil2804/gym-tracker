@@ -47,7 +47,10 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
 11. **Planner templates are shared and read-only.** Never write to `plan_exercises` or
    `plan_template_*` from the app; per-user changes go to `planner_settings.default_overrides` or a
    `workout_plans` row. Only map demo videos you have verified (title + channel via oEmbed);
-   otherwise leave `video_status = 'pending'`.
+   otherwise leave `video_status = 'pending'`. User-entered demos must be YouTube **Shorts** links
+   (`parseShortsUrl` in `src/lib/domain/muscles.ts`). Demo players start muted.
+12. **Workouts are logged on Today**, not a separate page. Plan sessions are ordinary workouts with
+   `workout_type = 'plan'`; don't add a second storage path for sets.
 
 ## Where things live
 - Domain logic (pure, tested): `src/lib/domain/*` — add tests in `tests/unit` for any change.
