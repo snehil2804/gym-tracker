@@ -17,12 +17,13 @@ import Link from "next/link";
 import { DAY_STYLE, DayBadge, DayIcon } from "@/components/day-status";
 import { useQuickLog } from "@/components/quick-log";
 import { Button, Card, CardHeader, EmptyState, ErrorNote, LinkButton, Skeleton, Stat, cx } from "@/components/ui";
+import { useGame } from "@/components/streak-game";
 import { useCore, type Core } from "@/lib/data/derived";
 import { classifyDay, PT_STATUS } from "@/lib/domain/attendance";
 import { addDays, formatShort, monthName, startOfWeek, weekdayName } from "@/lib/domain/dates";
 import { buildInsights } from "@/lib/domain/insights";
 import { EyeToggle, useMoneyHidden } from "@/components/preferences";
-import { currentStreak, gymAttendance, monthRange, workoutsBetween } from "@/lib/domain/stats";
+import { gymAttendance, monthRange, workoutsBetween } from "@/lib/domain/stats";
 
 export default function DashboardPage() {
   const { data, loading, error } = useCore();
@@ -196,7 +197,8 @@ function WeekCard({ d }: { d: Core }) {
   }).length;
   const m = monthRange(d.today);
   const monthAtt = gymAttendance(d.attendance, m.from, d.today);
-  const streak = currentStreak(d.attendance, d.today, [1, 2, 3, 4, 5, 6, 7].filter((x) => !d.scheduleDays.includes(x)));
+  const game = useGame(d);
+  const streak = game.streak;
 
   return (
     <Card glow="info">
@@ -247,10 +249,10 @@ function WeekCard({ d }: { d: Core }) {
             value={
               <span className="flex items-center gap-1">
                 {streak}
-                {streak > 1 && <Flame className="size-4 text-accent" />}
+                {streak > 1 && <Flame className="size-4 text-teal" />}
               </span>
             }
-            hint="confirmed days"
+            hint={game.weekStreak > 0 ? `${game.weekStreak} golden ${game.weekStreak === 1 ? "week" : "weeks"}` : `days · goal ${goal}/week`}
           />
         </div>
       </div>

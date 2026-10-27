@@ -116,21 +116,22 @@ function requestQuake(delay = 0) {
   window.dispatchEvent(new CustomEvent("rl-quake", { detail: { delay } }));
 }
 
-function Brand() {
+/** Logo (+ name unless `iconOnly`). Clicking it replays the drop and shakes the page. */
+function Brand({ iconOnly = false, size = 34 }: { iconOnly?: boolean; size?: number }) {
   // Each click remounts the logo part-way through its cycle so the bar drops right away.
   const [replay, setReplay] = useState(0);
   return (
     <Link
       href="/"
-      className="group flex items-center gap-2.5 px-2"
+      className={cx("group flex items-center gap-2.5", !iconOnly && "px-2")}
       aria-label="Rep Ledger — Today"
       onClick={() => {
         setReplay((n) => n + 1);
         requestQuake(CLICK_DROP_MS);
       }}
     >
-      <LiftLogo key={replay} size={34} className="shadow-brand" startAt={replay ? LIFT_DROP_MS - CLICK_DROP_MS : 0} />
-      <span className="font-display text-[17px] font-semibold tracking-tight">Rep Ledger</span>
+      <LiftLogo key={replay} size={size} className="shadow-brand" startAt={replay ? LIFT_DROP_MS - CLICK_DROP_MS : 0} />
+      {!iconOnly && <span className="font-display text-[17px] font-semibold tracking-tight">Rep Ledger</span>}
     </Link>
   );
 }
@@ -192,10 +193,11 @@ function Frame({ children }: { children: ReactNode }) {
       {/* Desktop sidebar */}
       <aside
         className={cx(
-          "fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r px-3 py-5 backdrop-blur-xl transition-colors duration-500 md:flex",
-          glass ? "border-white/25 bg-bg/25" : "border-line/70 bg-bg/70",
+          "fixed inset-y-0 left-0 z-30 hidden w-60 flex-col px-3 py-5 transition-colors duration-500 md:flex",
+          glass ? "glass-aside" : "border-r border-line/70 bg-bg/70 backdrop-blur-xl",
         )}
       >
+        {glass && <span aria-hidden className="glass-aside-layer" />}
         <Brand />
         <button
           onClick={() => quick.open()}
@@ -211,7 +213,7 @@ function Frame({ children }: { children: ReactNode }) {
               aria-current={isActive(path, n.href) ? "page" : undefined}
               className={cx(
                 "group flex h-11 items-center gap-3 rounded-xl px-2 text-sm font-medium transition-colors",
-                isActive(path, n.href) ? "bg-surface text-ink shadow-card" : "text-muted hover:bg-surface/70 hover:text-ink",
+                isActive(path, n.href) ? "bg-surface text-ink shadow-card" : glass ? "text-ink/85 hover:bg-surface/60 hover:text-ink" : "text-muted hover:bg-surface/70 hover:text-ink",
               )}
             >
               <span
@@ -231,10 +233,10 @@ function Frame({ children }: { children: ReactNode }) {
             <Avatar size={34} />
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium text-ink">{profile?.display_name ?? " "}</span>
-              <span className="block text-xs text-muted">Profile & settings</span>
+              <span className={cx("block text-xs", glass ? "text-ink/70" : "text-muted")}>Profile & settings</span>
             </span>
           </Link>
-          <button onClick={signOut} className="mt-1 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-sm text-muted hover:bg-surface-2 hover:text-ink">
+          <button onClick={signOut} className={cx("mt-1 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-sm hover:bg-surface-2 hover:text-ink", glass ? "text-ink/80" : "text-muted")}>
             <LogOut className="size-4" /> Sign out
           </button>
         </div>
@@ -245,13 +247,13 @@ function Frame({ children }: { children: ReactNode }) {
       <header
         className={cx(
           "sticky top-0 z-30 grid h-14 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b px-3 backdrop-blur-xl transition-colors duration-500 md:hidden",
-          glass ? "border-white/20 bg-bg/25" : "border-line/60 bg-bg/75",
+          glass ? "border-transparent bg-bg/25 [mask-image:linear-gradient(to_bottom,black_86%,transparent)]" : "border-line/60 bg-bg/75",
         )}
       >
-        <span aria-hidden />
-        <div className="flex justify-center">
-          <Brand />
-        </div>
+        <Brand iconOnly size={32} />
+        <Link href="/" className="justify-self-center font-display text-[17px] font-semibold tracking-tight">
+          Rep Ledger
+        </Link>
         <Link href="/settings" aria-label="Profile and settings" className="grid size-10 place-items-center rounded-full hover:bg-surface-2">
           <Avatar size={32} />
         </Link>

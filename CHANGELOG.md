@@ -5,6 +5,23 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Changed — streak game follows your weekly commitment
+- Streaks now respect your weekly goal: each week has (training days − goal) free off-days, so a
+  day off within your goal never breaks the streak. Further misses break it (−15 XP; a missed paid
+  PT session is never free).
+- Golden weeks: hit the goal with no breaks and the whole week turns gold on the calendar (shimmer,
+  crown on Sunday, +50 XP). Golden months: no breaks all month — the calendar card turns gold with a
+  banner and +150 XP. Week streak = golden weeks in a row.
+- Scoreboard: today's mission with the XP on offer, next badge to unlock, flame tiers (spark →
+  fire → blaze → inferno), this week's pips against the goal, 12 badges (new: Golden week, Gold
+  rush, Centurion). Today's streak uses the same rules.
+- Calendar cells pop in, won days get a stamp animation, cells lift on hover.
+
+### Fixed
+- Phone top bar: icon on the left, "Rep Ledger" centred.
+- Settings: sidebar is frosted glass that fades into the page (no hard line) and its labels are
+  darker for readability.
+
 ### Changed — "Aurora" look
 - No more orange: the brand gradient is emerald → cyan → blue (logo tile, Log training, the
   mobile + button, streak flame, XP bar, month ring). Losses use red instead of ember.

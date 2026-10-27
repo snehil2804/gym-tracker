@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Flame, ListChecks } from "lucide-react";
+import { ChevronLeft, ChevronRight, Crown, Flame, ListChecks } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { DayEditor } from "@/components/day-editor";
@@ -13,7 +13,7 @@ import { EyeToggle, Money, MoneyScope } from "@/components/preferences";
 import { addMonths, endOfMonth, isISODate, monthGrid, monthName, startOfMonth, weekdayLabel } from "@/lib/domain/dates";
 import { ledgerValue } from "@/lib/domain/finance";
 import { GamePanel, PerfectMonthBanner, useGame } from "@/components/streak-game";
-import { addDays, isoWeekday } from "@/lib/domain/dates";
+import { addDays, isoWeekday, startOfWeek } from "@/lib/domain/dates";
 
 export default function CalendarPage() {
   const { data: d, loading, error } = useCore();
@@ -84,18 +84,20 @@ function CalendarView({
         }
       />
 
-      <GamePanel game={game} month={month} today={d.today} />
+      <GamePanel game={game} month={month} today={d.today} goal={d.profile.weekly_workout_goal} />
       {monthResult?.perfect && <PerfectMonthBanner month={month} />}
 
-      <Card className="p-3 sm:p-5">
+      <Card className={cx("p-3 sm:p-5", monthResult?.perfect && "golden-month")}>
         <div className="mb-3 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(month, -1))} aria-label="Previous month">
             <ChevronLeft className="size-4" />
           </Button>
           <div className="text-center">
-            <h2 className="font-display text-lg font-semibold">
+            <h2 className="flex items-center justify-center gap-1.5 font-display text-lg font-semibold">
+              {monthResult?.perfect && <Crown className="size-4 text-[#d4a017]" />}
               {monthName(month)} {month.slice(0, 4)}
             </h2>
+            {monthResult?.perfect && <p className="text-xs font-semibold text-[#b8860b]">Golden month</p>}
             {month !== startOfMonth(d.today) && (
               <button className="text-xs text-muted underline-offset-2 hover:underline" onClick={() => setAnchor(startOfMonth(d.today))}>
                 Back to today
@@ -107,14 +109,14 @@ function CalendarView({
           </Button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 sm:gap-2" role="grid" aria-label={`${monthName(month)} ${month.slice(0, 4)}`}>
+        <div key={month} className="grid grid-cols-7 gap-1 sm:gap-2" role="grid" aria-label={`${monthName(month)} ${month.slice(0, 4)}`}>
           {[1, 2, 3, 4, 5, 6, 7].map((w) => (
             <div key={w} className="pb-1 text-center text-[11px] font-semibold tracking-wide text-muted uppercase" role="columnheader">
               <span className="sm:hidden">{weekdayLabel(w).charAt(0)}</span>
               <span className="hidden sm:inline">{weekdayLabel(w)}</span>
             </div>
           ))}
-          {grid.map((day) => {
+          {grid.map((day, idx) => {
             const inMonth = day >= month && day <= endOfMonth(month);
             const rec = d.byDate.get(day);
             const kind = classifyDay(day, rec, d.dayCtx);
@@ -126,22 +128,25 @@ function CalendarView({
             const run = game.chain.get(day);
             const linked = inMonth && run !== undefined && isoWeekday(day) !== 1 && game.chain.get(addDays(day, -1)) === run;
             const won = g === "won" || g === "double";
+            const goldWeek = inMonth && !!game.weeks.get(startOfWeek(day))?.golden && g !== "future";
             return (
               <button
                 key={day}
                 role="gridcell"
                 onClick={() => (day > d.today ? setSelected(day) : setSelected(day))}
                 aria-label={`${day}: ${dayLabel(kind, d.ptEnabled)}${hasWorkout ? ", workout logged" : ""}`}
+                style={{ ["--i" as string]: idx }}
                 className={cx(
-                  "relative flex aspect-square min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl text-sm transition-transform active:scale-95 sm:aspect-auto sm:h-20 sm:items-start sm:justify-between sm:p-2",
+                  "cal-cell relative flex aspect-square min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl text-sm active:scale-95 sm:aspect-auto sm:h-20 sm:items-start sm:justify-between sm:p-2",
                   inMonth ? s.cell : "opacity-30",
+                  goldWeek && (won ? "gold-win" : "gold-day"),
+                  won && inMonth && "cal-won",
                   kind === "future" && "bg-surface-2/50",
                   kind === "not_scheduled" && "bg-surface-2/40",
                   isToday && "ring-2 ring-ink ring-offset-1 ring-offset-surface",
                   isToday && game.todayOpen && "today-chase",
                   inMonth && won && run !== undefined && "trail-win",
                   inMonth && run !== undefined && !won && "trail-bridge",
-                  "hover:brightness-95",
                 )}
               >
                 {linked && <span aria-hidden className="trail-link" />}
@@ -152,11 +157,18 @@ function CalendarView({
                     <Flame className="size-3" />
                   </span>
                 )}
+                {goldWeek && isoWeekday(day) === 7 && (
+                  <span className="absolute -top-1.5 -right-1.5 z-10 grid size-5 place-items-center rounded-full bg-[linear-gradient(160deg,#ffe08a,#e9a417)] text-[#3a2a00] shadow" title="Golden week">
+                    <Crown className="size-3" />
+                  </span>
+                )}
                 <span className="absolute top-1 right-1 flex gap-0.5">
                   {hasWorkout && <i className="size-1.5 rounded-full bg-ink" title="Workout logged" />}
                   {blocked && <i className="size-1.5 rounded-full bg-rest" title="Planned break" />}
                 </span>
-                <span className="hidden max-w-full truncate text-[10px] font-medium sm:block">{kind === "future" || kind === "before" ? "" : dayLabel(kind, d.ptEnabled)}</span>
+                <span className="hidden max-w-full truncate text-[10px] font-medium sm:block" title={g === "skip" ? "Free off-day — within your weekly goal, doesn't break the streak" : undefined}>
+                  {kind === "future" || kind === "before" ? "" : g === "skip" ? "Free off-day" : dayLabel(kind, d.ptEnabled)}
+                </span>
               </button>
             );
           })}

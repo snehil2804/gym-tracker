@@ -74,12 +74,52 @@ describe("streak game", () => {
     const nov = g.months.get("2026-11")!;
     expect(nov.perfect).toBe(true);
     expect(g.badges.find((b) => b.id === "pm")?.earned).toBe(true);
-    expect(g.badges.find((b) => b.id === "pw")?.earned).toBe(true);
+    expect(g.badges.find((b) => b.id === "gw")?.earned).toBe(true);
+    expect(g.totals.goldenWeeks).toBeGreaterThanOrEqual(4);
   });
 
   it("a single miss spoils the month", () => {
     const g = computeGame({ attendance: [gym("2026-10-05"), absent("2026-10-06")], today: "2026-10-07", start: "2026-10-05" });
     expect(g.months.get("2026-10")!.stillPerfect).toBe(false);
+  });
+
+  it("days beyond the weekly goal are free off-days", () => {
+    // Goal 5 of 6 days: Tue unlogged uses the one free day; streak survives.
+    const g = computeGame({ attendance: [gym("2026-10-05"), gym("2026-10-07"), gym("2026-10-08")], today: "2026-10-08", start: "2026-10-05", weeklyGoal: 5 });
+    expect(g.days.get("2026-10-06")).toBe("skip");
+    expect(g.streak).toBe(3);
+  });
+
+  it("a second miss in the same week breaks the streak", () => {
+    const g = computeGame({ attendance: [gym("2026-10-05"), absent("2026-10-06"), absent("2026-10-07")], today: "2026-10-08", start: "2026-10-05", weeklyGoal: 5 });
+    expect(g.days.get("2026-10-06")).toBe("skip");
+    expect(g.days.get("2026-10-07")).toBe("missed");
+    expect(g.lastBreak?.date).toBe("2026-10-07");
+  });
+
+  it("a missed paid PT session is never a free day", () => {
+    const g = computeGame({ attendance: [gym("2026-10-05"), att("2026-10-06", { gym_status: "absent", pt_status: "chargeable_absence" })], today: "2026-10-07", start: "2026-10-05", weeklyGoal: 4 });
+    expect(g.days.get("2026-10-06")).toBe("missed");
+  });
+
+  it("a week that hits the goal with no breaks is golden and builds a week streak", () => {
+    const att = ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15"].map(gym);
+    const g = computeGame({ attendance: att, today: "2026-10-19", start: "2026-10-05", weeklyGoal: 4 });
+    expect(g.weeks.get("2026-10-05")!.golden).toBe(true);
+    expect(g.weeks.get("2026-10-12")!.golden).toBe(true);
+    expect(g.weekStreak).toBe(2);
+    expect(g.days.get("2026-10-09")).toBe("skip");
+  });
+
+  it("this week turns golden as soon as the goal is reached", () => {
+    const g = computeGame({ attendance: ["2026-10-05", "2026-10-06", "2026-10-07"].map(gym), today: "2026-10-07", start: "2026-10-05", weeklyGoal: 3 });
+    expect(g.thisWeek?.golden).toBe(true);
+    expect(g.weekStreak).toBe(1);
+  });
+
+  it("shows the XP waiting for today", () => {
+    const g = computeGame({ attendance: [gym("2026-10-05"), gym("2026-10-06")], today: "2026-10-07", start: "2026-10-05" });
+    expect(g.todayXp).toBe(XP.win + 2);
   });
 
   it("levels up with XP", () => {
