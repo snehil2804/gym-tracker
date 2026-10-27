@@ -21,7 +21,7 @@ by its owner**.
 
 | Area | State | Notes |
 |---|---|---|
-| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 6 migrations applied to the live project |
+| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 8 migrations applied to the live project |
 | Session ledger & financial integrity | ✅ Done, tested | 78 database checks pass against the live DB |
 | Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 40 unit tests pass |
 | Auth (email + password, reset, sign-out, protected routes) | ✅ Done | Verified locally; production sign-in not yet done by owner |
@@ -33,6 +33,7 @@ by its owner**.
 | Supabase Auth URL configuration | ⚠️ Manual step pending | Site URL / redirect URLs must point at the Vercel domain |
 | Auto-deploy on git push | ✅ Connected | Every push to `main` deploys to production |
 | Onboarding, PT/membership switches, profile photo, money eye toggles | ✅ Done | Welcome flow, PT-off UI, eye toggle and Settings profile verified in the browser with a throwaway account (deleted). `snehilworkemail@gmail.com` will see the welcome flow on next sign-in |
+| Account deletion | ✅ Done | Verified end-to-end in the browser with a throwaway account: zero orphaned rows or files afterwards. `snehilworkemail@gmail.com` deleted on request; only `snehilrai678.sr@gmail.com` remains |
 | Email / push notifications | ❌ Not built | Reminders are in-app only |
 
 ---

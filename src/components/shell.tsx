@@ -49,12 +49,44 @@ const noop = () => () => {};
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const mounted = useSyncExternalStore(noop, () => true, () => false);
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, error: profileError, refetch } = useProfile();
   const router = useRouter();
   const needsOnboarding = !!profile && !profile.onboarded_at;
+  const [gone, setGone] = useState(false);
+
+  // If the profile can't be loaded, find out whether the account still exists. A session that
+  // outlived its account (deleted on another device) is signed out instead of spinning forever.
+  useEffect(() => {
+    if (!profileError) return;
+    let cancelled = false;
+    getSupabase()
+      .auth.getUser()
+      .then(async ({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data.user) {
+          await getSupabase().auth.signOut({ scope: "local" });
+          window.location.replace("/login?deleted=1");
+        } else {
+          setGone(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profileError]);
   useEffect(() => {
     if (needsOnboarding) router.replace("/welcome");
   }, [needsOnboarding, router]);
+  if (gone)
+    return (
+      <div className="mx-auto max-w-md px-6 pt-24 text-center">
+        <p className="font-display text-xl font-semibold">Couldn&apos;t load your profile</p>
+        <p className="mt-2 text-sm text-muted">Check your connection and try again.</p>
+        <button className="mt-5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-ink" onClick={() => (setGone(false), refetch())}>
+          Try again
+        </button>
+      </div>
+    );
   if (!mounted || isLoading || !profile || needsOnboarding) return <PageFallback />;
   return (
     <FeaturesProvider value={{ pt: profile.pt_enabled, membership: profile.membership_enabled }}>

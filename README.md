@@ -35,6 +35,7 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
 | **Sign-in** | Continue with Google (primary), email + password, password reset |
 | **Welcome flow** | First sign-in asks name, photo, birth date (age), height, weight, gym membership, personal trainer and weekly goal — skippable, editable later |
+| **Delete account** | Settings → Delete account: removes photos, every record and the login; only a minimal log entry (email, provider, created/deleted dates, counts) is kept in `private.deleted_accounts` |
 | **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
 
 ---
@@ -251,7 +252,7 @@ The app never uses the `service_role` key.
 
 1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
 2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
-   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`, `20261027000006_onboarding_profile.sql`.
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`, `20261027000006_onboarding_profile.sql`, `20261027000007_account_deletion.sql`, `20261027000008_ledger_trigger_account_delete.sql`.
 3. Set the owner email (who receives the personal seed):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')

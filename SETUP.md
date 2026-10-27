@@ -39,6 +39,8 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
    4. `supabase/migrations/20261027000004_fk_indexes.sql`
    5. `supabase/migrations/20261027000005_client_cancelled.sql`
    6. `supabase/migrations/20261027000006_onboarding_profile.sql`
+   7. `supabase/migrations/20261027000007_account_deletion.sql`
+   8. `supabase/migrations/20261027000008_ledger_trigger_account_delete.sql`
 3. **Set the owner email** (only this account gets the initial personal records):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
@@ -128,7 +130,13 @@ Or connect `snehil2804/gym-tracker` under Vercel → Project → Settings → Gi
 | `npm run check` | typecheck + lint + tests + build |
 | `npm run test:db` | database suite via `psql` (`SUPABASE_DB_URL` required) |
 
-## 8. Resetting a user's data
+## 8. Deleted accounts
+Users delete themselves from Settings → Delete account. To see who deleted their account:
+```sql
+select email, providers, account_created_at, deleted_at, data_summary from private.deleted_accounts order by deleted_at desc;
+```
+
+## 9. Resetting a user's data
 Deleting the user in Supabase → Authentication → Users cascades to every table (audit rows
 included). To re-run the seed for the owner, delete and re-create the account, or clear
 `profiles.seeded_at` **and** delete the seeded rows first (the seed skips existing natural keys).

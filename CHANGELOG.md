@@ -5,6 +5,25 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — account deletion (27 Oct 2026)
+- **Settings → Delete account**: type DELETE to confirm; the app removes the user's photos and avatar from
+  Storage, then `public.delete_my_account()` logs a minimal entry and deletes the auth user — every
+  table cascades, so nothing is left behind. Signs out and shows a confirmation on the login page.
+- `private.deleted_accounts` (not exposed to the API): user id, email, sign-in providers, account
+  created / last sign-in / deleted timestamps and counts of what was removed.
+- A session whose account no longer exists (e.g. deleted on another device) is signed out instead of
+  loading forever.
+- Migrations `20261027000007_account_deletion`, `20261027000008_ledger_trigger_account_delete`;
+  `supabase/tests/account_deletion.sql` (9 checks).
+
+### Fixed
+- Deleting an account with attendance failed because the ledger trigger tried to void entries for the
+  already-deleted user; the trigger now skips work during an account-deletion cascade.
+
+### Removed
+- Account `snehilworkemail@gmail.com` deleted on the owner's request (logged in `private.deleted_accounts`).
+
+
 ### Added — onboarding & personalisation (27 Oct 2026)
 - **Welcome flow** for first-time accounts (`/welcome`): about you (photo, name, birth date → age,
   height, weight — all skippable except the name), gym membership (yes/no + plan), personal trainer

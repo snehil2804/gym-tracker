@@ -93,6 +93,7 @@ per `attendance_id`.
 | `public.record_session_adjustment(...)` / `void_session_adjustment(...)` | RPC, definer | manual credits, refunds, corrections; void (rollover voids both halves) |
 | `public.save_workout(jsonb)` | RPC, invoker | workout + exercises + sets atomically; creates unknown exercises |
 | `public.initialize_account()` | RPC, definer | defaults for everyone; personal seed for the owner only |
+| `public.delete_my_account(text)` | RPC, definer | requires 'DELETE'; refuses while photos remain in Storage; logs to `private.deleted_accounts`; deletes the auth user (all tables cascade) |
 | `public.restore_archive(jsonb)` | RPC, definer | insert-only restore into the caller's account; skips existing rows |
 | `public.package_summary` | view, security invoker | all package balances, counts and payment totals |
 

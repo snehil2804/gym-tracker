@@ -657,3 +657,45 @@ export function useUploadAvatar() {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Account deletion
+// ---------------------------------------------------------------------------
+async function removeAllFiles(bucket: string, uid: string, onProgress?: (n: number) => void) {
+  let removed = 0;
+  // The Storage API is the only way to delete files (and their rows); list in pages until empty.
+  for (let guard = 0; guard < 100; guard++) {
+    const { data, error } = await sb().storage.from(bucket).list(uid, { limit: 100 });
+    if (error) throw error;
+    const paths = (data ?? []).filter((f) => f.name && f.id).map((f) => `${uid}/${f.name}`);
+    if (!paths.length) break;
+    const res = await sb().storage.from(bucket).remove(paths);
+    if (res.error) throw res.error;
+    removed += paths.length;
+    onProgress?.(removed);
+  }
+  return removed;
+}
+
+/**
+ * Permanently deletes the signed-in account: photos and avatar files first, then every
+ * database record and the login itself (public.delete_my_account). Cannot be undone.
+ */
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: async ({ confirm, onStep }: { confirm: string; onStep?: (s: string) => void }) => {
+      const { data: u } = await sb().auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) throw new Error("Not signed in.");
+      onStep?.("Removing your photos…");
+      await removeAllFiles(PHOTO_BUCKET, uid);
+      await removeAllFiles(AVATAR_BUCKET, uid);
+      onStep?.("Deleting your records and account…");
+      const { data, error } = await sb().rpc("delete_my_account", { p_confirm: confirm });
+      if (error) throw error;
+      onStep?.("Signing out…");
+      await sb().auth.signOut({ scope: "local" });
+      return data as { deleted: boolean; removed: Record<string, number> };
+    },
+  });
+}

@@ -15,6 +15,7 @@ import {
   PageHeader,
   Segmented,
   Select,
+  Sheet,
   Skeleton,
   Switch,
   Textarea,
@@ -26,6 +27,7 @@ import {
   useSaveBlock,
   useSaveMembership,
   useSaveTrainer,
+  useDeleteAccount,
   useMeasurements,
   useSaveMeasurement,
   useTrainers,
@@ -63,6 +65,7 @@ export default function SettingsPage() {
       <RemindersSection profile={d.profile} />
       <DataSection />
       <AccountSection />
+      <DangerZone d={d} />
     </div>
   );
 }
@@ -733,5 +736,93 @@ function TrainingSection({ profile }: { profile: Profile }) {
         </Link>
       )}
     </Section>
+  );
+}
+
+function DangerZone({ d }: { d: Core }) {
+  const { data: user } = useUser();
+  const del = useDeleteAccount();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [step, setStep] = useState<string | null>(null);
+  const ready = typed.trim().toUpperCase() === "DELETE";
+  const counts = [
+    { one: "attendance day", many: "attendance days", n: d.attendance.length },
+    { one: "workout", many: "workouts", n: d.workouts.length },
+    { one: "PT package", many: "PT packages", n: d.packages.length },
+    { one: "payment", many: "payments", n: d.payments.length },
+    { one: "membership", many: "memberships", n: d.memberships.length },
+  ]
+    .filter((c) => c.n > 0)
+    .map((c) => ({ n: c.n, label: c.n === 1 ? c.one : c.many }));
+
+  return (
+    <section id="delete-account" className="scroll-mt-20">
+      <h2 className="text-[13px] font-semibold tracking-[0.06em] text-accent uppercase">Delete account</h2>
+      <div className="mt-3 rounded-2xl border border-accent/30 bg-surface p-5 shadow-card">
+        <p className="font-semibold">Delete my account and all my data</p>
+        <p className="mt-1 text-sm text-muted">
+          Permanently removes your login, profile, photos and every record — attendance, PT packages, payments, workouts,
+          measurements, goals and history. This can&apos;t be undone. Download a backup above first if you might want it.
+        </p>
+        <Button className="mt-4" variant="danger" icon={<Trash2 className="size-4" />} onClick={() => setOpen(true)}>
+          Delete account…
+        </Button>
+      </div>
+      <Sheet
+        open={open}
+        onClose={() => (del.isPending ? undefined : (setOpen(false), setTyped("")))}
+        title="Delete your account?"
+        description={user?.email ?? undefined}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" disabled={del.isPending} onClick={() => (setOpen(false), setTyped(""))}>
+              Cancel
+            </Button>
+            <Button
+              variant="accent"
+              disabled={!ready}
+              loading={del.isPending}
+              onClick={async () => {
+                try {
+                  await del.mutateAsync({ confirm: typed, onStep: setStep });
+                  try {
+                    sessionStorage.clear();
+                    localStorage.removeItem("rl-hidden-money");
+                  } catch {}
+                  window.location.replace("/login?deleted=1");
+                } catch (e) {
+                  setStep(null);
+                  toast.error(e);
+                }
+              }}
+            >
+              Delete everything
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 text-sm">
+          <p className="text-ink-2">This permanently deletes:</p>
+          <ul className="grid gap-1.5 rounded-xl bg-surface-2 p-3 text-ink-2">
+            <li>• Your login{user?.app_metadata?.provider === "google" ? " (Google sign-in link)" : ""} and profile</li>
+            <li>• Your profile photo and all progress photos</li>
+            <li>
+              • {counts.length ? counts.map((c) => `${c.n} ${c.label}`).join(", ") : "All your records"}, plus goals, measurements, the
+              exercise library and the change history
+            </li>
+          </ul>
+          <p className="text-muted">
+            Only a minimal note that an account with this email existed (and when it was created and deleted) is kept. Signing in again later
+            starts a brand-new, empty account.
+          </p>
+          <Field label='Type "DELETE" to confirm'>
+            <Input value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" placeholder="DELETE" data-autofocus />
+          </Field>
+          {step && <p className="rounded-xl bg-warn-soft px-3 py-2 text-warn">{step}</p>}
+        </div>
+      </Sheet>
+    </section>
   );
 }

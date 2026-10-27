@@ -41,7 +41,9 @@ export function LoginForm() {
     const e = params.get("error");
     return e ? readableAuthError(e) : null;
   });
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(() =>
+    params.get("deleted") ? "Your account and all of its data have been deleted." : null,
+  );
   // null = unknown (settings not loaded); true/false = whether Google is enabled in Supabase.
   const [googleEnabled, setGoogleEnabled] = useState<boolean | null>(null);
 
