@@ -25,6 +25,7 @@ import {
   Stat,
   useToast,
   cx,
+  PtOffNotice,
 } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import { useDeletePackage, useDeletePayment, useVoidAdjustment } from "@/lib/data/hooks";
@@ -40,6 +41,7 @@ export default function PackagePage() {
   const { data: d, loading, error } = useCore();
   if (error) return <ErrorNote error={error} />;
   if (loading || !d) return <Skeleton className="h-96" />;
+  if (!d.ptEnabled) return <PtOffNotice />;
   const pkg = d.packages.find((p) => p.id === id);
   if (!pkg)
     return (

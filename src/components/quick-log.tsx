@@ -63,6 +63,9 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
   }
 
   const date = dateState || today;
+  const ptOn = data.ptEnabled;
+  // Without personal training a miss is simply a missed gym day.
+  const missKind: MissKind | null = ptOn ? miss : "gym_only";
   const existing = data.byDate.get(date);
   const pkg = data.activeOn(date);
   const scheduled = isScheduledDay(date, pkg?.schedule_days ?? data.scheduleDays);
@@ -153,9 +156,17 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
       <>
         {header}
         <div className="grid gap-2">
-          <Choice icon={<Check className="size-5" />} tone="good" title={`I went ${dateLabel}`} description="Log a gym visit and your PT session." onClick={() => setMode("went")} />
-          <Choice icon={<X className="size-5" />} tone="accent" title={`I missed ${dateLabel}`} description="Tell us what you missed and why." onClick={() => setMode("missed")} />
-          <Choice icon={<Ban className="size-5" />} tone="info" title="Trainer cancelled" description="Not your loss — the session stays in your balance." onClick={() => setMode("cancelled")} />
+          <Choice
+            icon={<Check className="size-5" />}
+            tone="good"
+            title={`I went ${dateLabel}`}
+            description={ptOn ? "Log a gym visit and your PT session." : "Log a gym visit."}
+            onClick={() => (ptOn ? setMode("went") : commit({ date, gym_status: "attended", pt_status: "not_scheduled" }, `Gym visit logged for ${formatShort(date)}.`))}
+          />
+          <Choice icon={<X className="size-5" />} tone="accent" title={`I missed ${dateLabel}`} description={ptOn ? "Tell us what you missed and why." : "Add a reason if you like."} onClick={() => setMode("missed")} />
+          {ptOn && (
+            <Choice icon={<Ban className="size-5" />} tone="info" title="Trainer cancelled" description="Not your loss — the session stays in your balance." onClick={() => setMode("cancelled")} />
+          )}
           <Choice
             icon={<Moon className="size-5" />}
             tone="warn"
@@ -177,7 +188,21 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
     );
   }
 
-  if (mode === "went") {
+  if (mode === "went" && !ptOn) {
+    title = `Went to the gym ${dateLabel}`;
+    body = (
+      <>
+        {header}
+        <Choice
+          icon={<Check className="size-5" />}
+          tone="good"
+          title="Yes, log my gym visit"
+          description="Add workout details afterwards if you like."
+          onClick={() => commit({ date, gym_status: "attended", pt_status: "not_scheduled" }, `Gym visit logged for ${formatShort(date)}.`)}
+        />
+      </>
+    );
+  } else if (mode === "went") {
     title = `Went to the gym ${dateLabel}`;
     body = (
       <>
@@ -294,20 +319,24 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
       <>
         {back}
         {header}
-        <p className="mb-2 text-sm font-medium text-ink-2">What did you miss?</p>
-        <div className="grid gap-2">
-          {opts.map((o) => (
-            <Choice key={o.k} selected={miss === o.k} icon={o.icon} tone={o.tone} title={o.title} description={o.desc} onClick={() => setMiss(o.k)} />
-          ))}
-        </div>
+        {ptOn && (
+          <>
+            <p className="mb-2 text-sm font-medium text-ink-2">What did you miss?</p>
+            <div className="grid gap-2">
+              {opts.map((o) => (
+                <Choice key={o.k} selected={miss === o.k} icon={o.icon} tone={o.tone} title={o.title} description={o.desc} onClick={() => setMiss(o.k)} />
+              ))}
+            </div>
+          </>
+        )}
         {miss === "rescheduled" && (
           <Field label="Moved to" className="mt-4" hint="Log the make-up day as a completed session when it happens.">
             <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
           </Field>
         )}
-        {miss && (
+        {missKind && (
           <>
-            <p className="mt-5 mb-2 text-sm font-medium text-ink-2">Reason (optional)</p>
+            <p className={`${ptOn ? "mt-5" : ""} mb-2 text-sm font-medium text-ink-2`}>Reason (optional)</p>
             <div className="flex flex-wrap gap-2">
               {ABSENCE_REASONS.map((r) => (
                 <Chip key={r.value} selected={reason === r.value} onClick={() => setReason(reason === r.value ? null : r.value)}>
@@ -336,13 +365,13 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
         variant="primary"
         block
         size="lg"
-        disabled={!miss || (miss === "rescheduled" && !newDate) || (miss === "other" && !note.trim())}
+        disabled={!missKind || (missKind === "rescheduled" && !newDate) || (missKind === "other" && !note.trim())}
         loading={save.isPending}
         onClick={() =>
-          miss &&
+          missKind &&
           commit(
-            { date, ...map[miss], absence_reason: reason, notes: note || null, rescheduled_to: miss === "rescheduled" ? newDate : null },
-            miss === "both_charged" || miss === "pt_charged"
+            { date, ...map[missKind], absence_reason: reason, notes: note || null, rescheduled_to: missKind === "rescheduled" ? newDate : null },
+            missKind === "both_charged" || missKind === "pt_charged"
               ? `Missed session recorded (${formatMoney(rate)} of prepaid value).`
               : `Absence saved for ${formatShort(date)}.`,
           )

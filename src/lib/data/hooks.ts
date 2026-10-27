@@ -607,3 +607,53 @@ export function useSignedPhotoUrls(photos: ProgressPhoto[] | undefined) {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Profile photo
+// ---------------------------------------------------------------------------
+export const AVATAR_BUCKET = "avatars";
+
+/** Signed URL for the uploaded profile photo, falling back to the Google account picture. */
+export function useAvatarUrl() {
+  const { data: profile } = useProfile();
+  const { data: user } = useUser();
+  const path = profile?.avatar_path ?? null;
+  const signed = useQuery({
+    queryKey: ["avatar-url", path],
+    enabled: !!path,
+    staleTime: 50 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await sb().storage.from(AVATAR_BUCKET).createSignedUrl(path!, 3600);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
+  const meta = (user?.user_metadata ?? {}) as { avatar_url?: string; picture?: string };
+  return path ? signed.data ?? null : meta.avatar_url ?? meta.picture ?? null;
+}
+
+export function useUploadAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File | null) => {
+      const { data: u } = await sb().auth.getUser();
+      const uid = u.user!.id;
+      const { data: prof } = await sb().from("profiles").select("avatar_path").eq("id", uid).single();
+      const old = (prof as { avatar_path: string | null } | null)?.avatar_path ?? null;
+      let path: string | null = null;
+      if (file) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        path = `${uid}/avatar-${Date.now()}.${ext}`;
+        const up = await sb().storage.from(AVATAR_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+        if (up.error) throw up.error;
+      }
+      const { error } = await sb().from("profiles").update({ avatar_path: path }).eq("id", uid);
+      if (error) throw error;
+      if (old && old !== path) await sb().storage.from(AVATAR_BUCKET).remove([old]);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.profile });
+      qc.invalidateQueries({ queryKey: ["avatar-url"] });
+    },
+  });
+}

@@ -26,13 +26,16 @@ import {
   useSaveBlock,
   useSaveMembership,
   useSaveTrainer,
+  useMeasurements,
+  useSaveMeasurement,
   useTrainers,
   useUpdateProfile,
   useUser,
 } from "@/lib/data/hooks";
 import { buildArchive, CSV_EXPORTS, download, exportCSV, exportExerciseHistoryCSV, restoreArchive, validateArchive } from "@/lib/data/export";
 import { BLOCK_KIND } from "@/lib/domain/attendance";
-import { addDays, addMonths, daysBetween, formatDate } from "@/lib/domain/dates";
+import { addDays, addMonths, ageOn, daysBetween, formatDate } from "@/lib/domain/dates";
+import { AvatarUploader } from "@/components/avatar";
 import { formatMoney, paiseToInput, parseMoneyToPaise } from "@/lib/domain/money";
 import { getSupabase } from "@/lib/supabase/client";
 import type { BlockKind, Membership, Profile, Reminders } from "@/lib/types";
@@ -51,9 +54,11 @@ export default function SettingsPage() {
   return (
     <div className="anim-rise mx-auto max-w-3xl space-y-6">
       <PageHeader title="Settings" />
+      <AboutYouSection d={d} />
+      <TrainingSection profile={d.profile} />
       <ProfileSection profile={d.profile} />
       <MembershipSection d={d} />
-      <TrainersSection />
+      {d.ptEnabled && <TrainersSection />}
       <ScheduleSection d={d} />
       <RemindersSection profile={d.profile} />
       <DataSection />
@@ -77,13 +82,11 @@ function ProfileSection({ profile }: { profile: Profile }) {
   const update = useUpdateProfile();
   const [p, setP] = useState(profile);
   const set = <K extends keyof Profile>(k: K, v: Profile[K]) => setP((x) => ({ ...x, [k]: v }));
-  const dirty = JSON.stringify(p) !== JSON.stringify(profile);
+  const fields = ["timezone", "currency", "date_format", "theme", "weekly_workout_goal", "renewal_warning_days", "membership_warning_days", "tracking_start_date"] as const;
+  const dirty = fields.some((k) => p[k] !== profile[k]);
   return (
-    <Section title="Profile & display">
+    <Section title="Preferences">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Display name">
-          <Input value={p.display_name ?? ""} onChange={(e) => set("display_name", e.target.value)} />
-        </Field>
         <Field label="Time zone" hint="Decides which calendar day “today” is.">
           <Select value={p.timezone} onChange={(e) => set("timezone", e.target.value)}>
             {[...new Set([p.timezone, ...TIMEZONES])].map((t) => (
@@ -140,11 +143,17 @@ function ProfileSection({ profile }: { profile: Profile }) {
           loading={update.isPending}
           onClick={async () => {
             try {
-              const { id: _id, seeded_at: _s, reminders: _r, ...patch } = p;
-              void _id;
-              void _s;
-              void _r;
-              await update.mutateAsync(patch);
+              // Only this section's fields — other sections save their own.
+              await update.mutateAsync({
+                timezone: p.timezone,
+                currency: p.currency,
+                date_format: p.date_format,
+                theme: p.theme,
+                weekly_workout_goal: p.weekly_workout_goal,
+                renewal_warning_days: p.renewal_warning_days,
+                membership_warning_days: p.membership_warning_days,
+                tracking_start_date: p.tracking_start_date,
+              });
               toast.success("Settings saved.");
             } catch (e) {
               toast.error(e);
@@ -622,6 +631,107 @@ function AccountSection() {
       >
         Sign out
       </Button>
+    </Section>
+  );
+}
+
+function AboutYouSection({ d }: { d: Core }) {
+  const toast = useToast();
+  const update = useUpdateProfile();
+  const saveWeight = useSaveMeasurement();
+  const measurements = useMeasurements();
+  const { data: user } = useUser();
+  const profile = d.profile;
+  const latestWeight = (measurements.data ?? []).filter((m) => m.metric === "Body weight").at(-1);
+  const [name, setName] = useState(profile.display_name ?? "");
+  const [birth, setBirth] = useState(profile.birth_date ?? "");
+  const [height, setHeight] = useState(profile.height_cm ? String(profile.height_cm) : "");
+  const [weight, setWeight] = useState("");
+  const age = ageOn(birth, d.today);
+  const dirty = name !== (profile.display_name ?? "") || birth !== (profile.birth_date ?? "") || height !== (profile.height_cm ? String(profile.height_cm) : "") || weight !== "";
+  const invalid = !name.trim() || (birth !== "" && (birth > d.today || age === null)) || (height !== "" && !(Number(height) >= 50 && Number(height) <= 272)) || (weight !== "" && !(Number(weight) > 20 && Number(weight) < 400));
+
+  return (
+    <section id="profile" className="scroll-mt-20">
+      <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
+        <div className="relative h-24 bg-[radial-gradient(120%_140%_at_0%_0%,var(--accent-soft),transparent_60%),radial-gradient(120%_140%_at_100%_0%,var(--good-soft),transparent_55%)]" aria-hidden />
+        <div className="-mt-16 flex flex-col items-center px-5 pb-6 text-center">
+          <AvatarUploader size={108} />
+          <p className="mt-3 font-display text-2xl font-semibold tracking-tight">{profile.display_name || "Your name"}</p>
+          <p className="text-sm text-muted">
+            {user?.email}
+            {age !== null ? ` · ${age} years` : ""}
+            {profile.height_cm ? ` · ${profile.height_cm} cm` : ""}
+            {latestWeight ? ` · ${latestWeight.value} kg` : ""}
+          </p>
+        </div>
+        <div className="grid gap-4 border-t border-line p-5 sm:grid-cols-2">
+          <Field label="Display name">
+            <Input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+          </Field>
+          <Field label="Birth date" hint={age !== null ? `${age} years old` : "Used to show your age."}>
+            <Input type="date" value={birth} max={d.today} onChange={(e) => setBirth(e.target.value)} />
+          </Field>
+          <Field label="Height (cm)">
+            <Input inputMode="decimal" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^\d.]/g, ""))} placeholder="175" />
+          </Field>
+          <Field label="Today's weight (kg)" hint={latestWeight ? `Last: ${latestWeight.value} kg on ${formatDate(latestWeight.measured_on)}. Full history in Progress → Body.` : "Saved to Progress → Body."}>
+            <Input inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value.replace(/[^\d.]/g, ""))} placeholder={latestWeight ? String(latestWeight.value) : "72"} />
+          </Field>
+          <div className="flex justify-end sm:col-span-2">
+            <Button
+              variant="primary"
+              disabled={!dirty || invalid}
+              loading={update.isPending || saveWeight.isPending}
+              onClick={async () => {
+                try {
+                  await update.mutateAsync({ display_name: name.trim(), birth_date: birth || null, height_cm: height ? Number(height) : null });
+                  if (weight) await saveWeight.mutateAsync({ measured_on: d.today, metric: "Body weight", value: Number(weight), unit: "kg", note: null });
+                  setWeight("");
+                  toast.success("Profile saved.");
+                } catch (e) {
+                  toast.error(e);
+                }
+              }}
+            >
+              Save profile
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TrainingSection({ profile }: { profile: Profile }) {
+  const update = useUpdateProfile();
+  const toast = useToast();
+  const set = (patch: Partial<Profile>, message: string) =>
+    update
+      .mutateAsync(patch)
+      .then(() => toast.success(message))
+      .catch(toast.error);
+  return (
+    <Section id="training" title="What you track" description="Turn features on or off — nothing is deleted when you switch something off.">
+      <div className="divide-y divide-line">
+        <Switch
+          checked={profile.pt_enabled}
+          onChange={(v) => set({ pt_enabled: v }, v ? "Personal training is on. Add your package under PT Packages." : "Personal training hidden. Your PT records are kept.")}
+          label="Personal training"
+          description="PT packages, sessions, missed-session value and renewals. Turn on when you hire a trainer."
+        />
+        <Switch
+          checked={profile.membership_enabled}
+          onChange={(v) => set({ membership_enabled: v }, v ? "Gym membership tracking is on." : "Gym membership hidden from the dashboard.")}
+          label="Gym membership"
+          description="Membership card, expiry reminders and gym spending."
+        />
+      </div>
+      {profile.pt_enabled && (
+        <Link href="/packages" className="mt-3 inline-block text-sm font-medium text-ink underline-offset-2 hover:underline">
+          Manage PT packages →
+        </Link>
+      )}
     </Section>
   );
 }

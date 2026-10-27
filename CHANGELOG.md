@@ -5,6 +5,25 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — onboarding & personalisation (27 Oct 2026)
+- **Welcome flow** for first-time accounts (`/welcome`): about you (photo, name, birth date → age,
+  height, weight — all skippable except the name), gym membership (yes/no + plan), personal trainer
+  (yes/no + package), weekly goal, then an "all set" summary. Existing accounts with a PT package skip it.
+- **Personal training on/off** (`profiles.pt_enabled`, Settings → What you track). When off, PT Packages,
+  Review days, PT cards, PT calendar states/legend, PT options in the day editor and quick log, PT money
+  sections and the Sessions history tab are hidden; records are kept and return when switched on.
+- **Gym membership on/off** (`profiles.membership_enabled`) hides the membership card and reminders.
+- **Profile photo**: round avatar with tap-to-upload/remove (private `avatars` bucket, signed URLs; falls
+  back to the Google picture or initials). Shown in Settings, the sidebar and the mobile top bar.
+- Settings **Your profile** card: name, birth date with age, height, today's weight.
+- **Eye toggles** on every money card (dashboard, Money page, calendar summary) mask amounts as ₹••••;
+  remembered per device.
+- Migration `20261027000006_onboarding_profile`; 40 unit tests, 78 database checks.
+
+### Removed
+- "PT not confirmed" option from the day editor (unconfirmed days stay unconfirmed until you pick an outcome).
+
+
 ### Added — 27 Oct 2026
 - **“I cancelled” PT outcome** (`client_cancelled`) for sessions you call off yourself — shown as
   “<Name> cancelled” when a display name is set. Not deducted by default; counted per package

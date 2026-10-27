@@ -48,6 +48,12 @@ export interface Profile {
   reminders: Reminders;
   tracking_start_date: string | null;
   seeded_at: string | null;
+  onboarded_at: string | null;
+  pt_enabled: boolean;
+  membership_enabled: boolean;
+  birth_date: string | null;
+  height_cm: number | null;
+  avatar_path: string | null;
 }
 
 export interface Membership {

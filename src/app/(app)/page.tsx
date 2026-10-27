@@ -23,7 +23,8 @@ import { useCore, type Core } from "@/lib/data/derived";
 import { classifyDay, PT_STATUS } from "@/lib/domain/attendance";
 import { addDays, daysBetween, formatDate, formatShort, monthName, relativeDay, startOfWeek, weekdayName } from "@/lib/domain/dates";
 import { buildInsights } from "@/lib/domain/insights";
-import { formatMoney, sessionValue } from "@/lib/domain/money";
+import { sessionValue } from "@/lib/domain/money";
+import { EyeToggle, Money, MoneyScope, useMoneyHidden } from "@/components/preferences";
 import { membershipEnd, membershipStatus } from "@/lib/domain/reminders";
 import { currentStreak, gymAttendance, monthRange, workoutsBetween } from "@/lib/domain/stats";
 
@@ -45,7 +46,7 @@ function Dashboard({ d }: { d: Core }) {
     today: d.today,
     finance: d.finance,
     attendance: d.attendance,
-    activePackage: d.current,
+    activePackage: d.ptEnabled ? d.current : undefined,
     forecast: d.forecast,
     reviewCount: d.reviewDays.length,
   }).filter((i) => i.id !== "review");
@@ -65,21 +66,33 @@ function Dashboard({ d }: { d: Core }) {
       <TodayCard d={d} />
       <Reminders d={d} />
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <PackageCard d={d} />
-        <MissedValueCard d={d} />
-      </div>
+      {d.ptEnabled && (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <MoneyScope id="dash-package">
+            <PackageCard d={d} />
+          </MoneyScope>
+          <MoneyScope id="dash-missed">
+            <MissedValueCard d={d} />
+          </MoneyScope>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <WeekCard d={d} />
-        <MembershipCard d={d} />
-        <MoneyCard d={d} />
+        {d.membershipEnabled && (
+          <MoneyScope id="dash-membership">
+            <MembershipCard d={d} />
+          </MoneyScope>
+        )}
+        <MoneyScope id="dash-money">
+          <MoneyCard d={d} />
+        </MoneyScope>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <RecentWorkouts d={d} />
         <Card className="pb-2">
-          <CardHeader title="Insights" eyebrow="From your records" />
+          <CardHeader title="Insights" eyebrow="From your records" action={insights.length ? <EyeToggle id="dash-insights" /> : undefined} />
           {insights.length === 0 ? (
             <p className="px-5 py-4 text-sm text-muted">Insights appear once there are enough confirmed records to support them.</p>
           ) : (
@@ -89,10 +102,12 @@ function Dashboard({ d }: { d: Core }) {
                   <Lightbulb className={cx("mt-0.5 size-4 shrink-0", i.tone === "loss" ? "text-accent" : i.tone === "good" ? "text-good" : "text-muted")} />
                   {i.href ? (
                     <Link href={i.href} className="hover:underline">
-                      {i.text}
+                      <InsightText text={i.text} />
                     </Link>
                   ) : (
-                    <span>{i.text}</span>
+                    <span>
+                      <InsightText text={i.text} />
+                    </span>
                   )}
                 </li>
               ))}
@@ -127,6 +142,8 @@ function TodayCard({ d }: { d: Core }) {
                 <>
                   PT with {pkg!.trainer_name} is scheduled today. <span className="text-muted">Did you go?</span>
                 </>
+              ) : !d.ptEnabled ? (
+                "Did you go to the gym today?"
               ) : d.todayScheduled ? (
                 "Training day. Did you go to the gym?"
               ) : (
@@ -227,9 +244,12 @@ function PackageCard({ d }: { d: Core }) {
           </span>
         }
         action={
-          <LinkButton href={`/packages/${p.id}`} size="sm" variant="ghost">
-            Details <ArrowRight className="size-3.5" />
-          </LinkButton>
+          <span className="flex items-center gap-1">
+            <EyeToggle id="dash-package" />
+            <LinkButton href={`/packages/${p.id}`} size="sm" variant="ghost">
+              Details <ArrowRight className="size-3.5" />
+            </LinkButton>
+          </span>
         }
       />
       <div className="px-5 pt-3 pb-5">
@@ -258,7 +278,7 @@ function PackageCard({ d }: { d: Core }) {
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4 sm:grid-cols-4">
-          <Stat label="Prepaid value left" value={formatMoney(sessionValue(Math.max(p.remaining, 0), p.price_paise, p.sessions_purchased))} hint={`${formatMoney(rate)} per session`} />
+          <Stat label="Prepaid value left" value={<Money paise={sessionValue(Math.max(p.remaining, 0), p.price_paise, p.sessions_purchased)} />} hint={<><Money paise={rate} /> per session</>} />
           <Stat
             label="Next session"
             value={f?.nextSession && p.remaining > 0 ? relativeDay(f.nextSession, d.today) : "—"}
@@ -299,10 +319,10 @@ function MissedValueCard({ d }: { d: Core }) {
   const month = monthName(d.today);
   return (
     <Card tone={f.missedValueThisMonth > 0 ? "accent" : undefined} className="flex flex-col">
-      <CardHeader eyebrow="Missed PT value" title={`${month}, confirmed`} />
+      <CardHeader eyebrow="Missed PT value" title={`${month}, confirmed`} action={<EyeToggle id="dash-missed" />} />
       <div className="flex flex-1 flex-col px-5 pt-3 pb-5">
         <p className={cx("num font-display text-[40px] leading-none font-semibold tracking-tight", f.missedValueThisMonth > 0 ? "text-accent" : "text-ink")}>
-          {formatMoney(f.missedValueThisMonth)}
+          <Money paise={f.missedValueThisMonth} />
         </p>
         <p className="mt-2 text-sm text-ink-2">
           {f.missedSessionsThisMonth === 0
@@ -314,7 +334,7 @@ function MissedValueCard({ d }: { d: Core }) {
           <div className="flex justify-between">
             <span className="text-muted">All time</span>
             <span className="num font-medium">
-              {formatMoney(f.missedValue)} · {f.missedSessions} {f.missedSessions === 1 ? "session" : "sessions"}
+              <Money paise={f.missedValue} /> · {f.missedSessions} {f.missedSessions === 1 ? "session" : "sessions"}
             </span>
           </div>
           {f.pendingReviewDays > 0 && (
@@ -323,7 +343,7 @@ function MissedValueCard({ d }: { d: Core }) {
                 {f.pendingReviewDays} possible {f.pendingReviewDays === 1 ? "miss" : "misses"} to confirm
               </span>
               <span className="num flex items-center gap-1 font-medium text-warn">
-                up to {formatMoney(f.pendingReviewValue)} <ChevronRight className="size-3.5" />
+                up to <Money paise={f.pendingReviewValue} /> <ChevronRight className="size-3.5" />
               </span>
             </Link>
           )}
@@ -430,9 +450,12 @@ function MembershipCard({ d }: { d: Core }) {
         eyebrow="Gym membership"
         title={m.gym_name}
         action={
+          <span className="flex items-center gap-1">
+          <EyeToggle id="dash-membership" />
           <Badge tone={st.state === "active" ? (st.daysLeft <= d.profile.membership_warning_days ? "warn" : "good") : st.state === "expired" ? "loss" : "info"}>
             {st.state === "active" ? "Active" : st.state === "expired" ? "Expired" : "Starts soon"}
           </Badge>
+          </span>
         }
       />
       <div className="px-5 pt-3 pb-5">
@@ -452,7 +475,7 @@ function MembershipCard({ d }: { d: Core }) {
             <dt className="text-muted">Price</dt>
             <dd className="num font-medium">
               {m.price_is_approximate ? "≈ " : ""}
-              {formatMoney(m.price_paise)}
+              <Money paise={m.price_paise} />
               <span className="ml-1 text-xs font-normal text-muted">
                 {m.payment_status === "paid" ? "paid" : m.payment_status === "pending" ? "pending" : "payment unconfirmed"}
               </span>
@@ -477,31 +500,38 @@ function MoneyCard({ d }: { d: Core }) {
         eyebrow="Money"
         title="Spent so far"
         action={
-          <LinkButton href="/finance" size="sm" variant="ghost">
-            All <ArrowRight className="size-3.5" />
-          </LinkButton>
+          <span className="flex items-center gap-1">
+            <EyeToggle id="dash-money" />
+            <LinkButton href="/finance" size="sm" variant="ghost">
+              All <ArrowRight className="size-3.5" />
+            </LinkButton>
+          </span>
         }
       />
       <div className="px-5 pt-3 pb-5">
-        <p className="num font-display text-3xl font-semibold tracking-tight">{formatMoney(f.totalSpent)}</p>
+        <p className="num font-display text-3xl font-semibold tracking-tight"><Money paise={f.totalSpent} /></p>
         <p className="mt-1 text-xs text-muted">Only payments confirmed as paid.</p>
         <dl className="mt-4 space-y-1.5 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted">Gym</dt>
-            <dd className="num font-medium">{formatMoney(f.gymPaid)}</dd>
+            <dd className="num font-medium"><Money paise={f.gymPaid} /></dd>
           </div>
+          {d.ptEnabled && (
           <div className="flex justify-between">
             <dt className="text-muted">PT payments</dt>
-            <dd className="num font-medium">{formatMoney(f.ptPaid - f.ptRefunded)}</dd>
+            <dd className="num font-medium"><Money paise={f.ptPaid - f.ptRefunded} /></dd>
           </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-muted">Not yet recorded as paid</dt>
-            <dd className="num font-medium text-warn">{formatMoney(f.ptOutstanding + f.gymUnconfirmed)}</dd>
+            <dd className="num font-medium text-warn"><Money paise={(d.ptEnabled ? f.ptOutstanding : 0) + f.gymUnconfirmed} /></dd>
           </div>
+          {d.ptEnabled && (
           <div className="flex justify-between">
             <dt className="text-muted">Cost per completed PT session</dt>
-            <dd className="num font-medium">{f.effectiveCostPerCompleted === null ? "—" : formatMoney(f.effectiveCostPerCompleted)}</dd>
+            <dd className="num font-medium">{f.effectiveCostPerCompleted === null ? "—" : <Money paise={f.effectiveCostPerCompleted} />}</dd>
           </div>
+          )}
         </dl>
       </div>
     </Card>
@@ -567,4 +597,10 @@ function DashboardSkeleton() {
       </div>
     </div>
   );
+}
+
+/** Insight sentence with rupee amounts masked when the insights card is hidden. */
+function InsightText({ text }: { text: string }) {
+  const hidden = useMoneyHidden("dash-insights");
+  return <>{hidden ? text.replace(/₹[\d,.]+/g, "₹••••") : text}</>;
 }

@@ -8,9 +8,9 @@ import { DAY_STYLE, DayIcon, DayLegend } from "@/components/day-status";
 import { useQuickLog } from "@/components/quick-log";
 import { Button, Card, ErrorNote, LinkButton, PageHeader, Skeleton, cx } from "@/components/ui";
 import { useCore } from "@/lib/data/derived";
-import { blocksOn, classifyDay, DAY_KIND, type DayKind } from "@/lib/domain/attendance";
+import { blocksOn, classifyDay, dayLabel, PT_ONLY_KINDS, type DayKind } from "@/lib/domain/attendance";
+import { EyeToggle, Money, MoneyScope } from "@/components/preferences";
 import { addMonths, endOfMonth, isISODate, monthGrid, monthName, startOfMonth, weekdayLabel } from "@/lib/domain/dates";
-import { formatMoney } from "@/lib/domain/money";
 import { ledgerValue } from "@/lib/domain/finance";
 
 export default function CalendarPage() {
@@ -100,7 +100,7 @@ export default function CalendarPage() {
                 key={day}
                 role="gridcell"
                 onClick={() => (day > d.today ? setSelected(day) : setSelected(day))}
-                aria-label={`${day}: ${DAY_KIND[kind].label}${hasWorkout ? ", workout logged" : ""}`}
+                aria-label={`${day}: ${dayLabel(kind, d.ptEnabled)}${hasWorkout ? ", workout logged" : ""}`}
                 className={cx(
                   "relative flex aspect-square min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl text-sm transition-transform active:scale-95 sm:aspect-auto sm:h-20 sm:items-start sm:justify-between sm:p-2",
                   inMonth ? s.cell : "opacity-30",
@@ -116,7 +116,7 @@ export default function CalendarPage() {
                   {hasWorkout && <i className="size-1.5 rounded-full bg-ink" title="Workout logged" />}
                   {blocked && <i className="size-1.5 rounded-full bg-rest" title="Planned break" />}
                 </span>
-                <span className="hidden max-w-full truncate text-[10px] font-medium sm:block">{kind === "future" || kind === "before" ? "" : DAY_KIND[kind].label}</span>
+                <span className="hidden max-w-full truncate text-[10px] font-medium sm:block">{kind === "future" || kind === "before" ? "" : dayLabel(kind, d.ptEnabled)}</span>
               </button>
             );
           })}
@@ -136,6 +136,7 @@ export default function CalendarPage() {
           <h3 className="mb-3 text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">{monthName(month)} summary</h3>
           <dl className="space-y-1.5 text-sm">
             {(["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "rest", "unverified"] as DayKind[])
+              .filter((k) => d.ptEnabled || !PT_ONLY_KINDS.includes(k))
               .filter((k) => summary.counts.get(k))
               .map((k) => (
                 <div key={k} className="flex items-center justify-between">
@@ -143,15 +144,23 @@ export default function CalendarPage() {
                     <span className={cx("grid size-5 place-items-center rounded-md", DAY_STYLE[k].cell)}>
                       <DayIcon kind={k} className="size-3" />
                     </span>
-                    {DAY_KIND[k].label}
+                    {dayLabel(k, d.ptEnabled)}
                   </dt>
                   <dd className="num font-semibold">{summary.counts.get(k)}</dd>
                 </div>
               ))}
-            <div className="mt-2 flex justify-between border-t border-line pt-2">
-              <dt className="text-muted">Missed PT value (confirmed)</dt>
-              <dd className={cx("num font-semibold", summary.missed.value > 0 && "text-accent")}>{formatMoney(summary.missed.value)}</dd>
-            </div>
+            {d.ptEnabled && (
+              <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
+                <dt className="flex items-center gap-1 text-muted">
+                  Missed PT value (confirmed) <EyeToggle id="calendar-missed" className="size-7" />
+                </dt>
+                <dd className={cx("num font-semibold", summary.missed.value > 0 && "text-accent")}>
+                  <MoneyScope id="calendar-missed">
+                    <Money paise={summary.missed.value} />
+                  </MoneyScope>
+                </dd>
+              </div>
+            )}
           </dl>
           <Button variant="primary" block className="mt-4" onClick={() => quick.open("menu", d.today)}>
             Log today

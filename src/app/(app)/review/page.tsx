@@ -4,7 +4,7 @@ import { Ban, CalendarX, Check, CheckCheck, Dumbbell, PartyPopper, Pencil, X } f
 import { useMemo, useState } from "react";
 import { DayEditor } from "@/components/day-editor";
 import { DayBadge } from "@/components/day-status";
-import { Button, Card, EmptyState, ErrorNote, LinkButton, PageHeader, Skeleton, useToast, cx } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorNote, LinkButton, PageHeader, Skeleton, useToast, cx, PtOffNotice } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import { useSaveAttendanceBatch, type AttendanceInput } from "@/lib/data/hooks";
 import { classifyDay } from "@/lib/domain/attendance";
@@ -39,6 +39,7 @@ export default function ReviewPage() {
   const { data: d, loading, error } = useCore();
   if (error) return <ErrorNote error={error} />;
   if (loading || !d) return <Skeleton className="h-96" />;
+  if (!d.ptEnabled) return <PtOffNotice />;
   return <Review d={d} />;
 }
 

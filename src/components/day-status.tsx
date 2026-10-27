@@ -1,5 +1,6 @@
 import { ArrowRightLeft, Ban, CalendarX, Check, CheckCheck, CircleDashed, Dumbbell, HelpCircle, Minus, Moon, X } from "lucide-react";
-import { DAY_KIND, type DayKind } from "@/lib/domain/attendance";
+import { dayLabel, type DayKind } from "@/lib/domain/attendance";
+import { useFeatures } from "@/components/preferences";
 import { cx } from "@/components/ui";
 
 /** Each state has its own icon AND colour so it never relies on colour alone. */
@@ -26,26 +27,30 @@ export function DayIcon({ kind, className }: { kind: DayKind; className?: string
 }
 
 export function DayBadge({ kind, className }: { kind: DayKind; className?: string }) {
+  const { pt } = useFeatures();
   const s = DAY_STYLE[kind];
   return (
     <span className={cx("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap", s.cell, className)}>
       <DayIcon kind={kind} className="size-3" />
-      {DAY_KIND[kind].label}
+      {dayLabel(kind, pt)}
     </span>
   );
 }
 
 const LEGEND: DayKind[] = ["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "rest", "unverified", "not_scheduled"];
 
+const GYM_LEGEND: DayKind[] = ["gym_only", "missed", "rest", "not_scheduled"];
+
 export function DayLegend() {
+  const { pt } = useFeatures();
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
-      {LEGEND.map((k) => (
+      {(pt ? LEGEND : GYM_LEGEND).map((k) => (
         <li key={k} className="flex items-center gap-1.5">
           <span className={cx("grid size-5 place-items-center rounded-md", DAY_STYLE[k].cell)}>
             <DayIcon kind={k} className="size-3" />
           </span>
-          {DAY_KIND[k].label}
+          {dayLabel(k, pt)}
         </li>
       ))}
     </ul>

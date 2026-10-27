@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Loader2, X } from "lucide-react";
+import { Dumbbell, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import {
   createContext,
@@ -516,7 +516,7 @@ export function Switch({
   return (
     <div className="flex items-start justify-between gap-4 py-2">
       <label htmlFor={id} className="min-w-0 cursor-pointer">
-        <span className="block text-sm font-medium text-ink">{label}</span>
+        <span id={`${id}-label`} className="block text-sm font-medium text-ink">{label}</span>
         {description && <span className="mt-0.5 block text-xs text-muted">{description}</span>}
       </label>
       <button
@@ -524,6 +524,7 @@ export function Switch({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-labelledby={`${id}-label`}
         onClick={() => onChange(!checked)}
         className={cx(
           "relative h-6 w-10 shrink-0 rounded-full transition-colors",
@@ -742,5 +743,20 @@ export function KeyValue({ items, className }: { items: { k: ReactNode; v: React
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Shown on personal-training pages when PT tracking is switched off in Settings. */
+export function PtOffNotice() {
+  return (
+    <Card>
+      <EmptyState
+        icon={<Dumbbell className="size-5" />}
+        title="Personal training is turned off"
+        action={<LinkButton href="/settings#training" variant="primary">Turn it on in Settings</LinkButton>}
+      >
+        Hired a trainer? Switch on Personal training in Settings to track your PT package, sessions and their value.
+      </EmptyState>
+    </Card>
   );
 }

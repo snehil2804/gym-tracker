@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyDay, firstName, needsReview, PT_STATUS, selfCancelledLabel } from "@/lib/domain/attendance";
+import { classifyDay, dayLabel, firstName, needsReview, PT_ONLY_KINDS, PT_STATUS, selfCancelledLabel } from "@/lib/domain/attendance";
 import { computeFinance, missedByMonth } from "@/lib/domain/finance";
 import { forecastPackage, upcomingSessionDates } from "@/lib/domain/forecast";
 import { currentStreak, gymAttendance, personalRecords } from "@/lib/domain/stats";
@@ -16,6 +16,16 @@ describe("attendance rules", () => {
   it("only completed and chargeable PT consume a session", () => {
     const consuming = Object.entries(PT_STATUS).filter(([, v]) => v.consumes).map(([k]) => k);
     expect(consuming.sort()).toEqual(["chargeable_absence", "completed"]);
+  });
+
+  it("without personal training, days read as gym days and nothing needs review", () => {
+    const gymCtx = { ...ctx, scheduleDays: [] };
+    expect(needsReview("2026-10-12", undefined, gymCtx)).toBe(false);
+    expect(classifyDay("2026-10-12", undefined, gymCtx)).toBe("not_scheduled");
+    expect(dayLabel("not_scheduled", false)).toBe("Not logged");
+    expect(dayLabel("gym_only", false)).toBe("Went to gym");
+    expect(dayLabel("not_scheduled", true)).toBe("No PT scheduled");
+    expect(PT_ONLY_KINDS).not.toContain("rest");
   });
 
   it("a session you cancelled is never deducted", () => {

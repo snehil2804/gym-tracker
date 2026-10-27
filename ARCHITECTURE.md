@@ -45,7 +45,8 @@ signed-out requests to /login. Route handlers: /auth/callback, /auth/signout.
 ## Data model
 
 ```
-auth.users ─1:1─ profiles (settings, reminders, tracking_start_date, seeded_at)
+auth.users ─1:1─ profiles (settings, reminders, tracking_start_date, seeded_at, onboarded_at,
+                            pt_enabled, membership_enabled, birth_date, height_cm, avatar_path)
            ─1:n─ memberships (estimated_end_date GENERATED, confirmed_end_date nullable)
            ─1:n─ trainers ─1:n─ pt_packages ─1:n─ pt_payments (payment|refund, paid|pending)
                                      │      └─1:n─ pt_ledger (append-only, voidable)
@@ -103,7 +104,10 @@ All functions use `set search_path = ''`; `EXECUTE` is revoked from `anon`/`publ
 |---|---|
 | `src/app/(app)/layout.tsx` | Providers + Suspense + `AppShell` |
 | `src/components/providers.tsx` | QueryClient, toasts, `AccountInit` (calls `initialize_account` once per session), theme sync, sign-out watcher |
-| `src/components/shell.tsx` | client-only gate, sidebar (desktop), bottom tab bar + Log button (mobile), More sheet |
+| `src/components/shell.tsx` | client-only gate, onboarding redirect (`onboarded_at` null → `/welcome`), feature + privacy providers, sidebar, bottom tab bar, More sheet |
+| `src/app/welcome/page.tsx` | first-run flow: profile, gym membership, personal trainer, weekly goal |
+| `src/components/preferences.tsx` | `useFeatures()` (PT / membership switches), money privacy (`EyeToggle`, `Money`, `useMoneyFormatter`) |
+| `src/components/avatar.tsx` | round avatar + uploader (private `avatars` bucket) |
 | `src/components/quick-log.tsx` | context + sheet: went / missed / trainer cancelled / rest, with Undo |
 | `src/components/day-editor.tsx` | full day form, ledger impact preview, per-record audit history |
 | `src/components/package-sheets.tsx` | payment, adjustment, edit package, schedule days, close package |
@@ -132,6 +136,6 @@ All functions use `set search_path = ''`; `EXECUTE` is revoked from `anon`/`publ
 ## Testing strategy
 - **Unit** (`tests/unit`, Vitest): everything in `src/lib/domain`.
 - **Database** (`supabase/tests/integration.sql`): one `DO` block that creates users, switches to
-  `role authenticated` with JWT claims, asserts 74 behaviours and finally raises
+  `role authenticated` with JWT claims, asserts 78 behaviours and finally raises
   `ALL INTEGRATION TESTS PASSED` to roll everything back.
 - **Manual/browser**: local dev server against the live DB with throwaway accounts (since deleted).

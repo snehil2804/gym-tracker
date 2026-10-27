@@ -140,3 +140,13 @@ export function relativeDay(iso: ISODate, today: ISODate): string {
   if (n === -1) return "Yesterday";
   return n > 0 ? `in ${n} days` : `${-n} days ago`;
 }
+
+/** Whole years between a birth date and `today` (null when missing or implausible). */
+export function ageOn(birthDate: ISODate | null | undefined, today: ISODate): number | null {
+  if (!birthDate || !isISODate(birthDate)) return null;
+  const [by, bm, bd] = birthDate.split("-").map(Number);
+  const [ty, tm, td] = today.split("-").map(Number);
+  let age = ty - by;
+  if (tm < bm || (tm === bm && td < bd)) age--;
+  return age >= 0 && age < 130 ? age : null;
+}

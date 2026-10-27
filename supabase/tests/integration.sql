@@ -288,6 +288,7 @@ begin
   perform pg_temp.as_user(u3);
   v_json := public.initialize_account();
   perform pg_temp.ok((v_json ->> 'seeded')::boolean, 'T13 owner account receives the initial seed');
+  perform pg_temp.ok((select onboarded_at is not null and pt_enabled and membership_enabled from public.profiles where id = u3), 'owner seed skips onboarding and turns PT on');
   perform pg_temp.ok((select count(*) from public.attendance) = 10, 'T13 exactly ten absence dates seeded (no invented attendance)');
   perform pg_temp.ok((select count(*) from public.attendance where gym_status = 'absent') = 10, 'T13 all ten are confirmed gym absences');
   perform pg_temp.ok((select pt_status from public.attendance where date = '2026-10-11') = 'not_scheduled', 'T13 11 Oct (Sunday) is not a scheduled PT absence');
@@ -312,6 +313,15 @@ begin
   v_json := public.initialize_account();
   perform pg_temp.ok(v_json ->> 'reason' = 'not_owner', 'other accounts do not receive personal seed data');
   perform pg_temp.ok((select count(*) from public.memberships) = 0, 'other accounts start empty');
+  perform pg_temp.ok((select onboarded_at is null and not pt_enabled from public.profiles where id = u2), 'new accounts go through onboarding with PT off until they choose it');
+  update public.profiles set pt_enabled = true, birth_date = '1999-10-27', height_cm = 178, onboarded_at = now() where id = u2;
+  perform pg_temp.ok((select pt_enabled and height_cm = 178 from public.profiles where id = u2), 'users can update their own onboarding answers');
+  begin
+    update public.profiles set height_cm = 400 where id = u2;
+    v_err := null;
+  exception when check_violation then v_err := 'chk';
+  end;
+  perform pg_temp.ok(v_err = 'chk', 'implausible height is rejected');
 
   -- Restore into an account: second restore of the same archive inserts nothing.
   execute 'reset role';

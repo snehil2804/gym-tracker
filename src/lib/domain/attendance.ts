@@ -200,3 +200,24 @@ export function selfCancelledLabel(displayName: string | null | undefined) {
   const n = firstName(displayName);
   return n ? `${n} cancelled` : "I cancelled";
 }
+
+/** Day label that drops PT wording for people who don't track personal training. */
+export function dayLabel(kind: DayKind, ptEnabled: boolean): string {
+  if (ptEnabled) return DAY_KIND[kind].label;
+  switch (kind) {
+    case "trained":
+    case "gym_only":
+      return "Went to gym";
+    case "missed":
+    case "missed_unconfirmed":
+      return "Missed gym";
+    case "not_scheduled":
+    case "unverified":
+      return "Not logged";
+    default:
+      return DAY_KIND[kind].label;
+  }
+}
+
+/** Calendar states that only make sense with personal training. */
+export const PT_ONLY_KINDS: DayKind[] = ["pt_only", "charged", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "unverified"];

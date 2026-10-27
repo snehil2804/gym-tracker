@@ -2,7 +2,7 @@
 
 import { ArrowRight, Package, Plus, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { Badge, Card, EmptyState, ErrorNote, LinkButton, PageHeader, ProgressBar, Skeleton } from "@/components/ui";
+import { Badge, Card, EmptyState, ErrorNote, LinkButton, PageHeader, ProgressBar, Skeleton, PtOffNotice } from "@/components/ui";
 import { useCore } from "@/lib/data/derived";
 import { formatDate } from "@/lib/domain/dates";
 import { formatMoney, sessionValue } from "@/lib/domain/money";
@@ -12,6 +12,7 @@ export default function PackagesPage() {
   const { data: d, loading, error } = useCore();
   if (error) return <ErrorNote error={error} />;
   if (loading || !d) return <Skeleton className="h-96" />;
+  if (!d.ptEnabled) return <PtOffNotice />;
   const current = d.current;
 
   return (

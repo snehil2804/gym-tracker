@@ -38,7 +38,10 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
 7. **Dates are `YYYY-MM-DD` calendar strings.** Use `src/lib/domain/dates.ts`; get today with
    `useToday()` (profile time zone). Never `new Date().toISOString().slice(0,10)` for "today".
 8. **No fabricated data** in seeds, charts or insights. Empty states instead.
-9. **Security:** RLS on every new table (`user_id = (select auth.uid())`), composite `(id, user_id)`
+9. **Respect feature switches.** Hide PT UI when `profiles.pt_enabled` is false and membership UI when
+   `membership_enabled` is false (`useFeatures()`, `d.ptEnabled`). Money shown on a card must use
+   `<Money>`/`useMoneyFormatter` with an `EyeToggle`.
+10. **Security:** RLS on every new table (`user_id = (select auth.uid())`), composite `(id, user_id)`
    foreign keys for ownership, `set search_path = ''` on functions, revoke `EXECUTE` from `anon`.
    Never use or commit the service-role key; only `NEXT_PUBLIC_SUPABASE_*` vars exist.
 

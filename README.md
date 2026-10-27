@@ -34,6 +34,7 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 | **Money** | Cash spent vs pending, prepaid value split (completed / missed / remaining / cancelled / refunded / credited), effective cost per session, missed value by month, definitions |
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
 | **Sign-in** | Continue with Google (primary), email + password, password reset |
+| **Welcome flow** | First sign-in asks name, photo, birth date (age), height, weight, gym membership, personal trainer and weekly goal — skippable, editable later |
 | **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
 
 ---
@@ -94,7 +95,7 @@ src/
   proxy.ts            session refresh + auth redirect (Next 16 "proxy", formerly middleware)
 supabase/
   migrations/         schema, RLS, triggers, RPCs, views, seed function, storage
-  tests/integration.sql   74 database checks run as a real `authenticated` user (rolled back)
+  tests/integration.sql   78 database checks run as a real `authenticated` user (rolled back)
 tests/unit/           Vitest unit tests for the domain layer
 ```
 
@@ -151,6 +152,11 @@ adjustment                        ±n       manual correction, note required
   uses a session — counted once.
 - **Credits** add sessions (not cash). **Refunded sessions** remove sessions; the money is recorded
   as a refund payment, which reduces “spent”.
+
+### Personalisation
+- **Personal training** and **gym membership** tracking are switches in Settings → What you track (chosen
+  during onboarding). Switching one off hides its screens and cards; nothing is deleted.
+- Every money card has an **eye toggle** that masks amounts (₹••••) on this device.
 
 ### Payments
 Payments are separate from session value. `paid` payments count as spent; `pending` ones are listed
@@ -245,7 +251,7 @@ The app never uses the `service_role` key.
 
 1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
 2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
-   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`.
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`, `20261027000006_onboarding_profile.sql`.
 3. Set the owner email (who receives the personal seed):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
@@ -258,7 +264,7 @@ The app never uses the `service_role` key.
 ### Tests and checks
 
 ```bash
-npm test            # 38 unit tests (money, dates/time zones, rules, finance, forecast, parser)
+npm test            # 40 unit tests (money, dates/time zones, rules, finance, forecast, parser)
 npm run check       # typecheck + lint + tests + build
 npm run typecheck
 npm run lint
@@ -266,7 +272,7 @@ npm run build
 SUPABASE_DB_URL='postgresql://…' npm run test:db   # 72 database checks, all rolled back
 ```
 `supabase/tests/integration.sql` can also be pasted into the Supabase SQL editor. A successful run
-ends with the error message `ALL INTEGRATION TESTS PASSED (74 checks)` — the exception is
+ends with the error message `ALL INTEGRATION TESTS PASSED (78 checks)` — the exception is
 intentional: it rolls back everything the test created.
 
 ---

@@ -16,8 +16,10 @@ import {
   Sun,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Avatar } from "@/components/avatar";
+import { FeaturesProvider, PrivacyProvider } from "@/components/preferences";
 import { PageFallback } from "@/components/page-fallback";
 import { QuickLogProvider, useQuickLog } from "@/components/quick-log";
 import { Sheet, cx } from "@/components/ui";
@@ -47,11 +49,21 @@ const noop = () => () => {};
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const mounted = useSyncExternalStore(noop, () => true, () => false);
-  if (!mounted) return <PageFallback />;
+  const { data: profile, isLoading } = useProfile();
+  const router = useRouter();
+  const needsOnboarding = !!profile && !profile.onboarded_at;
+  useEffect(() => {
+    if (needsOnboarding) router.replace("/welcome");
+  }, [needsOnboarding, router]);
+  if (!mounted || isLoading || !profile || needsOnboarding) return <PageFallback />;
   return (
-    <QuickLogProvider>
-      <Frame>{children}</Frame>
-    </QuickLogProvider>
+    <FeaturesProvider value={{ pt: profile.pt_enabled, membership: profile.membership_enabled }}>
+      <PrivacyProvider>
+        <QuickLogProvider>
+          <Frame>{children}</Frame>
+        </QuickLogProvider>
+      </PrivacyProvider>
+    </FeaturesProvider>
   );
 }
 
@@ -95,7 +107,7 @@ function Frame({ children }: { children: ReactNode }) {
           <Plus className="size-4" /> Log training
         </button>
         <nav className="mt-6 flex flex-col gap-0.5" aria-label="Main">
-          {NAV.map((n) => (
+          {NAV.filter((n) => profile?.pt_enabled || n.href !== "/packages").map((n) => (
             <Link
               key={n.href}
               href={n.href}
@@ -111,7 +123,13 @@ function Frame({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="mt-auto border-t border-line pt-4">
-          <p className="truncate px-3 text-sm font-medium text-ink">{profile?.display_name ?? " "}</p>
+          <Link href="/settings" className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-surface-2">
+            <Avatar size={34} />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium text-ink">{profile?.display_name ?? " "}</span>
+              <span className="block text-xs text-muted">Profile & settings</span>
+            </span>
+          </Link>
           <button onClick={signOut} className="mt-1 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-sm text-muted hover:bg-surface-2 hover:text-ink">
             <LogOut className="size-4" /> Sign out
           </button>
@@ -121,8 +139,8 @@ function Frame({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line/70 bg-bg/85 px-4 backdrop-blur md:hidden">
         <Brand />
-        <Link href="/settings" aria-label="Settings" className="grid size-10 place-items-center rounded-full text-muted hover:bg-surface-2">
-          <Settings className="size-5" />
+        <Link href="/settings" aria-label="Profile and settings" className="grid size-10 place-items-center rounded-full hover:bg-surface-2">
+          <Avatar size={32} />
         </Link>
       </header>
 
@@ -164,10 +182,10 @@ function Frame({ children }: { children: ReactNode }) {
       <Sheet open={more} onClose={() => setMore(false)} title="More">
         <div className="grid grid-cols-2 gap-2 pb-2">
           {[
-            { href: "/packages", label: "PT Packages", icon: Package },
+            ...(profile?.pt_enabled ? [{ href: "/packages", label: "PT Packages", icon: Package }] : []),
             { href: "/finance", label: "Money", icon: IndianRupee },
             { href: "/progress", label: "Progress", icon: BarChart3 },
-            { href: "/review", label: "Review days", icon: ListChecks },
+            ...(profile?.pt_enabled ? [{ href: "/review", label: "Review days", icon: ListChecks }] : []),
             { href: "/history", label: "History", icon: History },
             { href: "/settings", label: "Settings", icon: Settings },
             { href: "/workouts/library", label: "Exercises", icon: LayoutGrid },

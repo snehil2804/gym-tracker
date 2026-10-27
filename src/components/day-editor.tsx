@@ -12,7 +12,7 @@ import { formatDate, formatShort, weekdayName } from "@/lib/domain/dates";
 import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { AbsenceReason, GymStatus, PtStatus } from "@/lib/types";
 
-const PT_ORDER: PtStatus[] = ["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled", "unverified"];
+const PT_ORDER: PtStatus[] = ["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled"];
 
 export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose: () => void }) {
   const rec = d.byDate.get(date);
@@ -21,7 +21,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
   const del = useDeleteAttendance();
   const audit = useAudit(500);
   const [gym, setGym] = useState<GymStatus>(rec?.gym_status ?? "attended");
-  const [pt, setPt] = useState<PtStatus>(rec?.pt_status ?? (isScheduledDay(date, d.scheduleDays) ? "completed" : "not_scheduled"));
+  const [pt, setPt] = useState<PtStatus>(rec?.pt_status ?? (d.ptEnabled && isScheduledDay(date, d.scheduleDays) ? "completed" : "not_scheduled"));
   const [pkgId, setPkgId] = useState<string>(rec?.pt_package_id ?? "");
   const [movedTo, setMovedTo] = useState(rec?.rescheduled_to ?? "");
   const [reason, setReason] = useState<AbsenceReason | null>(rec?.absence_reason ?? null);
@@ -77,7 +77,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
         description={
           <span className="flex flex-wrap items-center gap-2">
             <DayBadge kind={classifyDay(date, rec, d.dayCtx)} />
-            {isScheduledDay(date, d.scheduleDays) ? "Planned PT day" : "No PT planned on this weekday"}
+            {d.ptEnabled ? (isScheduledDay(date, d.scheduleDays) ? "Planned PT day" : "No PT planned on this weekday") : null}
           </span>
         }
         footer={
@@ -121,7 +121,8 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
             />
           </Field>
 
-          <Field label="PT session">
+          {d.ptEnabled && (
+          <Field label="PT session" hint={pt === "unverified" ? "Not confirmed yet — pick what happened." : undefined}>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {PT_ORDER.map((s) => (
                 <button
@@ -143,14 +144,15 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
               ))}
             </div>
           </Field>
+          )}
 
-          {pt === "rescheduled" && (
+          {d.ptEnabled && pt === "rescheduled" && (
             <Field label="Moved to" hint="Record the make-up day as completed when it happens — it is only counted once.">
               <Input type="date" value={movedTo} onChange={(e) => setMovedTo(e.target.value)} />
             </Field>
           )}
 
-          {["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled"].includes(pt) && d.packages.length > 1 && (
+          {["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled"].includes(pt) && d.ptEnabled && d.packages.length > 1 && (
             <Field label="Package" hint="Automatic picks the oldest active package that covers this date and still has sessions.">
               <Select value={pkgId} onChange={(e) => setPkgId(e.target.value)}>
                 <option value="">Automatic{autoPkg ? ` (${autoPkg.trainer_name}, from ${formatDate(autoPkg.start_date)})` : ""}</option>
@@ -181,9 +183,11 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
           </Field>
 
-          <div className={cx("rounded-xl px-3 py-2.5 text-sm", consumesNow !== consumedBefore ? "bg-warn-soft text-warn" : "bg-surface-2 text-ink-2")}>
-            {future && consumesNow ? "Sessions can't be marked completed or missed before the day happens." : impact}
-          </div>
+          {d.ptEnabled && (
+            <div className={cx("rounded-xl px-3 py-2.5 text-sm", consumesNow !== consumedBefore ? "bg-warn-soft text-warn" : "bg-surface-2 text-ink-2")}>
+              {future && consumesNow ? "Sessions can't be marked completed or missed before the day happens." : impact}
+            </div>
+          )}
 
           {workouts.length > 0 && (
             <div>

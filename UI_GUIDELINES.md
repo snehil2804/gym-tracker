@@ -91,6 +91,15 @@ Estimates always carry the `<Estimate />` tag; confirmed values use a `Confirmed
 - Text never uses series colours.
 - Re-validate palette changes with the dataviz validator for both themes.
 
+## Personalisation & privacy
+- Respect the user's switches: when `useFeatures().pt` is false, no PT wording, cards, states or options
+  appear anywhere (`dayLabel()` gives gym-only labels). Never delete data when a feature is hidden.
+- Any card that shows money gets an `<EyeToggle id="…" />` in its header and renders amounts with
+  `<Money>` / `useMoneyFormatter(id)` so the toggle masks them as ₹••••.
+- First-run flow: one question per screen, big `Choice` buttons, progress bar, Back/Continue footer,
+  "skip" always available for optional details, and a friendly summary at the end.
+- Avatars are circles with a soft gradient ring; tapping opens the file picker, with Remove nearby.
+
 ## Writing style
 - Plain, short, second person: "You missed 1 chargeable PT session this month — ₹200 of prepaid value."
 - Money: Indian format via `formatMoney` (₹6,000, ₹1,23,456, ₹333.33).

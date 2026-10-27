@@ -123,7 +123,7 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
     if (!title && dr.muscleGroups.length) setTitle(dr.muscleGroups.map((m) => m[0].toUpperCase() + m.slice(1)).join(" & "));
     if (!personal) setPersonal(text.trim());
     // A PT deduction is only *suggested* for explicit statements and still needs this choice to be confirmed.
-    setPt(dr.ptSuggestion === "completed" && !d.byDate.get(dr.date) ? "pt_done" : dr.attendance === "attended" && !d.byDate.get(dr.date) ? "gym_only" : "keep");
+    setPt(d.ptEnabled && dr.ptSuggestion === "completed" && !d.byDate.get(dr.date) ? "pt_done" : dr.attendance === "attended" && !d.byDate.get(dr.date) ? "gym_only" : "keep");
   }
 
   function applyTemplate(name: string) {
@@ -297,7 +297,11 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
           </div>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Switch checked={withTrainer} onChange={setWithTrainer} label="Trained with my trainer" description="Workout detail only — PT balance is set below." />
+          {d.ptEnabled ? (
+            <Switch checked={withTrainer} onChange={setWithTrainer} label="Trained with my trainer" description="Workout detail only — PT balance is set below." />
+          ) : (
+            <span />
+          )}
           <Field label="Energy">
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((e) => (
@@ -323,6 +327,7 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
             <p className="text-sm text-muted">Already logged for this day. Change it from the calendar if needed — saving this workout won&apos;t touch it.</p>
           ) : (
             <>
+              {d.ptEnabled && (
               <Choice
                 selected={pt === "pt_done"}
                 onClick={() => setPt("pt_done")}
@@ -330,7 +335,8 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
                 description={pkg ? `Uses 1 of ${pkg.remaining} sessions (${formatMoney(rate)}).` : "No active package covers this date."}
                 tone="good"
               />
-              <Choice selected={pt === "gym_only"} onClick={() => setPt("gym_only")} title="Gym visit, no PT session" description="Balance unchanged." />
+              )}
+              <Choice selected={pt === "gym_only"} onClick={() => setPt("gym_only")} title={d.ptEnabled ? "Gym visit, no PT session" : "I went to the gym"} description={d.ptEnabled ? "Balance unchanged." : "Marks this day as a gym visit."} />
               <Choice selected={pt === "keep"} onClick={() => setPt("keep")} title="Don't record attendance" description="Just save the workout." />
             </>
           )}

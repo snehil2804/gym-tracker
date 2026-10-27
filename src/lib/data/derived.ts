@@ -57,7 +57,11 @@ export function useCore() {
     const att = attendance.data ?? [];
     const byDate = new Map<string, Attendance>(att.map((a) => [a.date, a]));
     const current = pickCurrentPackage(pkgs, today);
-    const scheduleDays = current?.schedule_days ?? DEFAULT_SCHEDULE;
+    const ptEnabled = profile.data.pt_enabled;
+    const membershipEnabled = profile.data.membership_enabled;
+    // Without personal training there is no PT schedule: nothing is queued for review and
+    // unlogged weekdays are simply "not logged".
+    const scheduleDays = ptEnabled ? current?.schedule_days ?? DEFAULT_SCHEDULE : [];
     const trackingStart = profile.data.tracking_start_date ?? current?.start_date ?? null;
     const dayCtx: DayContext = { today, trackingStart, scheduleDays };
 
@@ -102,18 +106,20 @@ export function useCore() {
     const reminders = buildReminders({
       profile: profile.data,
       today,
-      membership,
-      pkg: current,
+      membership: membershipEnabled ? membership : undefined,
+      pkg: ptEnabled ? current : undefined,
       forecast,
       reviewCount: reviewDays.length,
       todayLogged: !!todayRec,
       todayScheduled,
-      outstandingPaise: finance.ptOutstanding,
-      pendingPaymentPaise: finance.ptPendingScheduled,
+      outstandingPaise: ptEnabled ? finance.ptOutstanding : 0,
+      pendingPaymentPaise: ptEnabled ? finance.ptPendingScheduled : 0,
       lastWeekWorkouts,
     });
 
     return {
+      ptEnabled,
+      membershipEnabled,
       today,
       profile: profile.data,
       packages: pkgs,

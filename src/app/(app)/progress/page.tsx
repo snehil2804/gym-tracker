@@ -97,7 +97,7 @@ function Training({ d }: { d: Core }) {
     <div className="space-y-4">
       <Card className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
         <Stat label="Gym attendance" value={all.rate === null ? "—" : `${Math.round(all.rate * 100)}%`} hint={`${all.attended} attended · ${all.missed} missed (confirmed)`} />
-        <Stat label="PT attendance" value={pt.rate === null ? "—" : `${Math.round(pt.rate * 100)}%`} hint={`${pt.completed} done · ${pt.charged} missed`} />
+        {d.ptEnabled && <Stat label="PT attendance" value={pt.rate === null ? "—" : `${Math.round(pt.rate * 100)}%`} hint={`${pt.completed} done · ${pt.charged} missed`} />}
         <Stat label="Workouts logged" value={d.workouts.length} />
         <Stat label="Current streak" value={currentStreak(d.attendance, d.today, [1, 2, 3, 4, 5, 6, 7].filter((x) => !d.scheduleDays.includes(x)))} hint="confirmed training days" />
       </Card>

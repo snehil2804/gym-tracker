@@ -119,7 +119,7 @@ function History({ d }: { d: Core }) {
           }}
           options={[
             { value: "attendance", label: "Attendance" },
-            { value: "sessions", label: "Sessions" },
+            ...(d.ptEnabled ? [{ value: "sessions" as const, label: "Sessions" }] : []),
             { value: "payments", label: "Payments" },
             { value: "workouts", label: "Workouts" },
             { value: "changes", label: "Changes" },

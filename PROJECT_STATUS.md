@@ -21,9 +21,9 @@ by its owner**.
 
 | Area | State | Notes |
 |---|---|---|
-| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 5 migrations applied to the live project |
-| Session ledger & financial integrity | ✅ Done, tested | 74 database checks pass against the live DB |
-| Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 38 unit tests pass |
+| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 6 migrations applied to the live project |
+| Session ledger & financial integrity | ✅ Done, tested | 78 database checks pass against the live DB |
+| Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 40 unit tests pass |
 | Auth (email + password, reset, sign-out, protected routes) | ✅ Done | Verified locally; production sign-in not yet done by owner |
 | Google sign-in (primary) | ✅ Working | Owner signed in with Google; seed verified (19Fitness, Soham ₹6,000/30, absences). Second Google account `snehilworkemail@gmail.com` exists with defaults only. Earlier note: | Google consent works — the owner's account was created via Google on 27 Oct. Supabase Site URL is still `http://localhost:3000`, so the return trip fails until URL Configuration is updated (SETUP.md §3b step 5) |
 | Initial seed (owner only, idempotent) | ✅ Done, tested | Verified end-to-end locally with a test owner account |
@@ -32,6 +32,7 @@ by its owner**.
 | Production deployment | ✅ Ready | Build READY; routes, headers and anonymous access checked |
 | Supabase Auth URL configuration | ⚠️ Manual step pending | Site URL / redirect URLs must point at the Vercel domain |
 | Auto-deploy on git push | ✅ Connected | Every push to `main` deploys to production |
+| Onboarding, PT/membership switches, profile photo, money eye toggles | ✅ Done | Welcome flow, PT-off UI, eye toggle and Settings profile verified in the browser with a throwaway account (deleted). `snehilworkemail@gmail.com` will see the welcome flow on next sign-in |
 | Email / push notifications | ❌ Not built | Reminders are in-app only |
 
 ---

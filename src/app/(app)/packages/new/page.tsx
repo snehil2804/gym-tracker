@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ScheduleDays } from "@/components/package-sheets";
-import { Badge, Button, Card, Choice, ErrorNote, Field, Input, Segmented, Select, Skeleton, Switch, Textarea, useToast } from "@/components/ui";
+import { Badge, Button, Card, Choice, ErrorNote, Field, Input, Segmented, Select, Skeleton, Switch, Textarea, useToast, PtOffNotice } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import { useClosePackage, useCreatePackage, useTrainers } from "@/lib/data/hooks";
 import { addDays, formatDate, maxDate } from "@/lib/domain/dates";
@@ -16,6 +16,7 @@ export default function NewPackagePage() {
   const { data: d, loading, error } = useCore();
   if (error) return <ErrorNote error={error} />;
   if (loading || !d) return <Skeleton className="h-96" />;
+  if (!d.ptEnabled) return <PtOffNotice />;
   return <PackageForm d={d} />;
 }
 

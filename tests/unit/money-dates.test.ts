@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { costPerSession, formatMoney, parseMoneyToPaise, sessionValue } from "@/lib/domain/money";
 import {
-  addDays, addMonths, daysBetween, endOfMonth, formatDate, isISODate, isoWeekday, monthGrid, startOfWeek, todayIn,
+  addDays, addMonths, ageOn, daysBetween, endOfMonth, formatDate, isISODate, isoWeekday, monthGrid, startOfWeek, todayIn,
 } from "@/lib/domain/dates";
 
 describe("money (integer paise)", () => {
@@ -62,6 +62,14 @@ describe("dates (T9)", () => {
     const newYear = new Date("2026-12-31T19:00:00Z"); // 00:30 on 1 Jan in India
     expect(todayIn("Asia/Kolkata", newYear)).toBe("2027-01-01");
   });
+  it("calculates age from a birth date", () => {
+    expect(ageOn("1999-10-27", "2026-10-27")).toBe(27);
+    expect(ageOn("1999-10-28", "2026-10-27")).toBe(26);
+    expect(ageOn("2000-02-29", "2027-02-28")).toBe(26);
+    expect(ageOn(null, "2026-10-27")).toBeNull();
+    expect(ageOn("2030-01-01", "2026-10-27")).toBeNull();
+  });
+
   it("validates and formats ISO dates", () => {
     expect(isISODate("2026-02-30")).toBe(false);
     expect(isISODate("2026-10-26")).toBe(true);
