@@ -14,6 +14,8 @@ dates are when the change landed.
 - Logo: same lifter, now on the bright gradient tile (no black background) with navy and white
   details.
 - Phone top bar: logo and "Rep Ledger" centred, profile photo on the right.
+- Settings: the profile-photo backdrop now spans the whole window and the sidebar / phone bars turn
+  see-through on that page, so the photo colours flow under the menu too.
 
 ### Added — streak game on the calendar
 - `src/lib/domain/game.ts` (+ 10 tests): every past day becomes won (gym or PT), double (both),

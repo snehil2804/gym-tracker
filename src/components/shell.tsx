@@ -184,11 +184,18 @@ function Frame({ children }: { children: ReactNode }) {
   const [more, setMore] = useState(false);
   const { data: profile } = useProfile();
   const quake = useQuake();
+  // On Settings the profile-photo backdrop runs under the menus, so they turn see-through there.
+  const glass = path === "/settings";
 
   return (
     <div className={cx("min-h-dvh", quake > 0 && "anim-quake")}>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line/70 bg-bg/70 px-3 py-5 backdrop-blur-xl md:flex">
+      <aside
+        className={cx(
+          "fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r px-3 py-5 backdrop-blur-xl transition-colors duration-500 md:flex",
+          glass ? "border-white/25 bg-bg/25" : "border-line/70 bg-bg/70",
+        )}
+      >
         <Brand />
         <button
           onClick={() => quick.open()}
@@ -235,7 +242,12 @@ function Frame({ children }: { children: ReactNode }) {
 
       {/* Mobile top bar */}
       {/* Phone top bar: logo and name centred, profile on the right. */}
-      <header className="sticky top-0 z-30 grid h-14 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-line/60 bg-bg/75 px-3 backdrop-blur-xl md:hidden">
+      <header
+        className={cx(
+          "sticky top-0 z-30 grid h-14 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b px-3 backdrop-blur-xl transition-colors duration-500 md:hidden",
+          glass ? "border-white/20 bg-bg/25" : "border-line/60 bg-bg/75",
+        )}
+      >
         <span aria-hidden />
         <div className="flex justify-center">
           <Brand />
@@ -252,7 +264,7 @@ function Frame({ children }: { children: ReactNode }) {
       {/* Mobile bottom navigation: the five most-used destinations, Log in the thumb zone. */}
       <nav
         aria-label="Main"
-        className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-surface/80 backdrop-blur-xl md:hidden"
+        className={cx("pb-safe fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur-xl transition-colors duration-500 md:hidden", glass ? "border-white/20 bg-surface/45" : "border-line/70 bg-surface/80")}
       >
         <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-center">
           <TabLink item={navItem("/")} active={isActive(path, "/")} />

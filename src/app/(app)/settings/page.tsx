@@ -691,7 +691,7 @@ function PhotoBackdrop({ url, palette }: { url: string | null; palette: PhotoPal
   const v = palette ? rgb(palette.vivid, 0.1) : "color-mix(in oklab, var(--info) 10%, transparent)";
   const fade = "linear-gradient(to bottom, black 0%, black 35%, transparent 100%)";
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden md:left-60">
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
