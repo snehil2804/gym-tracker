@@ -113,7 +113,7 @@ Estimates always carry the `<Estimate />` tag; confirmed values use a `Confirmed
   barbell SVG. Use `still` where motion would distract.
 - Nav icons get `ico ico-<move>` classes; add new moves in `globals.css` next to the others and
   keep them under ~1 s.
-- Main call-to-action uses `bg-brand shadow-brand` (ember → amber "Forge" gradient); everything else stays on the token palette. No pink/violet in brand surfaces; personal training uses `gold`.
+- Main call-to-action uses `bg-brand shadow-brand` (emerald → cyan → blue "Aurora" gradient); everything else stays on the token palette. No pink/violet in brand surfaces; personal training uses `gold`.
 - Cards that summarise one topic may take `glow` (`accent | warn | good | info | gold | teal`);
   the card header's eyebrow picks up the same colour. Don't use more than one glow colour per card.
 - Every animation must be disabled under `prefers-reduced-motion` (see the block in `globals.css`).

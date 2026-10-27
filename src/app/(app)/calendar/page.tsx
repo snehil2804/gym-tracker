@@ -148,7 +148,7 @@ function CalendarView({
                 <span className={cx("num text-[13px] font-semibold", kind === "future" ? "text-ink-2" : "")}>{Number(day.slice(8))}</span>
                 {kind !== "future" && kind !== "before" && <DayIcon kind={kind} className="size-3.5 sm:size-4" />}
                 {isToday && game.streak > 0 && (
-                  <span className="absolute -top-1.5 -left-1.5 z-10 grid size-5 place-items-center rounded-full bg-[linear-gradient(160deg,#ffa526,#e8430f)] text-white shadow" title={`${game.streak}-day streak`}>
+                  <span className="absolute -top-1.5 -left-1.5 z-10 grid size-5 place-items-center rounded-full bg-brand text-white shadow" title={`${game.streak}-day streak`}>
                     <Flame className="size-3" />
                   </span>
                 )}

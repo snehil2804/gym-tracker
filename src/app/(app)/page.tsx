@@ -261,7 +261,7 @@ function WeekCard({ d }: { d: Core }) {
 function RecentWorkouts({ d }: { d: Core }) {
   const recent = d.workouts.slice(0, 4);
   return (
-    <Card glow="accent" className="lg:col-span-2">
+    <Card glow="good" className="lg:col-span-2">
       <CardHeader
         eyebrow="Workouts"
         title="Recent"

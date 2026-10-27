@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Gym membership, PT package, attendance and workout tracker",
     start_url: "/",
     display: "standalone",
-    background_color: "#f5f3ee",
-    theme_color: "#18160f",
+    background_color: "#f3f6f9",
+    theme_color: "#0f172a",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };
 }

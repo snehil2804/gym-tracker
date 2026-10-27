@@ -4,7 +4,7 @@ import { useId, type CSSProperties } from "react";
 import { cx } from "@/components/ui";
 
 /**
- * Brand mark: a lifter on a graphite tile who dips, presses the barbell overhead (straining,
+ * Brand mark: a lifter on the brand-gradient tile who dips, presses the barbell overhead (straining,
  * teeth gritted), drops it — dust flies and the tile jolts — then picks it up again.
  * Everything is CSS (`.lifter-*` in globals.css) and stops under "reduce motion".
  * One cycle lasts LIFT_CYCLE_MS; the bar lands LIFT_DROP_MS into it.
@@ -14,8 +14,9 @@ export const LIFT_CYCLE_MS = 5000;
 export const LIFT_DROP_MS = 2050;
 
 const SKIN = "#ffc94a";
-const INK = "#16120e";
-const EMBER = "#ff6a1a";
+const INK = "#0f172a";
+const NAVY = "#0f172a";
+const WHITE = "#f8fafc";
 
 export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: { size?: number; className?: string; still?: boolean; startAt?: number }) {
   const uid = useId().replace(/:/g, "");
@@ -30,14 +31,14 @@ export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: {
     >
       <svg viewBox="0 0 64 64" className="size-full">
         <defs>
-          <linearGradient id={bg} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#34343a" />
-            <stop offset="1" stopColor="#0c0c0f" />
+          <linearGradient id={bg} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#10b981" />
+            <stop offset="0.5" stopColor="#06b6d4" />
+            <stop offset="1" stopColor="#2563eb" />
           </linearGradient>
-          <radialGradient id={glow} cx="0.5" cy="1" r="0.75">
-            <stop offset="0" stopColor={EMBER} stopOpacity="0.55" />
-            <stop offset="0.55" stopColor={EMBER} stopOpacity="0.08" />
-            <stop offset="1" stopColor={EMBER} stopOpacity="0" />
+          <radialGradient id={glow} cx="0.3" cy="0" r="0.9">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.38" />
+            <stop offset="0.6" stopColor="#fff" stopOpacity="0" />
           </radialGradient>
           <linearGradient id={steel} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#f4f6f8" />
@@ -46,18 +47,18 @@ export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: {
         </defs>
         <rect width="64" height="64" fill={`url(#${bg})`} />
         <rect width="64" height="64" fill={`url(#${glow})`} />
-        <rect className="lifter-flash" x="0" y="44" width="64" height="20" fill={`url(#${glow})`} opacity="0" />
-        <rect x="0.5" y="0.5" width="63" height="63" rx="17.5" fill="none" stroke="#fff" strokeOpacity="0.08" />
+        <rect className="lifter-flash" x="0" y="50" width="64" height="14" fill="#fff" opacity="0" />
+        <rect x="0.5" y="0.5" width="63" height="63" rx="17.5" fill="none" stroke="#fff" strokeOpacity="0.25" />
 
         <g className="lifter-scene">
-          <ellipse className="lifter-shadow" cx="32" cy="61.6" rx="15" ry="1.6" fill="#000" opacity="0.45" />
+          <ellipse className="lifter-shadow" cx="32" cy="61.6" rx="15" ry="1.6" fill="#0b1220" opacity="0.35" />
 
           <g className="lifter-body">
             {/* legs + shoes */}
-            <rect x="24.6" y="55" width="5.4" height="6.2" rx="1.6" fill="#24242a" />
-            <rect x="34" y="55" width="5.4" height="6.2" rx="1.6" fill="#24242a" />
-            <rect x="23.4" y="60" width="7" height="2" rx="1" fill={EMBER} />
-            <rect x="33.6" y="60" width="7" height="2" rx="1" fill={EMBER} />
+            <rect x="24.6" y="55" width="5.4" height="6.2" rx="1.6" fill="#1e293b" />
+            <rect x="34" y="55" width="5.4" height="6.2" rx="1.6" fill="#1e293b" />
+            <rect x="23.4" y="60" width="7" height="2" rx="1" fill={WHITE} />
+            <rect x="33.6" y="60" width="7" height="2" rx="1" fill={WHITE} />
             {/* arms scale from the shoulders as the bar goes up */}
             <rect className="lifter-arm" x="19.6" y="18.5" width="5.2" height="29" rx="2.6" fill={SKIN} />
             <rect className="lifter-arm" x="39.2" y="18.5" width="5.2" height="29" rx="2.6" fill={SKIN} />
@@ -65,8 +66,8 @@ export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: {
             <rect x="29.2" y="40.5" width="5.6" height="4" fill="#e5ac2e" />
             <circle cx="22.4" cy="46.4" r="3.6" fill={SKIN} />
             <circle cx="41.6" cy="46.4" r="3.6" fill={SKIN} />
-            <path d="M22.6 45.2 Q23 43.6 25.6 43.6 L38.4 43.6 Q41 43.6 41.4 45.2 L39.4 56.6 Q32 58 24.6 56.6Z" fill="#141418" />
-            <path d="M27.4 48.6 L36.6 48.6" stroke={EMBER} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M22.6 45.2 Q23 43.6 25.6 43.6 L38.4 43.6 Q41 43.6 41.4 45.2 L39.4 56.6 Q32 58 24.6 56.6Z" fill={NAVY} />
+            <path d="M27.4 48.6 L36.6 48.6" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" />
             {/* head */}
             <g className="lifter-face">
               <circle cx="32" cy="34" r="9.6" fill={SKIN} />
@@ -80,12 +81,12 @@ export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: {
               </g>
               <path className="lifter-smirk" d="M29.4 38.6 Q32.4 40 35 38.2" stroke={INK} strokeWidth="1.4" strokeLinecap="round" fill="none" />
               <rect className="lifter-grit" x="28.8" y="37.6" width="6.4" height="2.4" rx="1" fill="#fff" stroke={INK} strokeWidth="0.8" opacity="0" />
-              <path className="lifter-sweat" d="M42 29.5 q1.2 1.8 0 2.8 q-1.2 -1 0 -2.8Z" fill="#7cc4ff" opacity="0" />
+              <path className="lifter-sweat" d="M42 29.5 q1.2 1.8 0 2.8 q-1.2 -1 0 -2.8Z" fill="#e0f2fe" opacity="0" />
             </g>
           </g>
 
           {/* dust kicked up when the bar lands */}
-          <g className="lifter-dust" fill="#cfc6b8">
+          <g className="lifter-dust" fill="#ffffff">
             <circle cx="9" cy="60" r="1.3" />
             <circle cx="12" cy="61" r="0.9" />
             <circle cx="6" cy="61" r="1" />
@@ -98,10 +99,10 @@ export function LiftLogo({ size = 32, className, still = false, startAt = 0 }: {
           <g transform="translate(0 45.5)">
             <g className="lifter-bar">
               <rect x="4.5" y="-1.4" width="55" height="2.8" rx="1.4" fill={`url(#${steel})`} />
-              <rect x="5.6" y="-7.5" width="5.4" height="15" rx="1.7" fill="#0b0b0d" stroke={EMBER} strokeWidth="0.9" />
-              <rect x="11" y="-5" width="3" height="10" rx="1.2" fill="#1d1d22" />
-              <rect x="53" y="-7.5" width="5.4" height="15" rx="1.7" fill="#0b0b0d" stroke={EMBER} strokeWidth="0.9" />
-              <rect x="50" y="-5" width="3" height="10" rx="1.2" fill="#1d1d22" />
+              <rect x="5.6" y="-7.5" width="5.4" height="15" rx="1.7" fill={NAVY} stroke={WHITE} strokeWidth="0.9" />
+              <rect x="11" y="-5" width="3" height="10" rx="1.2" fill="#1e293b" />
+              <rect x="53" y="-7.5" width="5.4" height="15" rx="1.7" fill={NAVY} stroke={WHITE} strokeWidth="0.9" />
+              <rect x="50" y="-5" width="3" height="10" rx="1.2" fill="#1e293b" />
             </g>
           </g>
         </g>

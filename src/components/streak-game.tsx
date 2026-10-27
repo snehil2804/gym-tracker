@@ -147,8 +147,9 @@ function MonthRing({ m }: { m: MonthResult | undefined }) {
         />
         <defs>
           <linearGradient id="ring-ember" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ff6a1a" />
-            <stop offset="1" stopColor="#ffa526" />
+            <stop offset="0" stopColor="#10b981" />
+            <stop offset="0.5" stopColor="#06b6d4" />
+            <stop offset="1" stopColor="#3b82f6" />
           </linearGradient>
           <linearGradient id="ring-gold" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#ffd56b" />
@@ -167,7 +168,7 @@ export function PerfectMonthBanner({ month }: { month: string }) {
     <div className="perfect-banner relative mb-4 overflow-hidden rounded-2xl px-5 py-4 text-[#2a1d00]">
       <div aria-hidden className="confetti">
         {Array.from({ length: 18 }, (_, i) => (
-          <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 6) * 0.12}s`, background: ["#ff6a1a", "#ffd56b", "#2f9e66", "#3a7bd5"][i % 4] }} />
+          <i key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 6) * 0.12}s`, background: ["#10b981", "#ffd56b", "#06b6d4", "#3b82f6"][i % 4] }} />
         ))}
       </div>
       <p className="relative flex items-center gap-2 font-display text-lg font-semibold">

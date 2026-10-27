@@ -5,6 +5,16 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Changed — "Aurora" look
+- No more orange: the brand gradient is emerald → cyan → blue (logo tile, Log training, the
+  mobile + button, streak flame, XP bar, month ring). Losses use red instead of ember.
+- Neutrals moved from warm paper to cool slate in light and dark mode; new favicon, browser theme
+  colour and login panel to match. Nav colours: Today yellow, Calendar blue, Workouts emerald,
+  Progress cyan, Membership gold, History blue.
+- Logo: same lifter, now on the bright gradient tile (no black background) with navy and white
+  details.
+- Phone top bar: logo and "Rep Ledger" centred, profile photo on the right.
+
 ### Added — streak game on the calendar
 - `src/lib/domain/game.ts` (+ 10 tests): every past day becomes won (gym or PT), double (both),
   rest (rest weekday, rest mark, planned break — never breaks a streak), excused (trainer

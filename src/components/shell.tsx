@@ -33,15 +33,15 @@ import { getSupabase } from "@/lib/supabase/client";
 const NAV = [
   { href: "/", label: "Today", icon: Sun, anim: "ico-sun", tone: "text-warn", chip: "bg-warn-soft", hover: "group-hover:bg-warn-soft group-hover:text-warn" },
   { href: "/calendar", label: "Calendar", icon: CalendarDays, anim: "ico-cal", tone: "text-info", chip: "bg-info-soft", hover: "group-hover:bg-info-soft group-hover:text-info" },
-  { href: "/workouts", label: "Workouts", icon: Dumbbell, anim: "ico-lift", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
-  { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
+  { href: "/workouts", label: "Workouts", icon: Dumbbell, anim: "ico-lift", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
+  { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-teal", chip: "bg-teal-soft", hover: "group-hover:bg-teal-soft group-hover:text-teal" },
   { href: "/membership", label: "Membership", icon: IdCard, anim: "ico-coin", tone: "text-gold", chip: "bg-gold-soft", hover: "group-hover:bg-gold-soft group-hover:text-gold" },
-  { href: "/history", label: "History", icon: History, anim: "ico-rewind", tone: "text-teal", chip: "bg-teal-soft", hover: "group-hover:bg-teal-soft group-hover:text-teal" },
+  { href: "/history", label: "History", icon: History, anim: "ico-rewind", tone: "text-info", chip: "bg-info-soft", hover: "group-hover:bg-info-soft group-hover:text-info" },
   { href: "/settings", label: "Settings", icon: Settings, anim: "ico-gear", tone: "text-ink-2", chip: "bg-surface-3", hover: "group-hover:bg-surface-3 group-hover:text-ink-2" },
 ];
 const MORE_EXTRA = {
   "/review": { label: "Review days", icon: ListChecks, anim: "ico-pop", tone: "text-warn", chip: "bg-warn-soft", hover: "group-hover:bg-warn-soft group-hover:text-warn" },
-  "/workouts/library": { label: "Exercises", icon: LayoutGrid, anim: "ico-pop", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
+  "/workouts/library": { label: "Exercises", icon: LayoutGrid, anim: "ico-pop", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
 };
 const navItem = (href: string) => NAV.find((n) => n.href === href)!;
 
@@ -234,8 +234,12 @@ function Frame({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line/60 bg-bg/75 px-4 backdrop-blur-xl md:hidden">
-        <Brand />
+      {/* Phone top bar: logo and name centred, profile on the right. */}
+      <header className="sticky top-0 z-30 grid h-14 grid-cols-[2.5rem_1fr_2.5rem] items-center border-b border-line/60 bg-bg/75 px-3 backdrop-blur-xl md:hidden">
+        <span aria-hidden />
+        <div className="flex justify-center">
+          <Brand />
+        </div>
         <Link href="/settings" aria-label="Profile and settings" className="grid size-10 place-items-center rounded-full hover:bg-surface-2">
           <Avatar size={32} />
         </Link>
