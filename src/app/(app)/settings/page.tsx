@@ -53,7 +53,7 @@ export default function SettingsPage() {
     if (!d || !window.location.hash) return;
     // Wait for the sections to render, then jump to the linked one (e.g. #membership).
     const id = window.location.hash;
-    const t = setTimeout(() => document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+    const t = setTimeout(() => document.querySelector(id)?.scrollIntoView({ block: "start" }), 250);
     return () => clearTimeout(t);
   }, [d]);
   if (error) return <ErrorNote error={error} />;
@@ -323,7 +323,7 @@ function TrainersSection() {
   const toast = useToast();
   const [name, setName] = useState("");
   return (
-    <Section title="Trainers" description="PT schedules are set per package (PT Packages → Edit).">
+    <Section title="Trainers" description="PT schedules are set per package (Membership → Personal training → a package → Edit).">
       <ul className="divide-y divide-line">
         {(trainers.data ?? []).map((t) => (
           <TrainerRow key={t.id} id={t.id} name={t.name} phone={t.phone} active={t.is_active} />
@@ -535,7 +535,7 @@ function DataSection() {
         <Button icon={<Download className="size-4" />} loading={busy === "sets"} onClick={() => run("sets", async () => download(`rep-ledger-exercise-history-${stamp()}.csv`, await exportExerciseHistoryCSV(), "text/csv"))}>
           Exercise history (CSV)
         </Button>
-        <Link href="/finance" className="flex h-10 items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
+        <Link href="/membership#spending" className="flex h-10 items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
           Financial summary → see Money
         </Link>
       </div>
@@ -745,7 +745,7 @@ function TrainingSection({ profile }: { profile: Profile }) {
       <div className="divide-y divide-line">
         <Switch
           checked={profile.pt_enabled}
-          onChange={(v) => set({ pt_enabled: v }, v ? "Personal training is on. Add your package under PT Packages." : "Personal training hidden. Your PT records are kept.")}
+          onChange={(v) => set({ pt_enabled: v }, v ? "Personal training is on. Add your package under Membership." : "Personal training hidden. Your PT records are kept.")}
           label="Personal training"
           description="PT packages, sessions, missed-session value and renewals. Turn on when you hire a trainer."
         />
@@ -757,7 +757,7 @@ function TrainingSection({ profile }: { profile: Profile }) {
         />
       </div>
       {profile.pt_enabled && (
-        <Link href="/packages" className="mt-3 inline-block text-sm font-medium text-ink underline-offset-2 hover:underline">
+        <Link href="/membership#personal-training" className="mt-3 inline-block text-sm font-medium text-ink underline-offset-2 hover:underline">
           Manage PT packages →
         </Link>
       )}

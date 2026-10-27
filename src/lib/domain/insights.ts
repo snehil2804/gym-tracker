@@ -40,7 +40,7 @@ export function buildInsights(args: {
       id: "missed-month",
       tone: "loss",
       text: `You missed ${finance.missedSessionsThisMonth} chargeable PT ${finance.missedSessionsThisMonth === 1 ? "session" : "sessions"} this month — ${formatMoney(finance.missedValueThisMonth)} of prepaid value.`,
-      href: "/finance",
+      href: "/membership#spending",
     });
   }
 

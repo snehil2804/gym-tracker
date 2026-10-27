@@ -196,3 +196,26 @@ export function missedByMonth(ledger: LedgerEntry[], packages: PackageSummary[])
     .sort(([a], [b]) => (a < b ? -1 : 1))
     .map(([month, entries]) => ({ month, ...ledgerValue(entries, byId, () => true) }));
 }
+
+/**
+ * Money actually paid, per calendar month, split into gym and PT. Only payments marked paid count
+ * (same rule as `totalSpent`); PT refunds reduce their month. A membership counts in the month it
+ * was paid, or its start month if no payment date was recorded.
+ */
+export function spendByMonth(memberships: Membership[], payments: Payment[]) {
+  const months = new Map<string, { gym: number; pt: number }>();
+  const add = (date: string, key: "gym" | "pt", paise: number) => {
+    const m = date.slice(0, 7);
+    const row = months.get(m) ?? { gym: 0, pt: 0 };
+    row[key] += paise;
+    months.set(m, row);
+  };
+  for (const m of memberships) if (m.payment_status === "paid") add(m.paid_on ?? m.start_date, "gym", m.price_paise);
+  for (const p of payments) {
+    if (p.status !== "paid") continue;
+    add(p.paid_on ?? p.created_at, "pt", p.kind === "refund" ? -p.amount_paise : p.amount_paise);
+  }
+  return [...months.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([month, v]) => ({ month, gym: v.gym, pt: v.pt, total: v.gym + v.pt }));
+}

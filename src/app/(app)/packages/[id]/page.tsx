@@ -46,7 +46,7 @@ export default function PackagePage() {
   if (!pkg)
     return (
       <Card>
-        <EmptyState title="Package not found" action={<LinkButton href="/packages">All packages</LinkButton>}>
+        <EmptyState title="Package not found" action={<LinkButton href="/membership#personal-training">All packages</LinkButton>}>
           It may have been deleted, or it belongs to another account.
         </EmptyState>
       </Card>
@@ -95,8 +95,8 @@ function PackageDetail({ d, pkg }: { d: Core; pkg: PackageSummary }) {
 
   return (
     <div className="anim-rise space-y-4">
-      <Link href="/packages" className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
-        <ArrowLeft className="size-4" /> PT Packages
+      <Link href="/membership#personal-training" className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink">
+        <ArrowLeft className="size-4" /> Membership
       </Link>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -366,7 +366,7 @@ function PackageDetail({ d, pkg }: { d: Core; pkg: PackageSummary }) {
           try {
             await delPkg.mutateAsync(pkg.id);
             toast.success("Package deleted.");
-            router.push("/packages");
+            router.push("/membership#personal-training");
           } catch (e) {
             toast.error(e);
           }

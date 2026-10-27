@@ -125,7 +125,7 @@ export function buildReminders(args: {
       tone: "info",
       title: `${formatMoney(args.outstandingPaise)} of PT fees not recorded as paid`,
       detail: "Record payments so your spending totals are accurate.",
-      href: pkg ? `/packages/${pkg.id}` : "/packages",
+      href: pkg ? `/packages/${pkg.id}` : "/membership#personal-training",
     });
   }
   if (r.weekly_review && [1, 7].includes(isoWeekday(today))) {

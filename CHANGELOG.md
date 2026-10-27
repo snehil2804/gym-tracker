@@ -5,6 +5,17 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Changed — fewer pages
+- **Money** and **PT Packages** are merged into one **Membership** page (`/membership`) with three
+  sections: Personal training (package cards, renew / new), Gym membership (current membership,
+  earlier ones, gym spend) and Spending (total paid split gym / PT, new paid-per-month chart, key
+  costs and rates, then collapsible prepaid-value, all-payments and definitions panels). The wide
+  "By package" table was dropped — the same figures are on each package card and package page.
+- `/finance` and `/packages` redirect to the matching section (`next.config.ts`); package detail
+  and new-package pages are unchanged. Navigation shows one "Membership" item.
+- Added `spendByMonth` (`src/lib/domain/finance.ts`, with tests) and a short-label option for chart
+  axes. Linked sections (`#spending`, `#membership`, …) now jump instantly after the page loads.
+
 ### Added — motion & colour
 - Animated brand mark (`src/components/logo.tsx`): a little lifter presses the barbell overhead,
   drops it and picks it up again. The first time the app opens in a browser session (right after

@@ -126,6 +126,7 @@ export function Bars({
   format,
   xFormat,
   labelFormat,
+  axisFormat,
   allowDecimals = false,
 }: {
   data: object[];
@@ -133,6 +134,8 @@ export function Bars({
   bars: BarSpec[];
   stacked?: boolean;
   format?: (v: number, name: string) => string;
+  /** Short labels for the value axis (defaults to `format`). */
+  axisFormat?: (v: number) => string;
   xFormat?: (v: string) => string;
   labelFormat?: (v: string) => string;
   allowDecimals?: boolean;
@@ -148,7 +151,7 @@ export function Bars({
         </defs>
         <CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeWidth={1} />
         <XAxis dataKey={x} {...axis} tickFormatter={xFormat} interval="preserveStartEnd" minTickGap={12} />
-        <YAxis {...axis} allowDecimals={allowDecimals} tickFormatter={format ? (v: number) => format(v, "") : undefined} width={52} />
+        <YAxis {...axis} allowDecimals={allowDecimals} tickFormatter={axisFormat ?? (format ? (v: number) => format(v, "") : undefined)} width={52} />
         <Tooltip cursor={{ fill: "var(--surface-2)" }} content={(p) => <TipBox active={p.active} payload={p.payload} label={p.label} format={format} labelFormat={labelFormat ?? xFormat} />} />
         {bars.map((b, i) => (
           <Bar

@@ -5,12 +5,11 @@ import {
   CalendarDays,
   Dumbbell,
   History,
-  IndianRupee,
+  IdCard,
   LayoutGrid,
   ListChecks,
   LogOut,
   MoreHorizontal,
-  Package,
   Plus,
   Settings,
   Sun,
@@ -36,8 +35,7 @@ const NAV = [
   { href: "/calendar", label: "Calendar", icon: CalendarDays, anim: "ico-cal", tone: "text-info", chip: "bg-info-soft", hover: "group-hover:bg-info-soft group-hover:text-info" },
   { href: "/workouts", label: "Workouts", icon: Dumbbell, anim: "ico-lift", tone: "text-accent", chip: "bg-accent-soft", hover: "group-hover:bg-accent-soft group-hover:text-accent" },
   { href: "/progress", label: "Progress", icon: BarChart3, anim: "ico-bars", tone: "text-violet", chip: "bg-violet-soft", hover: "group-hover:bg-violet-soft group-hover:text-violet" },
-  { href: "/packages", label: "PT Packages", icon: Package, anim: "ico-pop", tone: "text-pink", chip: "bg-pink-soft", hover: "group-hover:bg-pink-soft group-hover:text-pink" },
-  { href: "/finance", label: "Money", icon: IndianRupee, anim: "ico-coin", tone: "text-good", chip: "bg-good-soft", hover: "group-hover:bg-good-soft group-hover:text-good" },
+  { href: "/membership", label: "Membership", icon: IdCard, anim: "ico-coin", tone: "text-pink", chip: "bg-pink-soft", hover: "group-hover:bg-pink-soft group-hover:text-pink" },
   { href: "/history", label: "History", icon: History, anim: "ico-rewind", tone: "text-teal", chip: "bg-teal-soft", hover: "group-hover:bg-teal-soft group-hover:text-teal" },
   { href: "/settings", label: "Settings", icon: Settings, anim: "ico-gear", tone: "text-ink-2", chip: "bg-surface-3", hover: "group-hover:bg-surface-3 group-hover:text-ink-2" },
 ];
@@ -48,6 +46,7 @@ const MORE_EXTRA = {
 const navItem = (href: string) => NAV.find((n) => n.href === href)!;
 
 function isActive(path: string, href: string) {
+  if (href === "/membership" && path.startsWith("/packages")) return true; // package pages belong to Membership
   return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
 }
 
@@ -168,7 +167,7 @@ function Frame({ children }: { children: ReactNode }) {
           <Plus className="size-4 transition-transform duration-300 group-hover:rotate-90" /> Log training
         </button>
         <nav className="mt-6 flex flex-col gap-0.5" aria-label="Main">
-          {NAV.filter((n) => profile?.pt_enabled || n.href !== "/packages").map((n) => (
+          {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
@@ -238,7 +237,7 @@ function Frame({ children }: { children: ReactNode }) {
             onClick={() => setMore(true)}
             className={cx(
               "flex flex-col items-center gap-0.5 text-[11px] font-medium",
-              ["/packages", "/finance", "/progress", "/history", "/settings", "/review"].some((h) => isActive(path, h)) ? "text-ink" : "text-muted",
+              ["/membership", "/packages", "/progress", "/history", "/settings", "/review"].some((h) => isActive(path, h)) ? "text-ink" : "text-muted",
             )}
           >
             <MoreHorizontal className="size-5" />
@@ -250,8 +249,7 @@ function Frame({ children }: { children: ReactNode }) {
       <Sheet open={more} onClose={() => setMore(false)} title="More">
         <div className="grid grid-cols-2 gap-2 pb-2">
           {[
-            ...(profile?.pt_enabled ? [navItem("/packages")] : []),
-            navItem("/finance"),
+            navItem("/membership"),
             navItem("/progress"),
             ...(profile?.pt_enabled ? [{ href: "/review", ...MORE_EXTRA["/review"] }] : []),
             navItem("/history"),

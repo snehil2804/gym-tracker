@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // The Money and PT Packages pages were merged into Membership (Oct 2026).
+  async redirects() {
+    return [
+      { source: "/finance", destination: "/membership#spending", permanent: false },
+      { source: "/packages", destination: "/membership#personal-training", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

@@ -348,7 +348,7 @@ function MissedValueCard({ d }: { d: Core }) {
             </Link>
           )}
         </div>
-        <LinkButton href="/finance" variant="ghost" size="sm" className="mt-auto self-start">
+        <LinkButton href="/membership#spending" variant="ghost" size="sm" className="mt-auto self-start">
           Financial details <ArrowRight className="size-3.5" />
         </LinkButton>
       </div>
@@ -502,7 +502,7 @@ function MoneyCard({ d }: { d: Core }) {
         action={
           <span className="flex items-center gap-1">
             <EyeToggle id="dash-money" />
-            <LinkButton href="/finance" size="sm" variant="ghost">
+            <LinkButton href="/membership#spending" size="sm" variant="ghost">
               All <ArrowRight className="size-3.5" />
             </LinkButton>
           </span>

@@ -94,7 +94,7 @@ to the owner's address. The owner's records are created on their first sign-in.
 2. Create a Google OAuth client and enable Google in Supabase (`SETUP.md` §3b), then sign in with
    **Continue with Google** using `snehilrai678.sr@gmail.com` (email sign-up also works).
 3. Settings → Gym membership: enter the **confirmed** contract end date; set payment status/price.
-4. PT Packages → Soham → Record payment for the ₹6,000 package (if paid).
+4. Membership → Personal training → Soham → Record payment for the ₹6,000 package (if paid).
 5. Review days: confirm the PT outcome of the nine seeded weekday absences and the other past
    training days since 29 Sep.
 6. Optional: set `NEXT_PUBLIC_ALLOW_SIGNUP=false` in Vercel and redeploy to hide sign-up.
