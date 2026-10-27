@@ -62,7 +62,7 @@ export function useCore() {
     const dayCtx: DayContext = { today, trackingStart, scheduleDays };
 
     const todayRec = byDate.get(today);
-    const ptSettledToday = !!todayRec && ["completed", "chargeable_absence", "trainer_cancelled", "rescheduled", "not_scheduled"].includes(todayRec.pt_status);
+    const ptSettledToday = !!todayRec && ["completed", "chargeable_absence", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled"].includes(todayRec.pt_status);
     const forecastFrom = ptSettledToday ? addDays(today, 1) : today;
     const forecast = current
       ? forecastPackage({

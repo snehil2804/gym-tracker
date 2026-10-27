@@ -135,7 +135,7 @@ export default function CalendarPage() {
         <Card className="p-5">
           <h3 className="mb-3 text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">{monthName(month)} summary</h3>
           <dl className="space-y-1.5 text-sm">
-            {(["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "rescheduled", "rest", "unverified"] as DayKind[])
+            {(["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "rest", "unverified"] as DayKind[])
               .filter((k) => summary.counts.get(k))
               .map((k) => (
                 <div key={k} className="flex items-center justify-between">

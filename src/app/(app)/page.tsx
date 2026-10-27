@@ -130,7 +130,7 @@ function TodayCard({ d }: { d: Core }) {
               ) : d.todayScheduled ? (
                 "Training day. Did you go to the gym?"
               ) : (
-                `No PT scheduled on ${weekdayName(d.today, true)}s.`
+                weekdayName(d.today) === "Sun" ? "Sunday is a rest day. Trained anyway? Log it." : `No PT scheduled on ${weekdayName(d.today, true)}s.`
               )}
             </p>
           )}
@@ -253,6 +253,7 @@ function PackageCard({ d }: { d: Core }) {
           <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-good" />{p.completed} completed</span>
           <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-accent" />{p.forfeited} missed (charged)</span>
           <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-info" />{p.trainer_cancelled} trainer-cancelled</span>
+          {p.client_cancelled > 0 && <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-ink-2" />{p.client_cancelled} cancelled by you</span>}
           <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-violet" />{p.rescheduled} rescheduled</span>
         </div>
 

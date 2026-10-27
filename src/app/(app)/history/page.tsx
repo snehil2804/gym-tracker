@@ -89,6 +89,7 @@ function History({ d }: { d: Core }) {
       ["chargeable_absence", "PT missed (charged)"],
       ["missed_unconfirmed", "PT missed (unconfirmed)"],
       ["trainer_cancelled", "Trainer cancelled"],
+      ["client_cancelled", "I cancelled"],
       ["rescheduled", "Rescheduled"],
       ["absent", "Gym missed"],
       ["attended", "Gym attended"],

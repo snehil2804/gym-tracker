@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyDay, needsReview, PT_STATUS } from "@/lib/domain/attendance";
+import { classifyDay, firstName, needsReview, PT_STATUS, selfCancelledLabel } from "@/lib/domain/attendance";
 import { computeFinance, missedByMonth } from "@/lib/domain/finance";
 import { forecastPackage, upcomingSessionDates } from "@/lib/domain/forecast";
 import { currentStreak, gymAttendance, personalRecords } from "@/lib/domain/stats";
@@ -18,6 +18,17 @@ describe("attendance rules", () => {
     expect(consuming.sort()).toEqual(["chargeable_absence", "completed"]);
   });
 
+  it("a session you cancelled is never deducted", () => {
+    expect(PT_STATUS.client_cancelled.consumes).toBe(false);
+  });
+
+  it("labels your own cancellations with your name when it is a real name", () => {
+    expect(selfCancelledLabel("Snehil Rai")).toBe("Snehil cancelled");
+    expect(selfCancelledLabel("snehilrai678.sr")).toBe("I cancelled");
+    expect(selfCancelledLabel(null)).toBe("I cancelled");
+    expect(firstName("asha")).toBe("Asha");
+  });
+
   it("T13: the ten seeded absences are represented correctly", () => {
     const rows = seededAttendance();
     expect(rows.map((r) => r.date)).toEqual(SEEDED_ABSENCES);
@@ -33,7 +44,10 @@ describe("attendance rules", () => {
 
   it("T12: unlogged past days stay unverified, never completed or missed", () => {
     expect(classifyDay("2026-10-02", undefined, ctx)).toBe("unverified");
-    expect(classifyDay("2026-10-18", undefined, ctx)).toBe("not_scheduled"); // Sunday
+    expect(classifyDay("2026-10-18", undefined, ctx)).toBe("rest"); // Sunday: rest day by default
+    expect(needsReview("2026-10-18", undefined, ctx)).toBe(false);
+    expect(classifyDay("2026-11-01", undefined, ctx)).toBe("rest"); // future Sunday too
+    expect(classifyDay("2026-09-27", undefined, ctx)).toBe("before"); // Sunday before tracking
     expect(classifyDay("2026-09-20", undefined, ctx)).toBe("before");
     expect(classifyDay("2026-10-30", undefined, ctx)).toBe("future");
     expect(needsReview("2026-10-30", undefined, ctx)).toBe(false);
@@ -46,6 +60,9 @@ describe("attendance rules", () => {
     expect(classifyDay("2026-10-05", att("2026-10-05", { gym_status: "absent", pt_status: "chargeable_absence" }), ctx)).toBe("charged");
     expect(classifyDay("2026-10-05", att("2026-10-05", { pt_status: "trainer_cancelled" }), ctx)).toBe("cancelled");
     expect(classifyDay("2026-10-05", att("2026-10-05", { pt_status: "rescheduled" }), ctx)).toBe("rescheduled");
+    expect(classifyDay("2026-10-05", att("2026-10-05", { gym_status: "absent", pt_status: "client_cancelled" }), ctx)).toBe("self_cancelled");
+    // A logged Sunday overrides the rest-day default.
+    expect(classifyDay("2026-10-18", att("2026-10-18", { gym_status: "attended", pt_status: "not_scheduled" }), ctx)).toBe("gym_only");
     expect(classifyDay("2026-10-05", att("2026-10-05", { gym_status: "rest", pt_status: "not_scheduled" }), ctx)).toBe("rest");
   });
 });

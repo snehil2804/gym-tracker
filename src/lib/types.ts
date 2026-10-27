@@ -7,6 +7,7 @@ export type PtStatus =
   | "chargeable_absence"
   | "missed_unconfirmed"
   | "trainer_cancelled"
+  | "client_cancelled"
   | "rescheduled"
   | "not_scheduled"
   | "unverified";
@@ -106,6 +107,7 @@ export interface PackageSummary {
   remaining: number;
   last_session_date: string | null;
   trainer_cancelled: number;
+  client_cancelled: number;
   rescheduled: number;
   missed_unconfirmed: number;
   paid_paise: number;

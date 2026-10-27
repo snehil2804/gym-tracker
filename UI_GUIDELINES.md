@@ -42,8 +42,9 @@ Every attendance state has an **icon + colour + label** (`src/components/day-sta
 | Missed gym | minus | warn |
 | Missed · PT unconfirmed | ? | warn, dashed outline |
 | Trainer cancelled | ban | info |
+| I cancelled (“Snehil cancelled”) | calendar-x | neutral (surface-3) |
 | Rescheduled | arrows | violet |
-| Rest day | moon | rest |
+| Rest day (also every unlogged Sunday) | moon | rest |
 | Not confirmed | dashed circle | unknown, hatched fill |
 | No PT scheduled | minus | faint |
 

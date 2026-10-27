@@ -5,6 +5,15 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added — 27 Oct 2026
+- **“I cancelled” PT outcome** (`client_cancelled`) for sessions you call off yourself — shown as
+  “<Name> cancelled” when a display name is set. Not deducted by default; counted per package
+  (`package_summary.client_cancelled`). Available in the day editor, quick log (missed and went flows),
+  review queue, history filter and calendar legend. Migration `20261027000005_client_cancelled`.
+- **Sundays are rest days by default**: unlogged Sundays show as *Rest day* (past and future), are never
+  queued for review and never count as missed. Logging anything on a Sunday overrides it.
+- Tests: 38 unit tests, 74 database checks.
+
 ### Fixed
 - An OAuth `?code=` that lands on any page (Supabase's Site-URL fallback) is forwarded to
   `/auth/callback`, so sign-in completes instead of stalling; expired/cross-site codes show a plain message.

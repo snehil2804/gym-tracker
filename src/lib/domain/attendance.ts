@@ -36,6 +36,12 @@ export const PT_STATUS: Record<
     help: "Not your loss. The session stays in your balance.",
     consumes: false,
   },
+  client_cancelled: {
+    label: "I cancelled",
+    short: "I cancelled",
+    help: "You called off the session. Not deducted — if your trainer still charged it, choose “Missed PT — chargeable” instead.",
+    consumes: false,
+  },
   rescheduled: {
     label: "Rescheduled",
     short: "Rescheduled",
@@ -69,6 +75,9 @@ export function ptConsumesSession(s: PtStatus) {
   return PT_STATUS[s].consumes;
 }
 
+/** Sundays are rest days by default. */
+export const DEFAULT_REST_DAYS = [7];
+
 export type DayKind =
   | "trained" // gym + PT completed
   | "pt_only" // PT completed, gym not marked attended
@@ -77,6 +86,7 @@ export type DayKind =
   | "missed" // missed the gym, no PT at stake
   | "missed_unconfirmed" // missed the gym, PT outcome not confirmed
   | "cancelled" // trainer cancelled
+  | "self_cancelled" // you cancelled
   | "rescheduled"
   | "rest"
   | "unverified" // past day, nothing confirmed
@@ -92,6 +102,7 @@ export const DAY_KIND: Record<DayKind, { label: string; tone: string }> = {
   missed: { label: "Missed gym", tone: "warn" },
   missed_unconfirmed: { label: "Missed · PT unconfirmed", tone: "warn" },
   cancelled: { label: "Trainer cancelled", tone: "info" },
+  self_cancelled: { label: "I cancelled", tone: "neutral" },
   rescheduled: { label: "Rescheduled", tone: "violet" },
   rest: { label: "Rest day", tone: "rest" },
   unverified: { label: "Not confirmed", tone: "unknown" },
@@ -104,6 +115,8 @@ export interface DayContext {
   today: ISODate;
   trackingStart: ISODate | null;
   scheduleDays: number[]; // ISO weekdays with planned PT
+  /** ISO weekdays that are rest days unless something else is logged (default: Sunday). */
+  restDays?: number[];
 }
 
 export function isScheduledDay(date: ISODate, scheduleDays: number[]) {
@@ -119,6 +132,8 @@ export function classifyDay(date: ISODate, rec: Attendance | undefined, ctx: Day
         return "charged";
       case "trainer_cancelled":
         return "cancelled";
+      case "client_cancelled":
+        return "self_cancelled";
       case "rescheduled":
         return "rescheduled";
     }
@@ -132,8 +147,9 @@ export function classifyDay(date: ISODate, rec: Attendance | undefined, ctx: Day
     if (date > ctx.today) return "future";
     return "unverified";
   }
-  if (date > ctx.today) return "future";
   if (ctx.trackingStart && date < ctx.trackingStart) return "before";
+  if ((ctx.restDays ?? DEFAULT_REST_DAYS).includes(isoWeekday(date))) return "rest";
+  if (date > ctx.today) return "future";
   return isScheduledDay(date, ctx.scheduleDays) ? "unverified" : "not_scheduled";
 }
 
@@ -145,7 +161,7 @@ export function needsReview(date: ISODate, rec: Attendance | undefined, ctx: Day
   if (date > ctx.today) return false;
   if (ctx.trackingStart && date < ctx.trackingStart) return false;
   const scheduled = isScheduledDay(date, ctx.scheduleDays);
-  if (!rec) return scheduled;
+  if (!rec) return scheduled && !(ctx.restDays ?? DEFAULT_REST_DAYS).includes(isoWeekday(date));
   if (rec.gym_status === "rest") return false;
   if (rec.pt_status === "missed_unconfirmed") return true;
   if (rec.pt_status === "unverified") return scheduled || rec.gym_status === "unverified";
@@ -168,3 +184,19 @@ export const BLOCK_KIND: Record<ScheduleBlock["kind"], string> = {
   holiday: "Public holiday",
   pause: "Package paused",
 };
+
+/**
+ * First name from the profile's display name, only when it looks like a real name
+ * ("Snehil Rai" → "Snehil"). Email-style defaults ("snehilrai678.sr") return null.
+ */
+export function firstName(displayName: string | null | undefined): string | null {
+  const first = (displayName ?? "").trim().split(/\s+/)[0] ?? "";
+  if (!/^\p{L}[\p{L}'’-]*$/u.test(first)) return null;
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+/** "Snehil cancelled" when the profile has a real name, otherwise "I cancelled". */
+export function selfCancelledLabel(displayName: string | null | undefined) {
+  const n = firstName(displayName);
+  return n ? `${n} cancelled` : "I cancelled";
+}

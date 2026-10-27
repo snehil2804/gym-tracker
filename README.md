@@ -94,7 +94,7 @@ src/
   proxy.ts            session refresh + auth redirect (Next 16 "proxy", formerly middleware)
 supabase/
   migrations/         schema, RLS, triggers, RPCs, views, seed function, storage
-  tests/integration.sql   72 database checks run as a real `authenticated` user (rolled back)
+  tests/integration.sql   74 database checks run as a real `authenticated` user (rolled back)
 tests/unit/           Vitest unit tests for the domain layer
 ```
 
@@ -106,9 +106,9 @@ tests/unit/           Vitest unit tests for the domain layer
 Each calendar date has at most one record with two independent fields:
 
 - **Gym:** attended · missed · rest · unconfirmed
-- **PT:** completed · missed–chargeable · missed–not sure · trainer cancelled · rescheduled · no PT scheduled · unconfirmed
+- **PT:** completed · missed–chargeable · missed–not sure · trainer cancelled · **I cancelled** · rescheduled · no PT scheduled · unconfirmed
 
-A day with no record is **unconfirmed**. Unconfirmed days are never counted as attended,
+A day with no record is **unconfirmed** — except **Sundays, which are rest days by default** (anything you log on a Sunday overrides that). Unconfirmed days are never counted as attended,
 completed, missed or lost.
 
 ### How the PT balance is calculated
@@ -144,6 +144,9 @@ adjustment                        ±n       manual correction, note required
 
 ### Trainer cancellations, reschedules, refunds and credits
 - **Trainer cancelled:** no deduction, never a loss.
+- **I cancelled** (you called the session off): no deduction by default. If the trainer still charged it
+  (e.g. late cancellation), record the day as *missed–chargeable* instead. Shown as “<Name> cancelled”
+  when your display name is set in Settings.
 - **Rescheduled:** the original day records the move; only the make-up day (logged as completed)
   uses a session — counted once.
 - **Credits** add sessions (not cash). **Refunded sessions** remove sessions; the money is recorded
@@ -242,7 +245,7 @@ The app never uses the `service_role` key.
 
 1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
 2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
-   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`.
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`.
 3. Set the owner email (who receives the personal seed):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
@@ -255,7 +258,7 @@ The app never uses the `service_role` key.
 ### Tests and checks
 
 ```bash
-npm test            # 36 unit tests (money, dates/time zones, rules, finance, forecast, parser)
+npm test            # 38 unit tests (money, dates/time zones, rules, finance, forecast, parser)
 npm run check       # typecheck + lint + tests + build
 npm run typecheck
 npm run lint
@@ -263,7 +266,7 @@ npm run build
 SUPABASE_DB_URL='postgresql://…' npm run test:db   # 72 database checks, all rolled back
 ```
 `supabase/tests/integration.sql` can also be pasted into the Supabase SQL editor. A successful run
-ends with the error message `ALL INTEGRATION TESTS PASSED (72 checks)` — the exception is
+ends with the error message `ALL INTEGRATION TESTS PASSED (74 checks)` — the exception is
 intentional: it rolls back everything the test created.
 
 ---

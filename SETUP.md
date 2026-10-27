@@ -37,6 +37,7 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
    2. `supabase/migrations/20261026000002_ledger_logic.sql`
    3. `supabase/migrations/20261026000003_reporting_seed_restore.sql`
    4. `supabase/migrations/20261027000004_fk_indexes.sql`
+   5. `supabase/migrations/20261027000005_client_cancelled.sql`
 3. **Set the owner email** (only this account gets the initial personal records):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
@@ -85,7 +86,7 @@ SUPABASE_DB_URL='postgresql://postgres:<password>@db.<ref>.supabase.co:5432/post
 ```
 
 Or paste `supabase/tests/integration.sql` into the SQL editor. Expected output is an *error* reading
-`ALL INTEGRATION TESTS PASSED (72 checks)` — that intentional exception rolls back all test data.
+`ALL INTEGRATION TESTS PASSED (74 checks)` — that intentional exception rolls back all test data.
 Any other message starting with `FAIL:` names the broken rule.
 
 ## 5. Deploy to Vercel
@@ -120,7 +121,7 @@ Or connect `snehil2804/gym-tracker` under Vercel → Project → Settings → Gi
 |---|---|
 | `npm run dev` | dev server (Turbopack) |
 | `npm run build` / `npm start` | production build / serve |
-| `npm test` | unit tests |
+| `npm test` | unit tests (38) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run check` | typecheck + lint + tests + build |

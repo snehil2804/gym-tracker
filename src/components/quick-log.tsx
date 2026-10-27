@@ -1,13 +1,13 @@
 "use client";
 
-import { ArrowLeft, ArrowRightLeft, Ban, CalendarCheck, Check, Dumbbell, HelpCircle, Moon, NotebookPen, UserX, X } from "lucide-react";
+import { ArrowLeft, ArrowRightLeft, Ban, CalendarCheck, CalendarX, Check, Dumbbell, HelpCircle, Moon, NotebookPen, UserX, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { DayBadge } from "@/components/day-status";
 import { Button, Chip, Choice, Field, Input, Sheet, Textarea, useToast } from "@/components/ui";
 import { useCore } from "@/lib/data/derived";
 import { useDeleteAttendance, useSaveAttendance, type AttendanceInput } from "@/lib/data/hooks";
-import { ABSENCE_REASONS, classifyDay, isScheduledDay } from "@/lib/domain/attendance";
+import { ABSENCE_REASONS, classifyDay, isScheduledDay, selfCancelledLabel } from "@/lib/domain/attendance";
 import { addDays, formatShort, relativeDay } from "@/lib/domain/dates";
 import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { AbsenceReason, Attendance } from "@/lib/types";
@@ -37,7 +37,7 @@ export function QuickLogProvider({ children }: { children: ReactNode }) {
   );
 }
 
-type MissKind = "gym_only" | "pt_charged" | "both_charged" | "pt_unsure" | "rescheduled" | "other";
+type MissKind = "gym_only" | "pt_charged" | "both_charged" | "pt_unsure" | "self_cancelled" | "rescheduled" | "other";
 
 function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mode; initialDate?: string; onClose: () => void }) {
   const { data } = useCore();
@@ -206,6 +206,12 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
             onClick={() => commit({ date, gym_status: "attended", pt_status: "trainer_cancelled" }, `Logged: trainer cancelled on ${formatShort(date)}.`)}
           />
           <Choice
+            icon={<CalendarX className="size-5" />}
+            title={`${selfCancelledLabel(data.profile.display_name)} the PT session`}
+            description="I trained, but called off PT myself. Not deducted unless the trainer charged it."
+            onClick={() => commit({ date, gym_status: "attended", pt_status: "client_cancelled" }, `Logged: you cancelled PT on ${formatShort(date)}.`)}
+          />
+          <Choice
             icon={<HelpCircle className="size-5" />}
             title="Not sure yet"
             description="Save the gym visit; confirm the PT session later."
@@ -275,6 +281,12 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
         icon: <HelpCircle className="size-5" />,
         tone: "warn",
       },
+      {
+        k: "self_cancelled",
+        title: `${selfCancelledLabel(data.profile.display_name)} the session`,
+        desc: "You called it off. Not deducted — if the trainer still charged it, choose a chargeable option above.",
+        icon: <CalendarX className="size-5" />,
+      },
       { k: "rescheduled", title: "Session was rescheduled", desc: "Moved to another day. Won't be counted twice.", icon: <ArrowRightLeft className="size-5" />, tone: "violet" },
       { k: "other", title: "Something else", desc: "Add a note; PT stays unconfirmed.", icon: <NotebookPen className="size-5" /> },
     ];
@@ -312,6 +324,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
     );
     const map: Record<MissKind, Pick<AttendanceInput, "gym_status" | "pt_status">> = {
       both_charged: { gym_status: "absent", pt_status: "chargeable_absence" },
+      self_cancelled: { gym_status: "absent", pt_status: "client_cancelled" },
       gym_only: { gym_status: "absent", pt_status: "not_scheduled" },
       pt_charged: { gym_status: "attended", pt_status: "chargeable_absence" },
       pt_unsure: { gym_status: "absent", pt_status: "missed_unconfirmed" },

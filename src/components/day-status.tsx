@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Ban, Check, CheckCheck, CircleDashed, Dumbbell, HelpCircle, Minus, Moon, X } from "lucide-react";
+import { ArrowRightLeft, Ban, CalendarX, Check, CheckCheck, CircleDashed, Dumbbell, HelpCircle, Minus, Moon, X } from "lucide-react";
 import { DAY_KIND, type DayKind } from "@/lib/domain/attendance";
 import { cx } from "@/components/ui";
 
@@ -11,6 +11,7 @@ export const DAY_STYLE: Record<DayKind, { icon: typeof Check; cell: string; dot:
   missed: { icon: Minus, cell: "bg-warn-soft text-warn", dot: "bg-warn", text: "text-warn" },
   missed_unconfirmed: { icon: HelpCircle, cell: "bg-warn-soft text-warn outline-1 outline-dashed -outline-offset-1 outline-warn/60", dot: "bg-warn", text: "text-warn" },
   cancelled: { icon: Ban, cell: "bg-info-soft text-info", dot: "bg-info", text: "text-info" },
+  self_cancelled: { icon: CalendarX, cell: "bg-surface-3 text-ink-2", dot: "bg-ink-2", text: "text-ink-2" },
   rescheduled: { icon: ArrowRightLeft, cell: "bg-violet-soft text-violet", dot: "bg-violet", text: "text-violet" },
   rest: { icon: Moon, cell: "bg-rest-soft text-rest", dot: "bg-rest", text: "text-rest" },
   unverified: { icon: CircleDashed, cell: "hatch text-unknown", dot: "bg-unknown", text: "text-unknown" },
@@ -34,7 +35,7 @@ export function DayBadge({ kind, className }: { kind: DayKind; className?: strin
   );
 }
 
-const LEGEND: DayKind[] = ["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "rescheduled", "rest", "unverified", "not_scheduled"];
+const LEGEND: DayKind[] = ["trained", "pt_only", "gym_only", "charged", "missed", "missed_unconfirmed", "cancelled", "self_cancelled", "rescheduled", "rest", "unverified", "not_scheduled"];
 
 export function DayLegend() {
   return (

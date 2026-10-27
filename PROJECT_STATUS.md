@@ -21,11 +21,11 @@ by its owner**.
 
 | Area | State | Notes |
 |---|---|---|
-| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 4 migrations applied to the live project |
-| Session ledger & financial integrity | ✅ Done, tested | 72 database checks pass against the live DB |
-| Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 36 unit tests pass |
+| Database schema, RLS, triggers, RPCs | ✅ Done, applied | 5 migrations applied to the live project |
+| Session ledger & financial integrity | ✅ Done, tested | 74 database checks pass against the live DB |
+| Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 38 unit tests pass |
 | Auth (email + password, reset, sign-out, protected routes) | ✅ Done | Verified locally; production sign-in not yet done by owner |
-| Google sign-in (primary) | ⚠️ Provider enabled; URL config pending | Google consent works — the owner's account was created via Google on 27 Oct. Supabase Site URL is still `http://localhost:3000`, so the return trip fails until URL Configuration is updated (SETUP.md §3b step 5) |
+| Google sign-in (primary) | ✅ Working | Owner signed in with Google; seed verified (19Fitness, Soham ₹6,000/30, absences). Second Google account `snehilworkemail@gmail.com` exists with defaults only. Earlier note: | Google consent works — the owner's account was created via Google on 27 Oct. Supabase Site URL is still `http://localhost:3000`, so the return trip fails until URL Configuration is updated (SETUP.md §3b step 5) |
 | Initial seed (owner only, idempotent) | ✅ Done, tested | Verified end-to-end locally with a test owner account |
 | UI: all 8 sections + review queue | ✅ Done | Verified in the browser on desktop and 375 px mobile |
 | Export / restore | ✅ Done | Restore tested in SQL (idempotent, isolation-safe) |

@@ -71,7 +71,7 @@ function PackageDetail({ d, pkg }: { d: Core; pkg: PackageSummary }) {
   const attendance = d.attendance.filter((a) => a.pt_package_id === pkg.id);
   const usedAny = pkg.completed + pkg.forfeited > 0;
   const todayRec = d.byDate.get(d.today);
-  const from = todayRec && ["completed", "chargeable_absence", "trainer_cancelled", "rescheduled", "not_scheduled"].includes(todayRec.pt_status) ? addDays(d.today, 1) : d.today;
+  const from = todayRec && ["completed", "chargeable_absence", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled"].includes(todayRec.pt_status) ? addDays(d.today, 1) : d.today;
   const forecast =
     pkg.status === "active"
       ? forecastPackage({
@@ -144,7 +144,7 @@ function PackageDetail({ d, pkg }: { d: Core; pkg: PackageSummary }) {
           <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="Completed" value={pkg.completed} hint={val(pkg.completed)} tone="good" />
             <Stat label="Missed · charged" value={pkg.forfeited} hint={val(pkg.forfeited)} tone={pkg.forfeited ? "accent" : undefined} />
-            <Stat label="Trainer cancelled" value={pkg.trainer_cancelled} hint="not deducted" />
+            <Stat label="Cancelled" value={pkg.trainer_cancelled + pkg.client_cancelled} hint={`${pkg.trainer_cancelled} by trainer · ${pkg.client_cancelled} by you · not deducted`} />
             <Stat label="Rescheduled" value={pkg.rescheduled} hint="counted once" />
           </div>
           {(pkg.credited || pkg.refunded || pkg.expired || pkg.transferred_in || pkg.transferred_out || pkg.adjusted || pkg.missed_unconfirmed) > 0 && (

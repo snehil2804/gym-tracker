@@ -59,7 +59,8 @@ auth.users ─1:1─ profiles (settings, reminders, tracking_start_date, seeded_
 
 ### Attendance states
 - `gym_status`: `attended | absent | rest | unverified`
-- `pt_status`: `completed | chargeable_absence | missed_unconfirmed | trainer_cancelled | rescheduled | not_scheduled | unverified`
+- `pt_status`: `completed | chargeable_absence | missed_unconfirmed | trainer_cancelled | client_cancelled | rescheduled | not_scheduled | unverified`
+- Days with no record are *unconfirmed*, except Sundays, which display as rest days by default (`DEFAULT_REST_DAYS` in `src/lib/domain/attendance.ts`; UI-only, nothing is written).
 - Only `completed` and `chargeable_absence` create a ledger entry (−1).
 
 ### Ledger kinds
@@ -131,6 +132,6 @@ All functions use `set search_path = ''`; `EXECUTE` is revoked from `anon`/`publ
 ## Testing strategy
 - **Unit** (`tests/unit`, Vitest): everything in `src/lib/domain`.
 - **Database** (`supabase/tests/integration.sql`): one `DO` block that creates users, switches to
-  `role authenticated` with JWT claims, asserts 72 behaviours and finally raises
+  `role authenticated` with JWT claims, asserts 74 behaviours and finally raises
   `ALL INTEGRATION TESTS PASSED` to roll everything back.
 - **Manual/browser**: local dev server against the live DB with throwaway accounts (since deleted).

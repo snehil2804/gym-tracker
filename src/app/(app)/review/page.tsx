@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, Check, CheckCheck, Dumbbell, PartyPopper, Pencil, X } from "lucide-react";
+import { Ban, CalendarX, Check, CheckCheck, Dumbbell, PartyPopper, Pencil, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DayEditor } from "@/components/day-editor";
 import { DayBadge } from "@/components/day-status";
@@ -19,7 +19,8 @@ const ACTIONS: Action[] = [
   { key: "gym", label: "Went · no PT", short: "Gym only", gym: "attended", pt: "not_scheduled", icon: Dumbbell, tone: "text-good" },
   { key: "charged", label: "PT missed · charged", short: "Charged", gym: "keep", pt: "chargeable_absence", icon: X, tone: "text-accent" },
   { key: "free", label: "No PT charge", short: "Not charged", gym: "keep", pt: "not_scheduled", icon: Check, tone: "text-ink-2" },
-  { key: "cancelled", label: "Trainer cancelled", short: "Cancelled", gym: "keep", pt: "trainer_cancelled", icon: Ban, tone: "text-info" },
+  { key: "cancelled", label: "Trainer cancelled", short: "Trainer cancelled", gym: "keep", pt: "trainer_cancelled", icon: Ban, tone: "text-info" },
+  { key: "self", label: "I cancelled", short: "I cancelled", gym: "keep", pt: "client_cancelled", icon: CalendarX, tone: "text-ink-2" },
 ];
 
 function toInput(date: string, rec: Attendance | undefined, a: Action): AttendanceInput {

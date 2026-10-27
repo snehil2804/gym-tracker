@@ -98,6 +98,10 @@ begin
   insert into public.attendance (date, gym_status, pt_status) values ('2026-10-07', 'attended', 'trainer_cancelled');
   select * into s from public.package_summary where id = p1;
   perform pg_temp.ok(s.remaining = 28 and s.trainer_cancelled = 1 and s.forfeited = 1, 'T5 trainer cancellation does not deduct');
+  insert into public.attendance (date, gym_status, pt_status, absence_reason) values ('2026-10-09', 'absent', 'client_cancelled', 'work');
+  select * into s from public.package_summary where id = p1;
+  perform pg_temp.ok(s.remaining = 28 and s.client_cancelled = 1, 'a session you cancelled is not deducted and is counted separately');
+  perform pg_temp.ok((select pt_package_id from public.attendance where date = '2026-10-09') = p1, 'a session you cancelled is linked to its package');
 
   -- ===================================================================
   -- Test 6 — reschedule: one session, one deduction

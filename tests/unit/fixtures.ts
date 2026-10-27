@@ -11,7 +11,7 @@ export function pkg(over: Partial<PackageSummary> = {}): PackageSummary {
     pausable: false, extension_allowed: false, status: "active", closed_on: null, unused_sessions_treatment: "undecided",
     renewed_from_id: null, notes: null, created_at: "2026-09-29T00:00:00Z",
     completed: 0, forfeited: 0, credited: 0, refunded: 0, expired: 0, transferred_in: 0, transferred_out: 0, adjusted: 0,
-    remaining: 30, last_session_date: null, trainer_cancelled: 0, rescheduled: 0, missed_unconfirmed: 0,
+    remaining: 30, last_session_date: null, trainer_cancelled: 0, client_cancelled: 0, rescheduled: 0, missed_unconfirmed: 0,
     paid_paise: 0, refunded_paise: 0, pending_paise: 0, outstanding_paise: 600000,
     ...over,
   };

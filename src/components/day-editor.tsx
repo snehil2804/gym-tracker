@@ -7,12 +7,12 @@ import { DayBadge } from "@/components/day-status";
 import { Badge, Button, Chip, ConfirmSheet, Field, Input, Segmented, Select, Sheet, Textarea, useToast, cx } from "@/components/ui";
 import type { Core } from "@/lib/data/derived";
 import { useAudit, useDeleteAttendance, useSaveAttendance } from "@/lib/data/hooks";
-import { ABSENCE_REASONS, BLOCK_KIND, blocksOn, classifyDay, GYM_STATUS, isScheduledDay, PT_STATUS } from "@/lib/domain/attendance";
+import { ABSENCE_REASONS, BLOCK_KIND, blocksOn, classifyDay, GYM_STATUS, isScheduledDay, PT_STATUS, selfCancelledLabel } from "@/lib/domain/attendance";
 import { formatDate, formatShort, weekdayName } from "@/lib/domain/dates";
 import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { AbsenceReason, GymStatus, PtStatus } from "@/lib/types";
 
-const PT_ORDER: PtStatus[] = ["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "rescheduled", "not_scheduled", "unverified"];
+const PT_ORDER: PtStatus[] = ["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled", "unverified"];
 
 export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose: () => void }) {
   const rec = d.byDate.get(date);
@@ -57,7 +57,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
         pt_status: pt,
         pt_package_id: pkgId || null,
         rescheduled_to: pt === "rescheduled" ? movedTo || null : null,
-        absence_reason: gym === "absent" || pt === "chargeable_absence" || pt === "missed_unconfirmed" ? reason : null,
+        absence_reason: gym === "absent" || pt === "chargeable_absence" || pt === "missed_unconfirmed" || pt === "client_cancelled" ? reason : null,
         notes: notes.trim() || null,
       });
       toast.success(`Saved ${formatShort(date)}.`);
@@ -135,7 +135,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
                   )}
                 >
                   <span className="flex items-center gap-2 text-sm font-semibold text-ink">
-                    {PT_STATUS[s].label}
+                    {s === "client_cancelled" ? selfCancelledLabel(d.profile.display_name) : PT_STATUS[s].label}
                     {PT_STATUS[s].consumes && <Badge tone={s === "completed" ? "good" : "loss"}>−1 session</Badge>}
                   </span>
                   <span className="mt-0.5 block text-xs text-muted">{PT_STATUS[s].help}</span>
@@ -150,7 +150,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
             </Field>
           )}
 
-          {["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "rescheduled"].includes(pt) && d.packages.length > 1 && (
+          {["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled"].includes(pt) && d.packages.length > 1 && (
             <Field label="Package" hint="Automatic picks the oldest active package that covers this date and still has sessions.">
               <Select value={pkgId} onChange={(e) => setPkgId(e.target.value)}>
                 <option value="">Automatic{autoPkg ? ` (${autoPkg.trainer_name}, from ${formatDate(autoPkg.start_date)})` : ""}</option>
@@ -165,7 +165,7 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
             </Field>
           )}
 
-          {(gym === "absent" || pt === "chargeable_absence" || pt === "missed_unconfirmed") && (
+          {(gym === "absent" || pt === "chargeable_absence" || pt === "missed_unconfirmed" || pt === "client_cancelled") && (
             <Field label="Reason">
               <div className="flex flex-wrap gap-2">
                 {ABSENCE_REASONS.map((r) => (

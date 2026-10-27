@@ -29,7 +29,8 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
    Clients cannot insert into `pt_ledger`; manual movements go through `record_session_adjustment`
    / `close_package`.
 3. **Never deduct a PT session from a gym absence, an unconfirmed day or ambiguous text.**
-   Trainer cancellations and reschedules never consume a session.
+   Trainer cancellations, your own cancellations (`client_cancelled`) and reschedules never consume a session.
+   Unlogged Sundays display as rest days (UI default only).
 4. **Corrections void, never delete** ledger entries; history must stay reconstructable.
 5. **Money is integer paise.** Use `parseMoneyToPaise`, `formatMoney`, `sessionValue` (`src/lib/domain/money.ts`).
    No floats for stored amounts. Each package keeps its own rate forever.
