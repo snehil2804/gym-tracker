@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bmi, classify, healthyRange, suggestedTarget } from "@/lib/domain/bmi";
+import { bmi, classify, healthyRange, midpointTarget } from "@/lib/domain/bmi";
 
 describe("BMI", () => {
   it("computes BMI to one decimal", () => {
@@ -16,8 +16,9 @@ describe("BMI", () => {
   });
   it("gives the healthy weight range for a height and a target inside it", () => {
     expect(healthyRange(172)).toEqual({ min: 54.8, max: 73.6 });
-    expect(suggestedTarget(79.3, 172)).toBe(73.5);
-    expect(suggestedTarget(50, 172)).toBe(55);
-    expect(suggestedTarget(65.2, 172)).toBe(65);
+    // midpoint BMI 21.75 × 1.72² = 64.3 kg → 64.5
+    expect(midpointTarget(172)).toBe(64.5);
+    expect(bmi(midpointTarget(172), 172)).toBe(21.8);
+    expect(midpointTarget(180)).toBe(70.5);
   });
 });

@@ -2,7 +2,6 @@ import type { Attendance, PackageSummary } from "../types";
 import { addDays, formatDate, startOfMonth, type ISODate } from "./dates";
 import type { FinanceSummary } from "./finance";
 import type { Forecast } from "./forecast";
-import { formatMoney } from "./money";
 import { gymAttendance } from "./stats";
 
 export interface Insight {
@@ -39,7 +38,7 @@ export function buildInsights(args: {
     out.push({
       id: "missed-month",
       tone: "loss",
-      text: `You missed ${finance.missedSessionsThisMonth} chargeable PT ${finance.missedSessionsThisMonth === 1 ? "session" : "sessions"} this month — ${formatMoney(finance.missedValueThisMonth)} of prepaid value.`,
+      text: `You missed ${finance.missedSessionsThisMonth} chargeable PT ${finance.missedSessionsThisMonth === 1 ? "session" : "sessions"} this month.`,
       href: "/membership/spending",
     });
   }
@@ -87,7 +86,7 @@ export function buildInsights(args: {
     out.push({
       id: "use-it",
       tone: "info",
-      text: `Attending every remaining session would use the ${formatMoney(finance.remainingValue)} still prepaid.`,
+      text: `${finance.remainingSessions} prepaid ${finance.remainingSessions === 1 ? "session is" : "sessions are"} left — attend them all to get full value.`,
     });
   }
   return out;

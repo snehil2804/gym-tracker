@@ -30,8 +30,10 @@ export function healthyRange(heightCm: number) {
   return { min: Math.ceil(BMI_HEALTHY.min * m2 * 10) / 10, max: Math.floor(BMI_HEALTHY.max * m2 * 10) / 10 };
 }
 
-/** A sensible default target: the current weight if healthy, otherwise the nearest healthy edge. */
-export function suggestedTarget(weightKg: number, heightCm: number) {
-  const r = healthyRange(heightCm);
-  return Math.min(Math.max(Math.round(weightKg * 2) / 2, Math.ceil(r.min * 2) / 2), Math.floor(r.max * 2) / 2);
+/** The middle of the healthy band: BMI (18.5 + 25) / 2 = 21.75. */
+export const BMI_MIDPOINT = (18.5 + 25) / 2;
+
+/** Default target weight: the weight at the midpoint BMI for this height, rounded to 0.5 kg. */
+export function midpointTarget(heightCm: number) {
+  return Math.round(BMI_MIDPOINT * (heightCm / 100) ** 2 * 2) / 2;
 }

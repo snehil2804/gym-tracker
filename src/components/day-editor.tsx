@@ -9,7 +9,6 @@ import type { Core } from "@/lib/data/derived";
 import { useAudit, useDeleteAttendance, useSaveAttendance } from "@/lib/data/hooks";
 import { ABSENCE_REASONS, BLOCK_KIND, blocksOn, classifyDay, GYM_STATUS, isScheduledDay, PT_STATUS, selfCancelledLabel } from "@/lib/domain/attendance";
 import { formatDate, formatShort, weekdayName } from "@/lib/domain/dates";
-import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { AbsenceReason, GymStatus, PtStatus } from "@/lib/types";
 
 const PT_ORDER: PtStatus[] = ["completed", "chargeable_absence", "missed_unconfirmed", "trainer_cancelled", "client_cancelled", "rescheduled", "not_scheduled"];
@@ -31,7 +30,6 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
   const future = date > d.today;
   const autoPkg = d.activeOn(date);
   const pkg = d.packages.find((p) => p.id === pkgId) ?? autoPkg;
-  const rate = pkg ? sessionValue(1, pkg.price_paise, pkg.sessions_purchased) : 0;
   const consumesNow = PT_STATUS[pt].consumes;
   const consumedBefore = rec ? PT_STATUS[rec.pt_status].consumes : false;
   const blocks = blocksOn(date, d.blocks);
@@ -43,9 +41,9 @@ export function DayEditor({ d, date, onClose }: { d: Core; date: string; onClose
   );
 
   let impact: string;
-  if (consumesNow && !consumedBefore) impact = pkg ? `Uses 1 session from ${pkg.trainer_name}'s package (${formatMoney(rate)} of prepaid value).` : "No package covers this date — saving will fail until you add one.";
+  if (consumesNow && !consumedBefore) impact = pkg ? `Uses 1 session from ${pkg.trainer_name}'s package.` : "No package covers this date — saving will fail until you add one.";
   else if (!consumesNow && consumedBefore) impact = "Returns 1 session to the package balance. The earlier entry is kept in history as voided.";
-  else if (consumesNow && consumedBefore && rec?.pt_status !== pt) impact = `Swaps the existing entry (still 1 session). ${pt === "chargeable_absence" ? `Counts as ${formatMoney(rate)} of missed value.` : "No longer counts as missed value."}`;
+  else if (consumesNow && consumedBefore && rec?.pt_status !== pt) impact = `Swaps the existing entry (still 1 session). ${pt === "chargeable_absence" ? "Counts as a missed (charged) session." : "No longer counts as a missed session."}`;
   else if (consumesNow) impact = "Already counted — saving won't deduct again.";
   else impact = "No change to your PT balance.";
 

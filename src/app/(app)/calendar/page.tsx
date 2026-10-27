@@ -9,9 +9,7 @@ import { useQuickLog } from "@/components/quick-log";
 import { Button, Card, ErrorNote, LinkButton, PageHeader, Skeleton, cx } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import { blocksOn, classifyDay, dayLabel, PT_ONLY_KINDS, type DayKind } from "@/lib/domain/attendance";
-import { EyeToggle, Money, MoneyScope } from "@/components/preferences";
 import { addMonths, endOfMonth, isISODate, monthGrid, monthName, startOfMonth, weekdayLabel } from "@/lib/domain/dates";
-import { ledgerValue } from "@/lib/domain/finance";
 import { GamePanel, PerfectMonthBanner, useGame } from "@/components/streak-game";
 import { addDays, isoWeekday, startOfWeek } from "@/lib/domain/dates";
 
@@ -32,9 +30,7 @@ export default function CalendarPage() {
       const k = classifyDay(day, d.byDate.get(day), d.dayCtx);
       counts.set(k, (counts.get(k) ?? 0) + 1);
     }
-    const byId = new Map(d.packages.map((p) => [p.id, p]));
-    const missed = ledgerValue(d.ledger, byId, (e) => e.kind === "forfeited" && !!e.session_date && e.session_date.startsWith(month.slice(0, 7)));
-    return { counts, missed };
+    return { counts };
   }, [d, month]);
 
   if (error) return <ErrorNote error={error} />;
@@ -53,7 +49,7 @@ function CalendarView({
 }: {
   d: Core;
   month: string;
-  summary: { counts: Map<DayKind, number>; missed: { value: number } };
+  summary: { counts: Map<DayKind, number> };
   selected: string | null;
   setSelected: (v: string | null) => void;
   setAnchor: (v: string | null) => void;
@@ -201,18 +197,6 @@ function CalendarView({
                   <dd className="num font-semibold">{summary.counts.get(k)}</dd>
                 </div>
               ))}
-            {d.ptEnabled && (
-              <div className="mt-2 flex items-center justify-between border-t border-line pt-2">
-                <dt className="flex items-center gap-1 text-muted">
-                  Missed PT value (confirmed) <EyeToggle id="calendar-missed" className="size-7" />
-                </dt>
-                <dd className={cx("num font-semibold", summary.missed.value > 0 && "text-accent")}>
-                  <MoneyScope id="calendar-missed">
-                    <Money paise={summary.missed.value} />
-                  </MoneyScope>
-                </dd>
-              </div>
-            )}
           </dl>
           <Button variant="primary" block className="mt-4" onClick={() => quick.open("menu", d.today)}>
             Log today

@@ -40,7 +40,8 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
 8. **No fabricated data** in seeds, charts or insights. Empty states instead.
 9. **Respect feature switches.** Hide PT UI when `profiles.pt_enabled` is false and membership UI when
    `membership_enabled` is false (`useFeatures()`, `d.ptEnabled`). Money shown on a card must use
-   `<Money>`/`useMoneyFormatter` with an `EyeToggle`.
+   `<Money>`/`useMoneyFormatter` with an `EyeToggle`. Prices and amounts appear **only on the Membership pages**
+   (`/membership/*`); calendar, history, insights, reminders and editors show sessions, not money.
 10. **Security:** RLS on every new table (`user_id = (select auth.uid())`), composite `(id, user_id)`
    foreign keys for ownership, `set search_path = ''` on functions, revoke `EXECUTE` from `anon`.
    Never use or commit the service-role key; only `NEXT_PUBLIC_SUPABASE_*` vars exist.
@@ -51,6 +52,7 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
    (`parseShortsUrl` in `src/lib/domain/muscles.ts`). Demo players start muted.
 12. **Workouts are logged on Today**, not a separate page. Plan sessions are ordinary workouts with
    `workout_type = 'plan'`; don't add a second storage path for sets.
+   Any exercise can be logged in any order; demo videos load only when the user taps Demo.
 
 ## Where things live
 - Domain logic (pure, tested): `src/lib/domain/*` — add tests in `tests/unit` for any change.

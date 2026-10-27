@@ -17,7 +17,6 @@ import {
   Skeleton,
   Switch,
   useToast,
-  cx,
 } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import {
@@ -29,15 +28,12 @@ import {
   useUpdateProfile,
   useUser,
   useAvatarUrl,
-  useGoals,
-  useSaveGoal,
 } from "@/lib/data/hooks";
 import { buildArchive, CSV_EXPORTS, download, exportCSV, exportExerciseHistoryCSV, restoreArchive, validateArchive } from "@/lib/data/export";
 import { BLOCK_KIND } from "@/lib/domain/attendance";
 import { ageOn, formatDate } from "@/lib/domain/dates";
 import { AvatarUploader } from "@/components/avatar";
 import { rgb, usePhotoPalette, type PhotoPalette } from "@/lib/photo/palette";
-import { BMI_LABEL, bmi, classify, healthyRange, suggestedTarget, type BmiClass } from "@/lib/domain/bmi";
 import { getSupabase } from "@/lib/supabase/client";
 import type { BlockKind, Profile, Reminders } from "@/lib/types";
 
@@ -560,122 +556,10 @@ function AboutYouSection({ d, palette }: { d: Core; palette: PhotoPalette | null
           </div>
         </div>
       </div>
-      <BmiSection heightCm={profile.height_cm} weightKg={latestWeight?.value ?? null} />
     </section>
   );
 }
 
-const BMI_TONE: Record<BmiClass, { text: string; pill: string }> = {
-  underweight: { text: "text-info", pill: "bg-info-soft text-info" },
-  normal: { text: "text-good", pill: "bg-good-soft text-good" },
-  overweight: { text: "text-warn", pill: "bg-warn-soft text-warn" },
-  obesity: { text: "text-accent", pill: "bg-accent-soft text-accent" },
-};
-
-/** BMI from height + latest weight, with a target weight you can nudge toward the healthy range. */
-function BmiSection({ heightCm, weightKg }: { heightCm: number | null; weightKg: number | null }) {
-  const toast = useToast();
-  const goals = useGoals();
-  const saveGoal = useSaveGoal();
-  const goal = (goals.data ?? []).find((g) => g.is_active && g.kind === "measurement" && g.metric === "Body weight");
-  const value = heightCm && weightKg ? bmi(weightKg, heightCm) : null;
-  const [target, setTarget] = useState<number | null>(null);
-  if (!heightCm || !weightKg || value === null) {
-    return (
-      <div className="mt-4 rounded-2xl border border-dashed border-line-strong bg-surface/80 p-5 text-sm text-muted backdrop-blur">
-        <p className="font-semibold text-ink">BMI</p>
-        Add your height and today&apos;s weight above to see your BMI and a healthy target weight.
-      </div>
-    );
-  }
-  const cls = classify(value);
-  const range = healthyRange(heightCm);
-  const t = target ?? (goal?.target_value != null ? Number(goal.target_value) : suggestedTarget(weightKg, heightCm));
-  const tBmi = bmi(t, heightCm)!;
-  const tCls = classify(tBmi);
-  const diff = Math.round((t - weightKg) * 10) / 10;
-  const pos = (b: number) => `${Math.min(Math.max(((b - 15) / (40 - 15)) * 100, 0), 100)}%`;
-  const step = (delta: number) => setTarget(Math.min(Math.max(Math.round((t + delta) * 2) / 2, 30), 250));
-  const saved = goal?.target_value != null && Number(goal.target_value) === t;
-
-  return (
-    <div className="mt-4 rounded-2xl border border-line bg-surface/90 p-5 shadow-card backdrop-blur">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Body-mass index</p>
-          <p className="mt-1 flex items-baseline gap-3">
-            <span className={cx("num font-display text-4xl font-semibold tracking-tight", BMI_TONE[cls].text)}>{value.toFixed(1)}</span>
-            <span className={cx("rounded-full px-3 py-1 text-sm font-bold", BMI_TONE[cls].pill)}>{BMI_LABEL[cls]}</span>
-          </p>
-          <p className="mt-1 text-xs text-muted">
-            {weightKg} kg at {heightCm} cm · healthy range for your height: <strong className="text-good">{range.min}–{range.max} kg</strong>
-          </p>
-        </div>
-      </div>
-
-      {/* Scale 15–40 with the healthy band */}
-      <div className="relative mt-5 mb-6">
-        <div className="flex h-2.5 overflow-hidden rounded-full">
-          <span className="bg-info/70" style={{ width: pos(18.5) }} />
-          <span className="bg-good" style={{ width: `calc(${pos(25)} - ${pos(18.5)})` }} />
-          <span className="bg-warn" style={{ width: `calc(${pos(30)} - ${pos(25)})` }} />
-          <span className="flex-1 bg-accent/80" />
-        </div>
-        <span className="absolute -top-1 size-4.5 -translate-x-1/2 rounded-full border-[3px] border-surface bg-ink shadow" style={{ left: pos(value) }} title={`You: ${value}`} />
-        <span className="absolute -top-1 size-4.5 -translate-x-1/2 rounded-full border-[3px] border-surface bg-good shadow ring-2 ring-good/40" style={{ left: pos(tBmi) }} title={`Target: ${tBmi}`} />
-        <div className="num relative mt-1.5 h-3 text-[10px] text-muted">
-          {[15, 18.5, 25, 30, 40].map((v, i, all) => (
-            <span key={v} className={cx("absolute", i === 0 ? "" : i === all.length - 1 ? "-translate-x-full" : "-translate-x-1/2")} style={{ left: pos(v) }}>
-              {v}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-surface-2 p-4">
-        <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Target weight</p>
-          <div className="mt-1 flex items-center gap-2">
-            <button type="button" onClick={() => step(-0.5)} className="grid size-10 place-items-center rounded-xl border border-line bg-surface text-lg font-semibold hover:bg-surface-3" aria-label="Decrease target by 0.5 kg">
-              −
-            </button>
-            <span className="num min-w-24 text-center font-display text-2xl font-semibold">{t.toFixed(1)} kg</span>
-            <button type="button" onClick={() => step(0.5)} className="grid size-10 place-items-center rounded-xl border border-line bg-surface text-lg font-semibold hover:bg-surface-3" aria-label="Increase target by 0.5 kg">
-              +
-            </button>
-          </div>
-          <p className="mt-1.5 text-xs text-muted">
-            BMI at target <strong className={BMI_TONE[tCls].text}>{tBmi.toFixed(1)} · {BMI_LABEL[tCls]}</strong>
-            {" · "}
-            {diff === 0 ? "that's where you are now" : `${Math.abs(diff)} kg to ${diff < 0 ? "lose" : "gain"}`}
-          </p>
-          {tCls !== "normal" && <p className="mt-1 text-xs text-warn">Outside the healthy range for your height ({range.min}–{range.max} kg).</p>}
-        </div>
-        <div className="flex flex-col gap-2 sm:items-end">
-          <Button
-            variant="primary"
-            disabled={saved}
-            loading={saveGoal.isPending}
-            onClick={async () => {
-              try {
-                await saveGoal.mutateAsync({ id: goal?.id, kind: "measurement", metric: "Body weight", title: `Reach ${t} kg`, target_value: t, is_active: true });
-                toast.success(`Target weight set to ${t} kg. Track it in Progress → Goals.`);
-              } catch (e) {
-                toast.error(e);
-              }
-            }}
-          >
-            {saved ? "Target saved" : goal ? "Update target" : "Save target"}
-          </Button>
-          <button type="button" className="text-xs text-muted underline-offset-2 hover:underline" onClick={() => setTarget(suggestedTarget(weightKg, heightCm))}>
-            Suggest a healthy target
-          </button>
-        </div>
-      </div>
-      <p className="mt-3 text-[11px] text-muted">BMI is a rough screen for adults and doesn&apos;t account for muscle mass — track waist and photos too.</p>
-    </div>
-  );
-}
 
 function TrainingSection({ profile }: { profile: Profile }) {
   const update = useUpdateProfile();

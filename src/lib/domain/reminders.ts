@@ -1,7 +1,6 @@
 import type { Membership, PackageSummary, Profile } from "../types";
 import { addDays, daysBetween, formatDate, formatShort, isoWeekday, relativeDay, type ISODate } from "./dates";
 import type { Forecast } from "./forecast";
-import { formatMoney } from "./money";
 
 export interface Reminder {
   id: string;
@@ -123,8 +122,8 @@ export function buildReminders(args: {
       id: "payments",
       kind: "pending_payments",
       tone: "info",
-      title: `${formatMoney(args.outstandingPaise)} of PT fees not recorded as paid`,
-      detail: "Record payments so your spending totals are accurate.",
+      title: "Some PT fees aren't recorded as paid",
+      detail: "Record payments in Membership so your spending totals are accurate.",
       href: pkg ? `/packages/${pkg.id}` : "/membership/training",
     });
   }

@@ -5,6 +5,20 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Changed — calmer Today, prices only on Membership
+- **Log in any order.** Today's workout lists every exercise; tap the one you're doing to log its
+  sets (or skip it). Logged rows show their sets ("35×12 · 35×11") and can be edited. No exercise
+  is forced first.
+- **Demos only on request.** No video loads on Today until you tap an exercise's Demo button; the
+  modal player starts muted.
+- **Removed from Today:** the "Recent workouts" card and the "Log workout" button.
+- **Prices only on Membership pages.** Removed amounts from the calendar month summary ("Missed PT
+  value"), History (Payments tab gone; change log no longer prints amounts), insights, reminders,
+  the day editor, quick log, review days and the workout editor.
+- **BMI moved to Today** (after "This week"), with a quick "Log weight" box. Removed from Settings.
+- **Default target weight** is now the middle of the healthy range, BMI 21.75 (e.g. 64.5 kg at 172 cm),
+  rounded to 0.5 kg; a saved target still wins, and "Reset to mid-healthy" restores the default.
+
 ### Added — log on Today, demos everywhere, BMI
 - **Today's workout** on the dashboard: the plan day from your active plan (custom) or the default,
   with every exercise listed and a muted YouTube Shorts demo. It asks "Did you complete <exercise>?"

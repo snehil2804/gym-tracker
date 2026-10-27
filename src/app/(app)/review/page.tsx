@@ -9,7 +9,6 @@ import { useCore, type Core } from "@/lib/data/derived";
 import { useSaveAttendanceBatch, type AttendanceInput } from "@/lib/data/hooks";
 import { classifyDay } from "@/lib/domain/attendance";
 import { formatShort, monthName } from "@/lib/domain/dates";
-import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { Attendance, GymStatus, PtStatus } from "@/lib/types";
 
 type Action = { key: string; label: string; short: string; gym: GymStatus | "keep"; pt: PtStatus; icon: typeof Check; tone: string };
@@ -82,8 +81,6 @@ function Review({ d }: { d: Core }) {
     );
   }
 
-  const pkg = d.current;
-  const rate = pkg ? sessionValue(1, pkg.price_paise, pkg.sessions_purchased) : 0;
   const allSelected = selected.size === days.length;
 
   return (
@@ -95,8 +92,7 @@ function Review({ d }: { d: Core }) {
 
       <Card className="mb-4 p-4 text-sm text-ink-2">
         <p>
-          <strong className="text-ink">How this affects your balance:</strong> “PT done” and “PT missed · charged” each use one session
-          {pkg ? ` (${formatMoney(rate)})` : ""}. Everything else leaves the balance untouched. You can change any day later from the calendar.
+          <strong className="text-ink">How this affects your balance:</strong> “PT done” and “PT missed · charged” each use one session. Everything else leaves the balance untouched. You can change any day later from the calendar.
         </p>
       </Card>
 

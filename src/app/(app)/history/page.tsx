@@ -8,11 +8,10 @@ import { useCore, type Core } from "@/lib/data/derived";
 import { useAudit } from "@/lib/data/hooks";
 import { ABSENCE_REASONS, classifyDay } from "@/lib/domain/attendance";
 import { formatDate, formatShort } from "@/lib/domain/dates";
-import { formatMoney } from "@/lib/domain/money";
 import { LEDGER_LABEL } from "@/lib/domain/packages";
 import type { AuditEntry } from "@/lib/types";
 
-type Tab = "attendance" | "sessions" | "payments" | "workouts" | "changes";
+type Tab = "attendance" | "sessions" | "workouts" | "changes";
 
 export default function HistoryPage() {
   const { data: d, loading, error } = useCore();
@@ -48,14 +47,16 @@ function describeAudit(a: AuditEntry): string {
     if (a.action === "insert") return `${label} ${Number(n.sessions) > 0 ? "+" : ""}${n.sessions}${n.session_date ? ` on ${formatShort(String(n.session_date))}` : ""}`;
     if (n.voided_at && !o.voided_at) return `${label} voided — ${n.void_reason}`;
   }
-  if (a.table_name === "pt_payments" && a.action === "insert") return `${n.kind === "refund" ? "Refund" : "Payment"} ${formatMoney(Number(n.amount_paise))} (${n.status})`;
-  if (a.table_name === "pt_packages" && a.action === "insert") return `Package created: ${formatMoney(Number(n.price_paise))} for ${n.sessions_purchased} sessions from ${formatDate(String(n.start_date))}`;
+  // Amounts are shown only on the Membership pages.
+  if (a.table_name === "pt_payments" && a.action === "insert") return `${n.kind === "refund" ? "Refund" : "Payment"} recorded (${n.status})`;
+  if (a.table_name === "pt_packages" && a.action === "insert") return `Package created: ${n.sessions_purchased} sessions from ${formatDate(String(n.start_date))}`;
   if (a.action === "insert") return "Created";
   if (a.action === "delete") return "Deleted";
   return (a.changed ?? [])
     .filter((c) => !HIDDEN_FIELDS.has(c))
     .map((c) => {
-      const fmt = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : c.endsWith("_paise") ? formatMoney(Number(v)) : typeof v === "object" ? JSON.stringify(v) : String(v));
+      if (c.endsWith("_paise")) return `${c.replace(/_paise$/, "").replace(/_/g, " ")} changed`;
+      const fmt = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v));
       return `${c.replace(/_/g, " ")}: ${fmt(o[c])} → ${fmt(n[c])}`;
     })
     .join("; ");
@@ -79,7 +80,6 @@ function History({ d }: { d: Core }) {
     [d.attendance, from, to, pkg, trainer, type],
   );
   const ledger = d.ledger.filter((l) => inRange(l.session_date ?? l.created_at.slice(0, 10)) && pkgOk(l.package_id) && (!type || l.kind === type));
-  const payments = d.payments.filter((p) => inRange(p.paid_on ?? p.due_on ?? p.created_at.slice(0, 10)) && pkgOk(p.package_id) && (!type || p.kind === type || p.status === type));
   const workouts = d.workouts.filter((w) => inRange(w.workout_date));
   const changes = (audit.data ?? []).filter((a) => inRange(a.created_at.slice(0, 10)) && (!type || a.table_name === type));
 
@@ -96,12 +96,6 @@ function History({ d }: { d: Core }) {
       ["rest", "Rest day"],
     ],
     sessions: Object.entries(LEDGER_LABEL),
-    payments: [
-      ["payment", "Payments"],
-      ["refund", "Refunds"],
-      ["pending", "Pending"],
-      ["paid", "Paid"],
-    ],
     workouts: [],
     changes: Object.entries(TABLE_LABEL),
   };
@@ -120,7 +114,6 @@ function History({ d }: { d: Core }) {
           options={[
             { value: "attendance", label: "Attendance" },
             ...(d.ptEnabled ? [{ value: "sessions" as const, label: "Sessions" }] : []),
-            { value: "payments", label: "Payments" },
             { value: "workouts", label: "Workouts" },
             { value: "changes", label: "Changes" },
           ]}
@@ -205,24 +198,6 @@ function History({ d }: { d: Core }) {
                 </div>
               );
             })
-          ) : (
-            <Empty />
-          ))}
-        {tab === "payments" &&
-          (payments.length ? (
-            payments.map((p) => (
-              <Link key={p.id} href={`/packages/${p.package_id}`} className="flex items-center justify-between px-5 py-3 text-sm hover:bg-surface-2/50">
-                <span>
-                  <span className="block font-medium">
-                    {p.kind === "refund" ? "Refund" : "Payment"} · {d.packages.find((x) => x.id === p.package_id)?.trainer_name}
-                  </span>
-                  <span className="text-xs text-muted">{p.paid_on ? formatDate(p.paid_on) : p.due_on ? `due ${formatDate(p.due_on)}` : "pending"}</span>
-                </span>
-                <span className="num flex items-center gap-2 font-semibold">
-                  {formatMoney(p.amount_paise)} <Badge tone={p.status === "paid" ? "good" : "warn"}>{p.status}</Badge>
-                </span>
-              </Link>
-            ))
           ) : (
             <Empty />
           ))}

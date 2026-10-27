@@ -9,15 +9,15 @@ import {
   Flame,
   Info,
   Lightbulb,
-  Plus,
   RefreshCw,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { DAY_STYLE, DayBadge, DayIcon } from "@/components/day-status";
 import { useQuickLog } from "@/components/quick-log";
-import { Button, Card, CardHeader, EmptyState, ErrorNote, LinkButton, Skeleton, Stat, cx } from "@/components/ui";
+import { Button, Card, CardHeader, ErrorNote, Skeleton, Stat, cx } from "@/components/ui";
 import { useGame } from "@/components/streak-game";
+import { BmiCard } from "@/components/bmi-card";
 import { TodayWorkout } from "@/components/planner/today-workout";
 import { useCore, type Core } from "@/lib/data/derived";
 import { classifyDay, PT_STATUS } from "@/lib/domain/attendance";
@@ -67,7 +67,7 @@ function Dashboard({ d }: { d: Core }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <WeekCard d={d} />
-        <RecentWorkouts d={d} />
+        <BmiCard heightCm={d.profile.height_cm} today={d.today} />
         <Card glow="warn" className="pb-2 lg:col-span-3">
           <CardHeader title="Insights" eyebrow="From your records" action={insights.length ? <EyeToggle id="dash-insights" /> : undefined} />
           {insights.length === 0 ? (
@@ -135,9 +135,6 @@ function TodayCard({ d }: { d: Core }) {
               <Button onClick={() => quick.open("menu", d.today)} icon={<RefreshCw className="size-4" />}>
                 Change
               </Button>
-              <LinkButton href="#today-workout" variant="primary" icon={<Plus className="size-4" />}>
-                Log workout
-              </LinkButton>
             </>
           ) : (
             <>
@@ -262,48 +259,6 @@ function WeekCard({ d }: { d: Core }) {
   );
 }
 
-function RecentWorkouts({ d }: { d: Core }) {
-  const recent = d.workouts.slice(0, 4);
-  return (
-    <Card glow="good" className="lg:col-span-2">
-      <CardHeader
-        eyebrow="Workouts"
-        title="Recent"
-        action={
-          <LinkButton href="#today-workout" size="sm" variant="ghost" icon={<Plus className="size-3.5" />}>
-            Log
-          </LinkButton>
-        }
-      />
-      {recent.length === 0 ? (
-        <EmptyState icon={<Dumbbell className="size-5" />} title="No workouts logged yet" action={<LinkButton href="#today-workout" variant="primary">Log today&apos;s workout</LinkButton>}>
-          Describe a session in a sentence or add exercises, sets and weights. Your charts build from what you log.
-        </EmptyState>
-      ) : (
-        <ul className="divide-y divide-line px-5 pb-2">
-          {recent.map((w) => (
-            <li key={w.id}>
-              <Link href={`/workouts/${w.id}`} className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 hover:bg-surface-2/60">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2 text-center leading-none">
-                  <span className="num text-[15px] font-semibold">{Number(w.workout_date.slice(8))}</span>
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-ink">{w.title || w.muscle_groups.join(", ") || "Workout"}</span>
-                  <span className="block truncate text-xs text-muted">
-                    {formatShort(w.workout_date)} · {w.exercises.length} {w.exercises.length === 1 ? "exercise" : "exercises"}
-                    {w.duration_min ? ` · ${w.duration_min} min` : ""}
-                    {w.with_trainer ? " · with trainer" : ""}
-                  </span>
-                </span>
-                <ChevronRight className="size-4 text-faint" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-  );
-}
 
 function DashboardSkeleton() {
   return (

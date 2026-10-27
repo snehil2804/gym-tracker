@@ -7,7 +7,6 @@ import { Badge, Button, Card, Chip, Choice, Field, Input, Select, Switch, Textar
 import type { Core } from "@/lib/data/derived";
 import { useExercises, useSaveAttendance, useSaveWorkout, useTrainers, type WorkoutPayload } from "@/lib/data/hooks";
 import { formatShort } from "@/lib/domain/dates";
-import { formatMoney, sessionValue } from "@/lib/domain/money";
 import { parseWorkoutText, type WorkoutDraft } from "@/lib/domain/parser";
 import type { Workout } from "@/lib/types";
 
@@ -89,7 +88,6 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
   const library = useMemo(() => (exercises.data ?? []).filter((e) => !e.is_archived), [exercises.data]);
   const existingAttendance = d.byDate.get(date);
   const pkg = d.activeOn(date);
-  const rate = pkg ? sessionValue(1, pkg.price_paise, pkg.sessions_purchased) : 0;
 
   function applyDraft() {
     const dr = parseWorkoutText(text, {
@@ -322,7 +320,7 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
                 selected={pt === "pt_done"}
                 onClick={() => setPt("pt_done")}
                 title="Gym + PT session completed"
-                description={pkg ? `Uses 1 of ${pkg.remaining} sessions (${formatMoney(rate)}).` : "No active package covers this date."}
+                description={pkg ? `Uses 1 of ${pkg.remaining} sessions.` : "No active package covers this date."}
                 tone="good"
               />
               )}

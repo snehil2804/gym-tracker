@@ -9,7 +9,6 @@ import { useCore } from "@/lib/data/derived";
 import { useDeleteAttendance, useSaveAttendance, type AttendanceInput } from "@/lib/data/hooks";
 import { ABSENCE_REASONS, classifyDay, isScheduledDay, selfCancelledLabel } from "@/lib/domain/attendance";
 import { addDays, formatShort, relativeDay } from "@/lib/domain/dates";
-import { formatMoney, sessionValue } from "@/lib/domain/money";
 import type { AbsenceReason, Attendance } from "@/lib/types";
 
 type Mode = "menu" | "went" | "missed" | "cancelled";
@@ -69,7 +68,6 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
   const existing = data.byDate.get(date);
   const pkg = data.activeOn(date);
   const scheduled = isScheduledDay(date, pkg?.schedule_days ?? data.scheduleDays);
-  const rate = pkg ? sessionValue(1, pkg.price_paise, pkg.sessions_purchased) : 0;
   const trainer = pkg?.trainer_name ?? "your trainer";
 
   async function commit(input: AttendanceInput, message: string) {
@@ -216,7 +214,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
             icon={<CalendarCheck className="size-5" />}
             tone="good"
             title="Yes — PT session done"
-            description={pkg ? `Uses 1 of ${pkg.remaining} remaining sessions (${formatMoney(rate)} of prepaid value).` : "No active package covers this date — add one first."}
+            description={pkg ? `Uses 1 of ${pkg.remaining} remaining sessions.` : "No active package covers this date — add one first."}
             onClick={() => commit({ date, gym_status: "attended", pt_status: "completed" }, `Gym + PT logged for ${formatShort(date)}.`)}
           />
           <Choice
@@ -289,7 +287,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
       {
         k: "both_charged",
         title: "Gym and PT session",
-        desc: pkg ? `Chargeable — uses 1 session (${formatMoney(rate)} of prepaid value).` : "Chargeable PT absence.",
+        desc: pkg ? "Chargeable — uses 1 session." : "Chargeable PT absence.",
         icon: <X className="size-5" />,
         tone: "accent",
       },
@@ -374,7 +372,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
           commit(
             { date, ...map[missKind], absence_reason: reason, notes: note || null, rescheduled_to: missKind === "rescheduled" ? newDate : null },
             missKind === "both_charged" || missKind === "pt_charged"
-              ? `Missed session recorded (${formatMoney(rate)} of prepaid value).`
+              ? "Missed session recorded — 1 session used."
               : `Absence saved for ${formatShort(date)}.`,
           )
         }
