@@ -58,6 +58,9 @@ Run `npm run check` before committing. If you change SQL, re-run the database su
 - Page files may only export Next's allowed members; put helpers in `src/lib` or `src/components`.
 
 ## Supabase specifics
+- Sign-in: Google OAuth is primary (`signInWithOAuth` in `src/app/login/login-form.tsx`, code exchange in
+  `src/app/auth/callback/route.ts`); email + password is the fallback. The Google client secret is
+  configured only in the Supabase dashboard.
 - Apply migrations with the Supabase MCP `apply_migration` or the CLI; keep the file in
   `supabase/migrations` byte-for-byte equivalent.
 - `private.app_config.owner_email` decides who gets the personal seed. Don't commit personal emails.

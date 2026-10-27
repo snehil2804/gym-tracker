@@ -33,6 +33,7 @@ Live: **https://gym-tracker-nine-roan.vercel.app** — data lives in Supabase (`
 | **Progress** | Weekly attendance and workouts, minutes, muscle groups, strength progression and PRs, body measurements, goals, private progress photos |
 | **Money** | Cash spent vs pending, prepaid value split (completed / missed / remaining / cancelled / refunded / credited), effective cost per session, missed value by month, definitions |
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
+| **Sign-in** | Continue with Google (primary), email + password, password reset |
 | **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
 
 ---
@@ -44,7 +45,7 @@ Browser (Next.js client components, React Query)
    │  publishable key + user session (JWT)
    ▼
 Supabase
-   ├─ Auth (email + password)
+   ├─ Auth (Google OAuth primary, email + password fallback)
    ├─ Postgres  ── RLS on every user table
    │     ├─ triggers: attendance → PT ledger (one entry per day, never twice)
    │     ├─ guards:   package price lock, balance never < 0, future/expired packages
@@ -170,6 +171,33 @@ Dates are stored as plain calendar dates. “Today” is computed in the profile
 (default Asia/Kolkata), so late-night logging never lands on the wrong day.
 
 ---
+
+## Sign-in with Google
+
+The login page shows **Continue with Google** first; email + password stays available underneath.
+The button switches itself on as soon as Google is enabled in Supabase (the page reads
+`/auth/v1/settings`), so no redeploy is needed.
+
+1. **Google Cloud Console** → <https://console.cloud.google.com/> → create/select a project.
+2. **Google Auth Platform → Branding / OAuth consent screen**: app name *Rep Ledger*, your support
+   email, audience **External**. While in *Testing*, add your Gmail under **Test users** (or publish
+   the app). Scopes: the defaults `openid`, `email`, `profile` are enough.
+3. **Clients → Create client → Web application**:
+   - Authorized JavaScript origins: `https://gym-tracker-nine-roan.vercel.app`, `http://localhost:3000`
+   - Authorized redirect URI: **`https://xipmgknkvhnfbujlavbh.supabase.co/auth/v1/callback`**
+   - Copy the **Client ID** and **Client secret**.
+4. **Supabase dashboard → Authentication → Sign In / Providers → Google**: enable it, paste the
+   Client ID and Client secret, save.
+5. **Supabase → Authentication → URL Configuration**: Site URL
+   `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
+   `https://gym-tracker-nine-roan.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`.
+6. Open the app → **Continue with Google** → pick `snehilrai678.sr@gmail.com`.
+
+Flow: browser → Google → `https://<ref>.supabase.co/auth/v1/callback` → `/auth/callback?code=…`
+(PKCE code exchange in `src/app/auth/callback/route.ts`) → dashboard. The owner seed matches on the
+Google account's email, so sign in with the same Gmail address as `owner_email`. If an email/password
+account with that address already exists, Supabase links the Google identity to it automatically.
+The client secret lives only in Supabase — never in this repo or in Vercel.
 
 ## Initial data
 

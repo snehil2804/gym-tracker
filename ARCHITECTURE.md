@@ -11,7 +11,7 @@
 └───────────────┬─────────────────────────────────────────────┘
                 │ supabase-js, publishable key + user JWT
 ┌───────────────▼────────────── Supabase ─────────────────────┐
-│ Auth (email + password)                                     │
+│ Auth (Google OAuth primary, email + password fallback)      │
 │ PostgREST → Postgres 17                                     │
 │   RLS on every user table (user_id = auth.uid())            │
 │   Triggers: attendance → pt_ledger, package guards, audit   │
@@ -38,6 +38,7 @@ signed-out requests to /login. Route handlers: /auth/callback, /auth/signout.
 | **Integer paise, round once** | `sessionValue(n) = round(n × price ÷ sessions)` per package, so allocations reconcile to the price. |
 | **Plain `date` columns + user time zone** | Calendar days never shift; "today" is computed with `Intl` in the profile's time zone. |
 | **Client-rendered app shell** | All data is per-user; rendering after mount avoids hydration mismatches with dates and cached data. `cacheComponents` is off. |
+| **Google OAuth via Supabase (PKCE)** | One-tap sign-in; the client secret stays in Supabase; `/auth/callback` exchanges the code server-side and sets the session cookie. |
 | **Owner-only seed in the DB** | `initialize_account()` compares the caller's email to `private.app_config.owner_email`; repeat calls are no-ops (`profiles.seeded_at` + row lock + natural keys). |
 | **Rule-based NL parser in the browser** | Works offline, no API keys, deterministic, and never confirms a paid PT session by itself. |
 

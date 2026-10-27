@@ -6,7 +6,7 @@ function safeNext(next: string | null) {
   return next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
 }
 
-/** Completes email confirmation, magic links and password-reset links. */
+/** Completes Google sign-in (OAuth PKCE), email confirmation and password-reset links. */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const next = safeNext(searchParams.get("next"));
@@ -16,7 +16,10 @@ export async function GET(request: NextRequest) {
   const supabase = await getServerSupabase();
 
   let error: string | null = null;
-  if (code) {
+  const providerError = searchParams.get("error_description") ?? searchParams.get("error");
+  if (providerError) {
+    error = providerError;
+  } else if (code) {
     const res = await supabase.auth.exchangeCodeForSession(code);
     error = res.error?.message ?? null;
   } else if (tokenHash && type) {

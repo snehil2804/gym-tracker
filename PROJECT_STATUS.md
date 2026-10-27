@@ -25,6 +25,7 @@ by its owner**.
 | Session ledger & financial integrity | ✅ Done, tested | 72 database checks pass against the live DB |
 | Domain logic (money, dates, rules, forecast, parser) | ✅ Done, tested | 36 unit tests pass |
 | Auth (email + password, reset, sign-out, protected routes) | ✅ Done | Verified locally; production sign-in not yet done by owner |
+| Google sign-in (primary) | ⚠️ Code deployed, provider not enabled | Needs a Google OAuth client + enabling Google in Supabase (SETUP.md §3b). Disabled-state and error handling verified locally; the full Google round trip is untested until enabled |
 | Initial seed (owner only, idempotent) | ✅ Done, tested | Verified end-to-end locally with a test owner account |
 | UI: all 8 sections + review queue | ✅ Done | Verified in the browser on desktop and 375 px mobile |
 | Export / restore | ✅ Done | Restore tested in SQL (idempotent, isolation-safe) |
@@ -88,7 +89,8 @@ to the owner's address. The owner's records are created on their first sign-in.
 
 1. Supabase → Authentication → URL Configuration: Site URL `https://gym-tracker-nine-roan.vercel.app`;
    add `https://gym-tracker-nine-roan.vercel.app/auth/callback` (and `http://localhost:3000/auth/callback`) to Redirect URLs.
-2. Sign up on the production site with `snehilrai678.sr@gmail.com`, confirm the email, sign in.
+2. Create a Google OAuth client and enable Google in Supabase (`SETUP.md` §3b), then sign in with
+   **Continue with Google** using `snehilrai678.sr@gmail.com` (email sign-up also works).
 3. Settings → Gym membership: enter the **confirmed** contract end date; set payment status/price.
 4. PT Packages → Soham → Record payment for the ₹6,000 package (if paid).
 5. Review days: confirm the PT outcome of the nine seeded weekday absences and the other past

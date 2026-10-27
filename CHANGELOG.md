@@ -6,6 +6,9 @@ dates are when the change landed.
 ## [Unreleased]
 
 ### Added
+- **Continue with Google** as the primary sign-in method (Supabase OAuth, PKCE). Email + password moves
+  below it as a fallback. The button enables itself when Google is turned on in Supabase; OAuth errors
+  returned to `/auth/callback` are shown on the login page in plain language.
 - Project documentation: `PROJECT_STATUS.md`, `CHANGELOG.md`, `CLAUDE.md`, `ARCHITECTURE.md`,
   `ROADMAP.md`, `SETUP.md`, `UI_GUIDELINES.md`; expanded `AGENTS.md` and `README.md`.
 

@@ -49,6 +49,33 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
 5. **Optional:** custom SMTP (Authentication → Emails) if confirmation emails don't arrive.
 6. **Check:** Advisors → Security should show only the 5 intended "security definer executable" warnings.
 
+## 3b. Google sign-in (primary method)
+
+The login page shows **Continue with Google** first; email + password stays available underneath.
+The button switches itself on as soon as Google is enabled in Supabase (the page reads
+`/auth/v1/settings`), so no redeploy is needed.
+
+1. **Google Cloud Console** → <https://console.cloud.google.com/> → create/select a project.
+2. **Google Auth Platform → Branding / OAuth consent screen**: app name *Rep Ledger*, your support
+   email, audience **External**. While in *Testing*, add your Gmail under **Test users** (or publish
+   the app). Scopes: the defaults `openid`, `email`, `profile` are enough.
+3. **Clients → Create client → Web application**:
+   - Authorized JavaScript origins: `https://gym-tracker-nine-roan.vercel.app`, `http://localhost:3000`
+   - Authorized redirect URI: **`https://xipmgknkvhnfbujlavbh.supabase.co/auth/v1/callback`**
+   - Copy the **Client ID** and **Client secret**.
+4. **Supabase dashboard → Authentication → Sign In / Providers → Google**: enable it, paste the
+   Client ID and Client secret, save.
+5. **Supabase → Authentication → URL Configuration**: Site URL
+   `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
+   `https://gym-tracker-nine-roan.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`.
+6. Open the app → **Continue with Google** → pick `snehilrai678.sr@gmail.com`.
+
+Flow: browser → Google → `https://<ref>.supabase.co/auth/v1/callback` → `/auth/callback?code=…`
+(PKCE code exchange in `src/app/auth/callback/route.ts`) → dashboard. The owner seed matches on the
+Google account's email, so sign in with the same Gmail address as `owner_email`. If an email/password
+account with that address already exists, Supabase links the Google identity to it automatically.
+The client secret lives only in Supabase — never in this repo or in Vercel.
+
 ## 4. Verify the backend
 
 ```bash
@@ -81,7 +108,7 @@ Or connect `snehil2804/gym-tracker` under Vercel → Project → Settings → Gi
 4. Deploy, then update Supabase Site URL / Redirect URLs to the new domain.
 
 ## 6. First sign-in
-1. Open the production URL → Sign up with the owner email → confirm via email → sign in.
+1. Open the production URL → **Continue with Google** with the owner Gmail (or sign up with email and confirm it).
 2. The app calls `initialize_account()` once: exercise library, templates and (owner only) the
    membership, Soham's package and the 10 confirmed absences appear.
 3. Follow the "Owner's next steps" in `PROJECT_STATUS.md`.
