@@ -699,3 +699,6 @@ export function useDeleteAccount() {
     },
   });
 }
+
+/** Matches the 40 MB file_size_limit on the avatars and progress-photos buckets. */
+export const MAX_PHOTO_BYTES = 40 * 1024 * 1024;

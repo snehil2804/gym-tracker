@@ -5,6 +5,11 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Changed
+- Photo uploads (profile and progress) now accept up to **40 MB** each (was 5 MB / 10 MB).
+  Migration `20261027000009_photo_limit_40mb`. Free-plan Supabase allows 50 MB per file and 1 GB total storage.
+
+
 ### Added — account deletion (27 Oct 2026)
 - **Settings → Delete account**: type DELETE to confirm; the app removes the user's photos and avatar from
   Storage, then `public.delete_my_account()` logs a minimal entry and deletes the auth user — every

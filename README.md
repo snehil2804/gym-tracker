@@ -252,7 +252,7 @@ The app never uses the `service_role` key.
 
 1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
 2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
-   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`, `20261027000006_onboarding_profile.sql`, `20261027000007_account_deletion.sql`, `20261027000008_ledger_trigger_account_delete.sql`.
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`, `20261027000005_client_cancelled.sql`, `20261027000006_onboarding_profile.sql`, `20261027000007_account_deletion.sql`, `20261027000008_ledger_trigger_account_delete.sql`, `20261027000009_photo_limit_40mb.sql`.
 3. Set the owner email (who receives the personal seed):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
@@ -344,3 +344,5 @@ disaster recovery of the whole database, use Supabase's own backups (daily on pa
 - Natural-language logging is rule-based: it recognises common exercises, sets/reps/kg, durations
   and dates, and asks you to choose when it is unsure.
 - Supabase's built-in email sender is rate-limited; configure custom SMTP for heavier use.
+- Photos can be up to 40 MB each, but the Supabase free plan has **1 GB of file storage in total**
+  (roughly 25 full-size 40 MB photos; far more for typical 3–6 MB phone photos).

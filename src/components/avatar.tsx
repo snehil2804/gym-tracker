@@ -3,7 +3,7 @@
 import { Camera, Loader2, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import { cx, useToast } from "@/components/ui";
-import { useAvatarUrl, useProfile, useUploadAvatar, useUser } from "@/lib/data/hooks";
+import { MAX_PHOTO_BYTES, useAvatarUrl, useProfile, useUploadAvatar, useUser } from "@/lib/data/hooks";
 
 export function initials(name: string | null | undefined, email?: string | null) {
   const src = (name ?? "").trim() || (email ?? "").split("@")[0];
@@ -41,7 +41,7 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
   async function onFile(f: File | undefined) {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("Choose an image file.");
-    if (f.size > 5 * 1024 * 1024) return toast.error("Photos must be under 5 MB.");
+    if (f.size > MAX_PHOTO_BYTES) return toast.error("Photos must be under 40 MB.");
     try {
       await upload.mutateAsync(f);
       toast.success("Profile photo updated.");

@@ -41,6 +41,7 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
    6. `supabase/migrations/20261027000006_onboarding_profile.sql`
    7. `supabase/migrations/20261027000007_account_deletion.sql`
    8. `supabase/migrations/20261027000008_ledger_trigger_account_delete.sql`
+   9. `supabase/migrations/20261027000009_photo_limit_40mb.sql`
 3. **Set the owner email** (only this account gets the initial personal records):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')

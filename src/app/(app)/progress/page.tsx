@@ -25,6 +25,7 @@ import {
 } from "@/components/ui";
 import { useCore, type Core } from "@/lib/data/derived";
 import {
+  MAX_PHOTO_BYTES,
   useDeleteGoal,
   useDeleteMeasurement,
   useDeletePhoto,
@@ -549,7 +550,7 @@ function Photos({ d }: { d: Core }) {
               const f = e.target.files?.[0];
               e.target.value = "";
               if (!f) return;
-              if (f.size > 10 * 1024 * 1024) return toast.error("Photos must be under 10 MB.");
+              if (f.size > MAX_PHOTO_BYTES) return toast.error("Photos must be under 40 MB.");
               try {
                 await upload.mutateAsync({ file: f, takenOn: on });
                 toast.success("Photo saved privately.");
@@ -568,7 +569,7 @@ function Photos({ d }: { d: Core }) {
           )}
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-muted">
-          <Lock className="size-3.5" /> Stored in a private bucket only your account can read. Images load through links that expire after 10 minutes. Optional.
+          <Lock className="size-3.5" /> Up to 40 MB each. Stored in a private bucket only your account can read. Images load through links that expire after 10 minutes. Optional.
         </p>
       </Card>
       {(photos.data ?? []).length === 0 ? (
