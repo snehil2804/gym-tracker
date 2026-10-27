@@ -5,8 +5,8 @@ rules in `ARCHITECTURE.md` (database-enforced, ledger-derived, integer paise) an
 `tests/unit` and `supabase/tests/integration.sql`.
 
 ## Now — finish going live
-- [ ] Set Supabase Auth Site URL / Redirect URLs to the Vercel domain.
-- [ ] Owner signs up on production; confirm the seed appears exactly once.
+- [x] Set Supabase Auth Site URL / Redirect URLs to the Vercel domain.
+- [x] Owner signs up on production (Google); seed verified exactly once.
 - [ ] Confirm membership end date and record PT / gym payments.
 - [ ] Work through the review queue (29 Sep → today).
 - [x] Connect `snehil2804/gym-tracker` to the Vercel project for auto-deploys on push.
