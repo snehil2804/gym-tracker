@@ -42,10 +42,12 @@
   --chart-loss: #d9481f;
   --chart-ink: #4a463d;
   --chart-grid: #ebe7de;
+  --photo-glow: 0.62;
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --photo-glow: 0.4;
   :root:not([data-theme="light"]) {
     --bg: #11100d;
     --surface: #1a1915;
@@ -86,6 +88,7 @@
 }
 
 :root[data-theme="dark"] {
+  --photo-glow: 0.4;
   --bg: #11100d;
   --surface: #1a1915;
   --surface-2: #23211c;

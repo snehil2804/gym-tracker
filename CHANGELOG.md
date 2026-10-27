@@ -14,8 +14,10 @@ dates are when the change landed.
 - Horizontal tab/chip strips scroll without a visible scrollbar.
 
 ### Changed
-- Settings opens with a larger centred profile photo (144 px), name, email and Age / Height / Weight
-  chips, over a soft brand gradient that spans the top of the page and fades into the background.
+- Settings opens with a large centred profile photo (196 px), name, email and Age / Height / Weight
+  chips. The photo sits in an evenly spaced, concentric ring coloured from the photo itself, and the
+  whole Settings window carries a blurred wash of the photo's colours (`src/lib/photo/palette.ts`),
+  falling back to the brand gradient when there is no photo.
 - Placeholders no longer use real names ("Trainer's name", "Your gym's name", generic examples).
 - Every screen checked automatically for horizontal overflow at 375 px (iPhone 12 mini width).
 

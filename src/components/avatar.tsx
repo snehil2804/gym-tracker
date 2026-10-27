@@ -4,6 +4,7 @@ import { Camera, Loader2, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { PhotoEditor } from "@/components/photo-editor";
 import { cx, useToast } from "@/components/ui";
+import { rgb, type PhotoPalette } from "@/lib/photo/palette";
 import { MAX_PHOTO_BYTES, useAvatarUrl, useProfile, useUploadAvatar, useUser } from "@/lib/data/hooks";
 
 export function initials(name: string | null | undefined, email?: string | null) {
@@ -33,7 +34,16 @@ export function Avatar({ size = 40, className }: { size?: number; className?: st
 }
 
 /** Large interactive avatar: tap to upload, with a remove button once a photo is set. */
-export function AvatarUploader({ size = 112 }: { size?: number }) {
+export function AvatarUploader({ size = 112, palette }: { size?: number; palette?: PhotoPalette | null }) {
+  const ring = size >= 160 ? 5 : 4;
+  const gap = size >= 160 ? 5 : 4;
+  const outer = size + 2 * (ring + gap);
+  const badge = size >= 160 ? 44 : 36;
+  // Badge centred on the ring at the 4:30 position.
+  const badgeAt = outer / 2 + (outer / 2) * Math.SQRT1_2 - badge / 2 - ring / 2;
+  const ringA = palette ? rgb(palette.left) : "var(--accent)";
+  const ringB = palette ? rgb(palette.right) : "var(--good)";
+  const ringV = palette ? rgb(palette.vivid) : "var(--info)";
   const fileRef = useRef<HTMLInputElement>(null);
   const upload = useUploadAvatar();
   const toast = useToast();
@@ -63,17 +73,35 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="group relative rounded-full outline-offset-4 transition-transform hover:scale-[1.03] active:scale-95"
+        className="group relative shrink-0 rounded-full outline-offset-4 transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98]"
+        style={{ width: outer, height: outer }}
         aria-label="Change profile photo"
       >
-        <span className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-accent/70 via-accent/10 to-good/60 opacity-70 blur-[1px] transition-opacity group-hover:opacity-100" aria-hidden />
-        <span className="relative block rounded-full bg-surface p-1">
-          <Avatar size={size} />
+        {/* Soft glow in the photo's own colours. */}
+        <span
+          aria-hidden
+          className="absolute inset-[6%] rounded-full opacity-70 blur-2xl transition-opacity group-hover:opacity-90"
+          style={{ background: `linear-gradient(135deg, ${ringA}, ${ringB})` }}
+        />
+        {/* Even ring: gradient band, then a clean gap, then the photo — all concentric. */}
+        <span
+          className="absolute inset-0 rounded-full"
+          style={{ padding: ring, background: `conic-gradient(from 210deg, ${ringA}, ${ringV}, ${ringB}, ${ringA})` }}
+        >
+          <span className="block size-full rounded-full bg-surface" style={{ padding: gap }}>
+            <Avatar size={size} />
+          </span>
         </span>
-        <span className="absolute inset-1 grid place-items-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-          {upload.isPending ? <Loader2 className="size-6 animate-spin" /> : <Camera className="size-6" />}
+        <span
+          className="absolute grid place-items-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          style={{ inset: ring + gap }}
+        >
+          {upload.isPending ? <Loader2 className="size-7 animate-spin" /> : <Camera className="size-7" />}
         </span>
-        <span className="absolute right-1 bottom-1 grid size-9 place-items-center rounded-full border-2 border-surface bg-primary text-primary-ink shadow-pop">
+        <span
+          className="absolute grid place-items-center rounded-full border-[3px] border-surface bg-primary text-primary-ink shadow-pop"
+          style={{ width: badge, height: badge, left: badgeAt, top: badgeAt }}
+        >
           {upload.isPending ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
         </span>
       </button>
@@ -84,7 +112,7 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
       {editing && (
         <PhotoEditor file={editing} round title="Profile photo" maxSide={1024} busy={upload.isPending} onCancel={() => setEditing(null)} onDone={save} />
       )}
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex items-center gap-4 text-[13px]">
         <button type="button" className="font-medium text-ink underline-offset-2 hover:underline" onClick={() => fileRef.current?.click()}>
           {profile?.avatar_path ? "Change photo" : "Upload photo"}
         </button>
@@ -94,7 +122,7 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
             className="inline-flex items-center gap-1 text-muted hover:text-accent"
             onClick={() => upload.mutateAsync(null).then(() => toast.success("Photo removed.")).catch(toast.error)}
           >
-            <Trash2 className="size-3" /> Remove
+            <Trash2 className="size-3.5" /> Remove
           </button>
         )}
       </div>

@@ -32,11 +32,13 @@ import {
   useTrainers,
   useUpdateProfile,
   useUser,
+  useAvatarUrl,
 } from "@/lib/data/hooks";
 import { buildArchive, CSV_EXPORTS, download, exportCSV, exportExerciseHistoryCSV, restoreArchive, validateArchive } from "@/lib/data/export";
 import { BLOCK_KIND } from "@/lib/domain/attendance";
 import { addDays, addMonths, ageOn, daysBetween, formatDate } from "@/lib/domain/dates";
 import { AvatarUploader } from "@/components/avatar";
+import { rgb, usePhotoPalette, type PhotoPalette } from "@/lib/photo/palette";
 import { formatMoney, paiseToInput, parseMoneyToPaise } from "@/lib/domain/money";
 import { getSupabase } from "@/lib/supabase/client";
 import type { BlockKind, Membership, Profile, Reminders } from "@/lib/types";
@@ -45,6 +47,8 @@ const TIMEZONES = ["Asia/Kolkata", "Asia/Dubai", "Asia/Singapore", "Europe/Londo
 
 export default function SettingsPage() {
   const { data: d, loading, error } = useCore();
+  const avatarUrl = useAvatarUrl();
+  const palette = usePhotoPalette(avatarUrl);
   useEffect(() => {
     if (!d || !window.location.hash) return;
     // Wait for the sections to render, then jump to the linked one (e.g. #membership).
@@ -56,19 +60,9 @@ export default function SettingsPage() {
   if (loading || !d) return <Skeleton className="h-96" />;
   return (
     <div className="relative">
-      {/* Soft brand gradient behind the top of the page; fades into the background. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-4 -top-5 h-[520px] sm:-inset-x-6 md:-top-8 lg:-right-10 lg:-left-10"
-        style={{
-          background:
-            "radial-gradient(65% 75% at 8% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 70%), radial-gradient(60% 70% at 95% 5%, color-mix(in oklab, var(--good) 22%, transparent), transparent 70%), radial-gradient(45% 55% at 50% 28%, color-mix(in oklab, var(--info) 12%, transparent), transparent 75%)",
-          maskImage: "linear-gradient(to bottom, black 45%, transparent)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent)",
-        }}
-      />
-      <div className="anim-rise relative mx-auto max-w-3xl space-y-6">
-      <AboutYouSection d={d} />
+      <PhotoBackdrop url={avatarUrl} palette={palette} />
+      <div className="anim-rise relative z-10 mx-auto max-w-3xl space-y-6">
+      <AboutYouSection d={d} palette={palette} />
       <TrainingSection profile={d.profile} />
       <ProfileSection profile={d.profile} />
       <MembershipSection d={d} />
@@ -668,7 +662,7 @@ function AccountSection() {
   );
 }
 
-function AboutYouSection({ d }: { d: Core }) {
+function AboutYouSection({ d, palette }: { d: Core; palette: PhotoPalette | null }) {
   const toast = useToast();
   const update = useUpdateProfile();
   const saveWeight = useSaveMeasurement();
@@ -686,9 +680,9 @@ function AboutYouSection({ d }: { d: Core }) {
 
   return (
     <section id="profile" className="scroll-mt-20">
-      <div className="flex flex-col items-center pt-2 pb-6 text-center sm:pt-4">
-        <AvatarUploader size={144} />
-        <h1 className="mt-4 font-display text-[28px] leading-tight font-semibold tracking-tight sm:text-[32px]">{profile.display_name || "Your name"}</h1>
+      <div className="flex flex-col items-center pt-4 pb-8 text-center sm:pt-8">
+        <AvatarUploader size={196} palette={palette} />
+        <h1 className="mt-5 font-display text-[30px] leading-tight font-semibold tracking-tight sm:text-[36px]">{profile.display_name || "Your name"}</h1>
         <p className="mt-1 max-w-full truncate text-sm text-muted">{user?.email}</p>
         {(age !== null || profile.height_cm || latestWeight) && (
           <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -856,6 +850,48 @@ function DangerZone({ d }: { d: Core }) {
         </div>
       </Sheet>
     </section>
+  );
+}
+
+/**
+ * Window-wide backdrop made from the profile photo itself: a heavily blurred copy at the top, plus
+ * soft washes of the photo's colours lower down, so the whole page carries its tone while scrolling.
+ */
+function PhotoBackdrop({ url, palette }: { url: string | null; palette: PhotoPalette | null }) {
+  const a = palette ? rgb(palette.left, 0.16) : "color-mix(in oklab, var(--accent) 16%, transparent)";
+  const b = palette ? rgb(palette.right, 0.14) : "color-mix(in oklab, var(--good) 14%, transparent)";
+  const v = palette ? rgb(palette.vivid, 0.1) : "color-mix(in oklab, var(--info) 10%, transparent)";
+  const fade = "linear-gradient(to bottom, black 0%, black 35%, transparent 100%)";
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden md:left-60">
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt=""
+          referrerPolicy="no-referrer"
+          className="absolute inset-x-0 top-0 h-[75vh] min-h-[480px] w-full scale-125 object-cover"
+          style={{ filter: "blur(72px) saturate(1.6)", opacity: "var(--photo-glow)", maskImage: fade, WebkitMaskImage: fade }}
+        />
+      ) : (
+        <div
+          className="absolute inset-x-0 top-0 h-[70vh] min-h-[460px]"
+          style={{
+            background:
+              "radial-gradient(65% 75% at 10% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 70%), radial-gradient(60% 70% at 92% 5%, color-mix(in oklab, var(--good) 22%, transparent), transparent 70%)",
+            maskImage: fade,
+            WebkitMaskImage: fade,
+          }}
+        />
+      )}
+      {/* Gentle washes that carry the photo's colours down the page. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(70% 28% at 0% 32%, ${a}, transparent 70%), radial-gradient(70% 26% at 100% 55%, ${b}, transparent 70%), radial-gradient(80% 24% at 20% 85%, ${v}, transparent 70%)`,
+        }}
+      />
+    </div>
   );
 }
 
