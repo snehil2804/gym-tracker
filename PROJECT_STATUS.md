@@ -31,7 +31,7 @@ by its owner**.
 | Export / restore | ✅ Done | Restore tested in SQL (idempotent, isolation-safe) |
 | Production deployment | ✅ Ready | Build READY; routes, headers and anonymous access checked |
 | Supabase Auth URL configuration | ⚠️ Manual step pending | Site URL / redirect URLs must point at the Vercel domain |
-| Auto-deploy on git push | ⚠️ Not connected | Deployed via the Vercel API from `main`; connect the repo in Vercel settings |
+| Auto-deploy on git push | ✅ Connected | Every push to `main` deploys to production |
 | Email / push notifications | ❌ Not built | Reminders are in-app only |
 
 ---
@@ -96,7 +96,6 @@ to the owner's address. The owner's records are created on their first sign-in.
 5. Review days: confirm the PT outcome of the nine seeded weekday absences and the other past
    training days since 29 Sep.
 6. Optional: set `NEXT_PUBLIC_ALLOW_SIGNUP=false` in Vercel and redeploy to hide sign-up.
-7. Optional: connect the GitHub repo in Vercel for auto-deploys.
 
 ---
 

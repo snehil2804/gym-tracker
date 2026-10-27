@@ -9,7 +9,7 @@ rules in `ARCHITECTURE.md` (database-enforced, ledger-derived, integer paise) an
 - [ ] Owner signs up on production; confirm the seed appears exactly once.
 - [ ] Confirm membership end date and record PT / gym payments.
 - [ ] Work through the review queue (29 Sep → today).
-- [ ] Connect `snehil2804/gym-tracker` to the Vercel project for auto-deploys on push.
+- [x] Connect `snehil2804/gym-tracker` to the Vercel project for auto-deploys on push.
 - [ ] Decide whether to close sign-ups (`NEXT_PUBLIC_ALLOW_SIGNUP=false`).
 
 ## Next — reliability & verification

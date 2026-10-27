@@ -285,8 +285,8 @@ npx vercel link --project gym-tracker --yes
 npx vercel deploy --prod
 ```
 
-To deploy on every push instead, connect a Git repository to the project in the Vercel dashboard
-(Project → Settings → Git).
+The project is connected to `snehil2804/gym-tracker`: every push to `main` deploys to production
+(https://gymrepledger.vercel.app).
 
 After the first deploy, update Supabase *Site URL* / *Redirect URLs* (setup step 4) to the Vercel domain.
 
