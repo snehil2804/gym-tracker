@@ -188,9 +188,10 @@ The button switches itself on as soon as Google is enabled in Supabase (the page
    - Copy the **Client ID** and **Client secret**.
 4. **Supabase dashboard → Authentication → Sign In / Providers → Google**: enable it, paste the
    Client ID and Client secret, save.
-5. **Supabase → Authentication → URL Configuration**: Site URL
-   `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
-   `https://gym-tracker-nine-roan.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`.
+5. **Supabase → Authentication → URL Configuration** (required — otherwise Supabase sends you back to
+   `http://localhost:3000` after Google): Site URL `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
+   `https://gym-tracker-nine-roan.vercel.app/**` and `http://localhost:3000/**` (the wildcard is needed
+   because the callback carries a `?next=` parameter).
 6. Open the app → **Continue with Google** → pick `snehilrai678.sr@gmail.com`.
 
 Flow: browser → Google → `https://<ref>.supabase.co/auth/v1/callback` → `/auth/callback?code=…`
@@ -248,7 +249,7 @@ The app never uses the `service_role` key.
    on conflict (key) do update set value = excluded.value;
    ```
 4. **Authentication → URL configuration:** set *Site URL* to your deployed URL and add
-   `https://<your-domain>/auth/callback` (and `http://localhost:3000/auth/callback`) to *Redirect URLs*.
+   `https://<your-domain>/**` (and `http://localhost:3000/**`) to *Redirect URLs*.
    Email + password is enabled by default; keep “Confirm email” on.
 
 ### Tests and checks
@@ -318,7 +319,7 @@ disaster recovery of the whole database, use Supabase's own backups (daily on pa
 
 | Problem | Fix |
 |---|---|
-| Confirmation email link opens `localhost` | Set Supabase *Site URL* and *Redirect URLs* to the deployed domain (setup step 4). Your email is still confirmed — sign in on the deployed site. |
+| After Google (or an email link) you land on `localhost:3000/?code=…` | Set Supabase *Site URL* and *Redirect URLs* to the deployed domain (setup step 4). Your email is still confirmed — sign in on the deployed site. |
 | “No active PT package covers …” | Add or renew a package whose start date is on/before that day, or allow expiry extension. |
 | “Price and session count are locked” | Sessions are recorded; use a credit, refund or adjustment instead. |
 | “This change would leave the package with -1 sessions” | The package is used up — renew or record a credit. |

@@ -5,6 +5,10 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Fixed
+- An OAuth `?code=` that lands on any page (Supabase's Site-URL fallback) is forwarded to
+  `/auth/callback`, so sign-in completes instead of stalling; expired/cross-site codes show a plain message.
+
 ### Added
 - **Continue with Google** as the primary sign-in method (Supabase OAuth, PKCE). Email + password moves
   below it as a fallback. The button enables itself when Google is turned on in Supabase; OAuth errors

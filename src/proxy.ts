@@ -11,6 +11,20 @@ const PUBLIC_PATHS = ["/login", "/auth"];
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const path = request.nextUrl.pathname;
+
+  // Supabase falls back to the Site URL root (/?code=…) when the requested redirect isn't on its
+  // allow-list. Hand such codes to the callback so the sign-in still completes.
+  const strayCode = request.nextUrl.searchParams.get("code");
+  if (strayCode && !path.startsWith("/auth/")) {
+    const cb = request.nextUrl.clone();
+    cb.pathname = "/auth/callback";
+    cb.search = "";
+    cb.searchParams.set("code", strayCode);
+    cb.searchParams.set("next", path === "/login" ? "/" : path);
+    return NextResponse.redirect(cb);
+  }
+
   let response = NextResponse.next({ request });
   if (!url || !key) return response;
 
@@ -28,7 +42,6 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims?.sub);
-  const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
   if (!signedIn && !isPublic) {

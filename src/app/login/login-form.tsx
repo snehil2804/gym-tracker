@@ -25,6 +25,8 @@ function readableAuthError(raw: string): string {
   if (/Invalid login credentials/i.test(raw)) return "That email and password don't match.";
   if (/Email not confirmed/i.test(raw)) return "Confirm your email first — check your inbox for the link.";
   if (/access_denied|cancel/i.test(raw)) return "Google sign-in was cancelled.";
+  if (/code verifier|flow state|invalid.*code|expired/i.test(raw))
+    return "That sign-in link expired or was opened on a different site or browser. Tap Continue with Google again.";
   return raw;
 }
 

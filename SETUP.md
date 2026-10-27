@@ -44,7 +44,7 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
    ```
 4. **Authentication → URL Configuration**
    - Site URL: your production URL (e.g. `https://gym-tracker-nine-roan.vercel.app`)
-   - Redirect URLs: `https://<prod-domain>/auth/callback`, `http://localhost:3000/auth/callback`
+   - Redirect URLs: `https://<prod-domain>/**`, `http://localhost:3000/**`
    - Keep Email provider enabled with "Confirm email" on.
 5. **Optional:** custom SMTP (Authentication → Emails) if confirmation emails don't arrive.
 6. **Check:** Advisors → Security should show only the 5 intended "security definer executable" warnings.
@@ -65,9 +65,10 @@ The button switches itself on as soon as Google is enabled in Supabase (the page
    - Copy the **Client ID** and **Client secret**.
 4. **Supabase dashboard → Authentication → Sign In / Providers → Google**: enable it, paste the
    Client ID and Client secret, save.
-5. **Supabase → Authentication → URL Configuration**: Site URL
-   `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
-   `https://gym-tracker-nine-roan.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`.
+5. **Supabase → Authentication → URL Configuration** (required — otherwise Supabase sends you back to
+   `http://localhost:3000` after Google): Site URL `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
+   `https://gym-tracker-nine-roan.vercel.app/**` and `http://localhost:3000/**` (the wildcard is needed
+   because the callback carries a `?next=` parameter).
 6. Open the app → **Continue with Google** → pick `snehilrai678.sr@gmail.com`.
 
 Flow: browser → Google → `https://<ref>.supabase.co/auth/v1/callback` → `/auth/callback?code=…`
