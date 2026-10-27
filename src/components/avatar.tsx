@@ -1,7 +1,8 @@
 "use client";
 
 import { Camera, Loader2, Trash2 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { PhotoEditor } from "@/components/photo-editor";
 import { cx, useToast } from "@/components/ui";
 import { MAX_PHOTO_BYTES, useAvatarUrl, useProfile, useUploadAvatar, useUser } from "@/lib/data/hooks";
 
@@ -38,12 +39,19 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
   const toast = useToast();
   const { data: profile } = useProfile();
 
-  async function onFile(f: File | undefined) {
+  const [editing, setEditing] = useState<File | null>(null);
+
+  function onFile(f: File | undefined) {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("Choose an image file.");
     if (f.size > MAX_PHOTO_BYTES) return toast.error("Photos must be under 40 MB.");
+    setEditing(f); // crop & rotate first
+  }
+
+  async function save(f: File) {
     try {
       await upload.mutateAsync(f);
+      setEditing(null);
       toast.success("Profile photo updated.");
     } catch (e) {
       toast.error(e);
@@ -69,7 +77,13 @@ export function AvatarUploader({ size = 112 }: { size?: number }) {
           {upload.isPending ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
         </span>
       </button>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => onFile(e.target.files?.[0]).finally(() => (e.target.value = ""))} />
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+          onFile(e.target.files?.[0]);
+          e.target.value = "";
+        }} />
+      {editing && (
+        <PhotoEditor file={editing} round title="Profile photo" maxSide={1024} busy={upload.isPending} onCancel={() => setEditing(null)} onDone={save} />
+      )}
       <div className="flex items-center gap-3 text-xs">
         <button type="button" className="font-medium text-ink underline-offset-2 hover:underline" onClick={() => fileRef.current?.click()}>
           {profile?.avatar_path ? "Change photo" : "Upload photo"}

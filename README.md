@@ -35,6 +35,7 @@ Live: **https://gymrepledger.vercel.app** — data lives in Supabase (`ap-south-
 | **History** | Attendance, session ledger, payments, workouts and the audit trail, filterable by date, trainer, package and type |
 | **Sign-in** | Continue with Google (primary), email + password, password reset |
 | **Welcome flow** | First sign-in asks name, photo, birth date (age), height, weight, gym membership, personal trainer and weekly goal — skippable, editable later |
+| **Photos** | Crop, zoom, rotate and straighten before uploading (round crop for the profile photo; 3:4, 4:5, square, 16:9 or original for progress photos), or upload the original — up to 40 MB |
 | **Delete account** | Settings → Delete account: removes photos, every record and the login; only a minimal log entry (email, provider, created/deleted dates, counts) is kept in `private.deleted_accounts` |
 | **Settings** | Profile, time zone, theme, membership (estimated vs confirmed expiry), trainers, planned breaks, reminder toggles, CSV/JSON export, archive restore, password |
 

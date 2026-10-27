@@ -99,6 +99,8 @@ Estimates always carry the `<Estimate />` tag; confirmed values use a `Confirmed
 - First-run flow: one question per screen, big `Choice` buttons, progress bar, Back/Continue footer,
   "skip" always available for optional details, and a friendly summary at the end.
 - Avatars are circles with a soft gradient ring; tapping opens the file picker, with Remove nearby.
+- Every photo upload goes through `PhotoEditor` (crop/zoom/rotate) before saving; progress photos also
+  offer *Use original*.
 
 ## Writing style
 - Plain, short, second person: "You missed 1 chargeable PT session this month — ₹200 of prepaid value."

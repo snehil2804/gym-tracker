@@ -3,6 +3,7 @@
 import { Camera, CirclePlus, EyeOff, LineChart as LineIcon, Lock, Target, Trash2, Trophy } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Bars, ChartCard, Lines, RankBars } from "@/components/charts";
+import { PhotoEditor } from "@/components/photo-editor";
 import {
   Badge,
   Button,
@@ -533,9 +534,28 @@ function Photos({ d }: { d: Core }) {
   const [on, setOn] = useState(d.today);
   const [hidden, setHidden] = useState(true);
   const [toDelete, setToDelete] = useState<ProgressPhoto | null>(null);
+  const [editing, setEditing] = useState<File | null>(null);
 
   return (
     <div className="space-y-4">
+      {editing && (
+        <PhotoEditor
+          file={editing}
+          title="Progress photo"
+          allowOriginal
+          busy={upload.isPending}
+          onCancel={() => setEditing(null)}
+          onDone={async (f) => {
+            try {
+              await upload.mutateAsync({ file: f, takenOn: on });
+              setEditing(null);
+              toast.success("Photo saved privately.");
+            } catch (err) {
+              toast.error(err);
+            }
+          }}
+        />
+      )}
       <Card className="p-5">
         <div className="flex flex-wrap items-end gap-3">
           <Field label="Photo date">
@@ -550,13 +570,9 @@ function Photos({ d }: { d: Core }) {
               const f = e.target.files?.[0];
               e.target.value = "";
               if (!f) return;
+              if (!f.type.startsWith("image/")) return toast.error("Choose an image file.");
               if (f.size > MAX_PHOTO_BYTES) return toast.error("Photos must be under 40 MB.");
-              try {
-                await upload.mutateAsync({ file: f, takenOn: on });
-                toast.success("Photo saved privately.");
-              } catch (err) {
-                toast.error(err);
-              }
+              setEditing(f); // crop & rotate first
             }}
           />
           <Button variant="primary" icon={<Camera className="size-4" />} loading={upload.isPending} onClick={() => fileRef.current?.click()}>
@@ -586,7 +602,7 @@ function Photos({ d }: { d: Core }) {
             <figure key={p.id} className="overflow-hidden rounded-2xl border border-line bg-surface">
               {urls.data?.[p.storage_path] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={urls.data[p.storage_path]} alt={`Progress photo ${formatDate(p.taken_on)}`} className="aspect-[3/4] w-full object-cover" />
+                <img src={urls.data[p.storage_path]} alt={`Progress photo ${formatDate(p.taken_on)}`} className="aspect-[3/4] w-full bg-surface-2 object-contain" />
               ) : (
                 <div className="aspect-[3/4] w-full animate-pulse bg-surface-2" />
               )}

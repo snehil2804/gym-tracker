@@ -5,6 +5,13 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Added
+- **Crop & rotate before upload** (`src/components/photo-editor.tsx`, `react-easy-crop`): drag, pinch/slider
+  zoom, 90° rotate, ±45° straighten. Profile photos use a round crop (saved at up to 1024 px);
+  progress photos offer 3:4, 4:5, square, 16:9 or original framing (up to 3000 px), or **Use original**
+  to upload untouched. Progress gallery tiles now show the whole photo.
+- Fix found while testing: the editor's image URL was revoked by React's double-mount in development.
+
 ### Changed
 - Photo uploads (profile and progress) now accept up to **40 MB** each (was 5 MB / 10 MB).
   Migration `20261027000009_photo_limit_40mb`. Free-plan Supabase allows 50 MB per file and 1 GB total storage.
