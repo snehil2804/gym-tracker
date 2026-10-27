@@ -5,7 +5,7 @@ packages in advance. It tracks the gym membership, PT packages and payments, dai
 a ledger of PT sessions, workouts and strength progress — and, most importantly, the **value of
 prepaid PT sessions lost to confirmed chargeable absences**.
 
-Live: see *Deployment* below. Data lives in Supabase; the app is deployed on Vercel.
+Live: **https://gym-tracker-nine-roan.vercel.app** Data lives in Supabase; the app is deployed on Vercel.
 
 ---
 
@@ -201,7 +201,7 @@ The app never uses the `service_role` key.
 
 1. Create a project (any region; this one uses `ap-south-1`, Mumbai).
 2. Apply the migrations in order — SQL editor, `supabase db push`, or `psql`:
-   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`.
+   `supabase/migrations/20261026000001_core_schema.sql`, `…0002_ledger_logic.sql`, `…0003_reporting_seed_restore.sql`, `20261027000004_fk_indexes.sql`.
 3. Set the owner email (who receives the personal seed):
    ```sql
    insert into private.app_config (key, value) values ('owner_email', 'you@example.com')
