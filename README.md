@@ -5,7 +5,19 @@ packages in advance. It tracks the gym membership, PT packages and payments, dai
 a ledger of PT sessions, workouts and strength progress — and, most importantly, the **value of
 prepaid PT sessions lost to confirmed chargeable absences**.
 
-Live: **https://gym-tracker-nine-roan.vercel.app** Data lives in Supabase; the app is deployed on Vercel.
+Live: **https://gym-tracker-nine-roan.vercel.app** — data lives in Supabase (`ap-south-1`), the app runs on Vercel (`bom1`).
+
+## Documentation
+
+| File | What's in it |
+|---|---|
+| [PROJECT_STATUS.md](PROJECT_STATUS.md) | What's done, what's verified, what's pending, owner's next steps |
+| [SETUP.md](SETUP.md) | Local setup, recreating the Supabase backend, deploying, first sign-in |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, data model, triggers/RPCs, security, testing |
+| [UI_GUIDELINES.md](UI_GUIDELINES.md) | Visual identity, tokens, components, interaction and chart rules |
+| [ROADMAP.md](ROADMAP.md) | Planned work |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
+| [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) | Rules and task map for coding agents |
 
 ---
 
@@ -215,6 +227,7 @@ The app never uses the `service_role` key.
 
 ```bash
 npm test            # 36 unit tests (money, dates/time zones, rules, finance, forecast, parser)
+npm run check       # typecheck + lint + tests + build
 npm run typecheck
 npm run lint
 npm run build
