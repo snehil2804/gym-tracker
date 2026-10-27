@@ -8,7 +8,7 @@ by its owner**.
 
 | | |
 |---|---|
-| Production URL | https://gym-tracker-nine-roan.vercel.app |
+| Production URL | https://gymrepledger.vercel.app (primary; `gym-tracker-nine-roan.vercel.app` redirects here) |
 | Vercel project | `gym-tracker` (`prj_N87my63Ng6m7CkwBAkCfXkgYqW81`), team "Snehil's projects", functions region `bom1` |
 | Supabase project | `gym-tracker` (`xipmgknkvhnfbujlavbh`), org "Snehil Personal Projects", region `ap-south-1`, free plan ($0/month) |
 | Source | private GitHub repo `snehil2804/gym-tracker`, branch `main` |
@@ -87,8 +87,8 @@ to the owner's address. The owner's records are created on their first sign-in.
 
 ## Owner's next steps
 
-1. Supabase → Authentication → URL Configuration: Site URL `https://gym-tracker-nine-roan.vercel.app`;
-   add `https://gym-tracker-nine-roan.vercel.app/auth/callback` (and `http://localhost:3000/auth/callback`) to Redirect URLs.
+1. Supabase → Authentication → URL Configuration: Site URL `https://gymrepledger.vercel.app`;
+   add `https://gymrepledger.vercel.app/auth/callback` (and `http://localhost:3000/auth/callback`) to Redirect URLs.
 2. Create a Google OAuth client and enable Google in Supabase (`SETUP.md` §3b), then sign in with
    **Continue with Google** using `snehilrai678.sr@gmail.com` (email sign-up also works).
 3. Settings → Gym membership: enter the **confirmed** contract end date; set payment status/price.

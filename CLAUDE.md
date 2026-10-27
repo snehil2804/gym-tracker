@@ -7,7 +7,7 @@ it holds the Next.js 16 rules that `next dev` maintains.
 Rep Ledger is a single-owner personal tracker for a gym membership (19Fitness), prepaid personal
 training packages (trainer Soham), daily attendance, workouts and the money behind them. Next.js 16
 client app on Vercel; Supabase Postgres with RLS does all data protection and session accounting.
-Production: https://gym-tracker-nine-roan.vercel.app · Supabase ref `xipmgknkvhnfbujlavbh`.
+Production: https://gymrepledger.vercel.app · Supabase ref `xipmgknkvhnfbujlavbh`.
 Current state and pending manual steps: `PROJECT_STATUS.md`.
 
 ## Commands

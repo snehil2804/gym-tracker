@@ -18,7 +18,7 @@ dates are when the change landed.
 
 ## [0.1.0] — 2026-10-27
 
-First complete release, deployed to https://gym-tracker-nine-roan.vercel.app.
+First complete release, deployed to https://gymrepledger.vercel.app.
 
 ### Infrastructure
 - Created Supabase project `gym-tracker` (`xipmgknkvhnfbujlavbh`, ap-south-1, free plan).

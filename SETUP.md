@@ -43,7 +43,7 @@ Make sure `http://localhost:3000/auth/callback` is in Supabase → Authenticatio
    on conflict (key) do update set value = excluded.value;
    ```
 4. **Authentication → URL Configuration**
-   - Site URL: your production URL (e.g. `https://gym-tracker-nine-roan.vercel.app`)
+   - Site URL: your production URL (e.g. `https://gymrepledger.vercel.app`)
    - Redirect URLs: `https://<prod-domain>/**`, `http://localhost:3000/**`
    - Keep Email provider enabled with "Confirm email" on.
 5. **Optional:** custom SMTP (Authentication → Emails) if confirmation emails don't arrive.
@@ -60,14 +60,14 @@ The button switches itself on as soon as Google is enabled in Supabase (the page
    email, audience **External**. While in *Testing*, add your Gmail under **Test users** (or publish
    the app). Scopes: the defaults `openid`, `email`, `profile` are enough.
 3. **Clients → Create client → Web application**:
-   - Authorized JavaScript origins: `https://gym-tracker-nine-roan.vercel.app`, `http://localhost:3000`
+   - Authorized JavaScript origins: `https://gymrepledger.vercel.app`, `http://localhost:3000`
    - Authorized redirect URI: **`https://xipmgknkvhnfbujlavbh.supabase.co/auth/v1/callback`**
    - Copy the **Client ID** and **Client secret**.
 4. **Supabase dashboard → Authentication → Sign In / Providers → Google**: enable it, paste the
    Client ID and Client secret, save.
 5. **Supabase → Authentication → URL Configuration** (required — otherwise Supabase sends you back to
-   `http://localhost:3000` after Google): Site URL `https://gym-tracker-nine-roan.vercel.app`; Redirect URLs
-   `https://gym-tracker-nine-roan.vercel.app/**` and `http://localhost:3000/**` (the wildcard is needed
+   `http://localhost:3000` after Google): Site URL `https://gymrepledger.vercel.app`; Redirect URLs
+   `https://gymrepledger.vercel.app/**` and `http://localhost:3000/**` (the wildcard is needed
    because the callback carries a `?next=` parameter).
 6. Open the app → **Continue with Google** → pick `snehilrai678.sr@gmail.com`.
 
