@@ -250,3 +250,47 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/*
+  iOS Safari gives date/time inputs an intrinsic minimum width and centres their text, which makes
+  them spill out of narrow grid columns. Reset that so they behave like normal text fields.
+*/
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+}
+input[type="date"]:not(.w-auto),
+input[type="time"]:not(.w-auto),
+input[type="datetime-local"]:not(.w-auto),
+input[type="month"]:not(.w-auto) {
+  display: block;
+  width: 100%;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+/* An empty iOS date field collapses to zero height; keep it the same height as other inputs. */
+input[type="date"]:not(.h-8):not(.h-9),
+input[type="time"]:not(.h-8):not(.h-9) {
+  min-height: 2.75rem;
+}
+
+/* Horizontal chip/tab strips scroll by swipe without showing a scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

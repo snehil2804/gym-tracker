@@ -147,7 +147,7 @@ function PackageForm({ d }: { d: Core }) {
         )}
         {(!renewing || !sameTrainer) && (
           <Field label="Trainer name">
-            <Input list="trainer-names" value={trainerName} onChange={(e) => setTrainerName(e.target.value)} placeholder="e.g. Soham" />
+            <Input list="trainer-names" value={trainerName} onChange={(e) => setTrainerName(e.target.value)} placeholder="Trainer's name" />
             <datalist id="trainer-names">
               {(trainers.data ?? []).map((t) => (
                 <option key={t.id} value={t.name} />

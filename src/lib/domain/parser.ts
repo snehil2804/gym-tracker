@@ -1,7 +1,7 @@
 // Rule-based parser that turns a short free-text note into an editable workout
 // draft. It never decides that a paid PT session happened on its own: it only
 // *suggests* a completed PT session when the text says so explicitly
-// ("Soham trained me", "PT session with Soham"), and the user must still
+// ("<trainer> trained me", "PT session with <trainer>"), and the user must still
 // confirm the draft before anything is saved.
 
 import { addDays, isoWeekday, type ISODate } from "./dates";

@@ -12,7 +12,6 @@ import {
   Estimate,
   Field,
   Input,
-  PageHeader,
   Segmented,
   Select,
   Sheet,
@@ -48,14 +47,27 @@ export default function SettingsPage() {
   const { data: d, loading, error } = useCore();
   useEffect(() => {
     if (!d || !window.location.hash) return;
-    const el = document.querySelector(window.location.hash);
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Wait for the sections to render, then jump to the linked one (e.g. #membership).
+    const id = window.location.hash;
+    const t = setTimeout(() => document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+    return () => clearTimeout(t);
   }, [d]);
   if (error) return <ErrorNote error={error} />;
   if (loading || !d) return <Skeleton className="h-96" />;
   return (
-    <div className="anim-rise mx-auto max-w-3xl space-y-6">
-      <PageHeader title="Settings" />
+    <div className="relative">
+      {/* Soft brand gradient behind the top of the page; fades into the background. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-x-4 -top-5 h-[520px] sm:-inset-x-6 md:-top-8 lg:-right-10 lg:-left-10"
+        style={{
+          background:
+            "radial-gradient(65% 75% at 8% 0%, color-mix(in oklab, var(--accent) 24%, transparent), transparent 70%), radial-gradient(60% 70% at 95% 5%, color-mix(in oklab, var(--good) 22%, transparent), transparent 70%), radial-gradient(45% 55% at 50% 28%, color-mix(in oklab, var(--info) 12%, transparent), transparent 75%)",
+          maskImage: "linear-gradient(to bottom, black 45%, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent)",
+        }}
+      />
+      <div className="anim-rise relative mx-auto max-w-3xl space-y-6">
       <AboutYouSection d={d} />
       <TrainingSection profile={d.profile} />
       <ProfileSection profile={d.profile} />
@@ -66,6 +78,7 @@ export default function SettingsPage() {
       <DataSection />
       <AccountSection />
       <DangerZone d={d} />
+      </div>
     </div>
   );
 }
@@ -197,7 +210,7 @@ function MembershipSection({ d }: { d: Core }) {
 function MembershipForm({ m, today, onDone }: { m?: Membership; today: string; onDone?: () => void }) {
   const toast = useToast();
   const save = useSaveMembership();
-  const [gym, setGym] = useState(m?.gym_name ?? "19Fitness");
+  const [gym, setGym] = useState(m?.gym_name ?? "");
   const [start, setStart] = useState(m?.start_date ?? today);
   const [months, setMonths] = useState(String(m?.duration_months ?? 3));
   const [confirmed, setConfirmed] = useState(m?.confirmed_end_date ?? "");
@@ -423,7 +436,7 @@ function ScheduleSection({ d }: { d: Core }) {
           <Input type="date" value={end} min={start} onChange={(e) => setEnd(e.target.value)} />
         </Field>
         <Field label="Note (optional)" className="sm:col-span-2">
-          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Diwali trip" />
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Holiday trip" />
         </Field>
       </div>
       <Button
@@ -528,7 +541,7 @@ function DataSection() {
         <Button icon={<Download className="size-4" />} loading={busy === "sets"} onClick={() => run("sets", async () => download(`rep-ledger-exercise-history-${stamp()}.csv`, await exportExerciseHistoryCSV(), "text/csv"))}>
           Exercise history (CSV)
         </Button>
-        <Link href="/finance" className="flex items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
+        <Link href="/finance" className="flex h-10 items-center justify-center rounded-xl border border-dashed border-line-strong px-3 text-sm text-muted hover:bg-surface-2">
           Financial summary → see Money
         </Link>
       </div>
@@ -597,43 +610,60 @@ function AccountSection() {
   const toast = useToast();
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
+  const providers = ((user?.app_metadata as { providers?: string[] } | undefined)?.providers ?? []) as string[];
+  const usesGoogle = providers.includes("google");
+  const hasPassword = providers.includes("email");
   return (
     <Section id="account" title="Account">
-      <p className="text-sm">
-        Signed in as <span className="font-medium">{user?.email}</span>
-      </p>
-      <div className="mt-4 flex flex-wrap items-end gap-2">
-        <Field label="New password" className="min-w-56 flex-1" hint="At least 8 characters.">
-          <Input type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} />
-        </Field>
-        <Button
-          disabled={pw.length < 8}
-          loading={busy}
-          onClick={async () => {
-            setBusy(true);
-            const { error } = await getSupabase().auth.updateUser({ password: pw });
-            setBusy(false);
-            if (error) toast.error(error);
-            else {
-              setPw("");
-              toast.success("Password updated.");
-            }
-          }}
-        >
-          Change password
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs text-muted">Signed in as</p>
+          <p className="truncate text-[15px] font-medium text-ink">{user?.email}</p>
+        </div>
+        <Badge tone="neutral">{usesGoogle ? "Google sign-in" : "Email & password"}</Badge>
       </div>
-      <Button
-        className="mt-5"
-        variant="danger"
-        icon={<LogOut className="size-4" />}
-        onClick={async () => {
-          await getSupabase().auth.signOut();
-          window.location.replace("/login");
+
+      <form
+        className="mt-5 border-t border-line pt-5"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (pw.length < 8) return;
+          setBusy(true);
+          const { error } = await getSupabase().auth.updateUser({ password: pw });
+          setBusy(false);
+          if (error) toast.error(error);
+          else {
+            setPw("");
+            toast.success(hasPassword ? "Password updated." : "Password set. You can now also sign in with email.");
+          }
         }}
       >
-        Sign out
-      </Button>
+        <label htmlFor="new-password" className="text-[13px] font-medium text-ink-2">
+          {hasPassword ? "Change password" : "Set a password (optional)"}
+        </label>
+        <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+          <Input id="new-password" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password" className="sm:flex-1" />
+          <Button type="submit" className="h-11 shrink-0" disabled={pw.length < 8} loading={busy}>
+            {hasPassword ? "Update password" : "Set password"}
+          </Button>
+        </div>
+        <p className="mt-1.5 text-xs text-muted">
+          At least 8 characters.{usesGoogle && !hasPassword ? " You can keep using Google — a password just adds email sign-in." : ""}
+        </p>
+      </form>
+
+      <div className="mt-5 border-t border-line pt-5">
+        <Button
+          variant="danger"
+          icon={<LogOut className="size-4" />}
+          onClick={async () => {
+            await getSupabase().auth.signOut();
+            window.location.replace("/login");
+          }}
+        >
+          Sign out
+        </Button>
+      </div>
     </Section>
   );
 }
@@ -656,19 +686,21 @@ function AboutYouSection({ d }: { d: Core }) {
 
   return (
     <section id="profile" className="scroll-mt-20">
-      <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
-        <div className="relative h-24 bg-[radial-gradient(120%_140%_at_0%_0%,var(--accent-soft),transparent_60%),radial-gradient(120%_140%_at_100%_0%,var(--good-soft),transparent_55%)]" aria-hidden />
-        <div className="-mt-16 flex flex-col items-center px-5 pb-6 text-center">
-          <AvatarUploader size={108} />
-          <p className="mt-3 font-display text-2xl font-semibold tracking-tight">{profile.display_name || "Your name"}</p>
-          <p className="text-sm text-muted">
-            {user?.email}
-            {age !== null ? ` · ${age} years` : ""}
-            {profile.height_cm ? ` · ${profile.height_cm} cm` : ""}
-            {latestWeight ? ` · ${latestWeight.value} kg` : ""}
-          </p>
-        </div>
-        <div className="grid gap-4 border-t border-line p-5 sm:grid-cols-2">
+      <div className="flex flex-col items-center pt-2 pb-6 text-center sm:pt-4">
+        <AvatarUploader size={144} />
+        <h1 className="mt-4 font-display text-[28px] leading-tight font-semibold tracking-tight sm:text-[32px]">{profile.display_name || "Your name"}</h1>
+        <p className="mt-1 max-w-full truncate text-sm text-muted">{user?.email}</p>
+        {(age !== null || profile.height_cm || latestWeight) && (
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {age !== null && <ProfileChip label="Age" value={`${age}`} />}
+            {profile.height_cm ? <ProfileChip label="Height" value={`${profile.height_cm} cm`} /> : null}
+            {latestWeight ? <ProfileChip label="Weight" value={`${latestWeight.value} kg`} /> : null}
+          </div>
+        )}
+      </div>
+      <h2 className="text-[13px] font-semibold tracking-[0.06em] text-muted uppercase">Your profile</h2>
+      <div className="mt-3 rounded-2xl border border-line bg-surface/90 shadow-card backdrop-blur">
+        <div className="grid gap-4 p-5 sm:grid-cols-2">
           <Field label="Display name">
             <Input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
           </Field>
@@ -824,5 +856,14 @@ function DangerZone({ d }: { d: Core }) {
         </div>
       </Sheet>
     </section>
+  );
+}
+
+function ProfileChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-1.5 rounded-full border border-line bg-surface/80 px-3 py-1.5 text-sm shadow-card backdrop-blur">
+      <span className="text-xs text-muted">{label}</span>
+      <span className="num font-semibold text-ink">{value}</span>
+    </span>
   );
 }

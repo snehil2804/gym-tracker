@@ -63,7 +63,7 @@ export default function ProgressPage() {
   return (
     <div className="anim-rise">
       <PageHeader title="Progress" subtitle="Every chart is built from records you saved — nothing is estimated or filled in." />
-      <div className="-mx-1 mb-5 overflow-x-auto px-1">
+      <div className="-mx-1 mb-5 no-scrollbar overflow-x-auto px-1">
         <Segmented
           className="min-w-max"
           value={tab}

@@ -109,7 +109,7 @@ function History({ d }: { d: Core }) {
   return (
     <div className="anim-rise">
       <PageHeader title="History" subtitle="Everything you've recorded, and every change made to it." />
-      <div className="-mx-1 mb-4 overflow-x-auto px-1">
+      <div className="-mx-1 mb-4 no-scrollbar overflow-x-auto px-1">
         <Segmented
           className="min-w-max"
           value={tab}

@@ -70,7 +70,7 @@ export default function WorkoutsPage() {
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
               <Input className="pl-9" placeholder="Search workouts or exercises" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
-            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            <div className="-mx-1 flex gap-1.5 no-scrollbar overflow-x-auto px-1 pb-1">
               <Chip selected={!muscle} onClick={() => setMuscle(null)}>
                 All
               </Chip>

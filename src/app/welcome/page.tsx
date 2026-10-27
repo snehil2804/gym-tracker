@@ -194,7 +194,7 @@ function Onboarding({ onSaving }: { onSaving: () => void }) {
               {hasGym && (
                 <div className="anim-rise space-y-4 rounded-2xl border border-line bg-surface p-4">
                   <Field label="Gym name">
-                    <Input value={gymName} onChange={(e) => setGymName(e.target.value)} placeholder="e.g. 19Fitness" />
+                    <Input value={gymName} onChange={(e) => setGymName(e.target.value)} placeholder="Your gym's name" />
                   </Field>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Start date">
@@ -233,7 +233,7 @@ function Onboarding({ onSaving }: { onSaving: () => void }) {
               {hasPt && (
                 <div className="anim-rise space-y-4 rounded-2xl border border-line bg-surface p-4">
                   <Field label="Trainer's name">
-                    <Input value={trainer} onChange={(e) => setTrainer(e.target.value)} placeholder="e.g. Soham" />
+                    <Input value={trainer} onChange={(e) => setTrainer(e.target.value)} placeholder="Trainer's name" />
                   </Field>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Package price">

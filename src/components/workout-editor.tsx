@@ -226,7 +226,7 @@ export function WorkoutEditor({ d, initial, initialDate, duplicateOf }: { d: Cor
                 rows={3}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="I went to the gym today. Trained chest and triceps. Soham trained me for one hour. Did bench press 3x10 at 30kg, cable fly and triceps pushdowns."
+                placeholder="I went to the gym today. Trained chest and triceps for an hour. Did bench press 3x10 at 30kg, cable fly and triceps pushdowns."
               />
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="primary" size="sm" disabled={!text.trim()} onClick={applyDraft} icon={<Sparkles className="size-3.5" />}>

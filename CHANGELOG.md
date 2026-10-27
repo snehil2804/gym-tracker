@@ -5,6 +5,21 @@ dates are when the change landed.
 
 ## [Unreleased]
 
+### Fixed — mobile & layout polish
+- Date fields no longer spill out of their cards on iPhone Safari (global reset of the iOS date/time
+  input's intrinsic width and centred text); History From/To and Settings birth date fit at 375 px.
+- Account section: password field and button share one aligned row (stacked on phones), clearer
+  "Change / Set password" labelling and a sign-in method badge (Google / Email & password).
+- Settings deep links (e.g. `#membership`, `#account`) now scroll to the right section.
+- Horizontal tab/chip strips scroll without a visible scrollbar.
+
+### Changed
+- Settings opens with a larger centred profile photo (144 px), name, email and Age / Height / Weight
+  chips, over a soft brand gradient that spans the top of the page and fades into the background.
+- Placeholders no longer use real names ("Trainer's name", "Your gym's name", generic examples).
+- Every screen checked automatically for horizontal overflow at 375 px (iPhone 12 mini width).
+
+
 ### Added
 - **Crop & rotate before upload** (`src/components/photo-editor.tsx`, `react-easy-crop`): drag, pinch/slider
   zoom, 90° rotate, ±45° straighten. Profile photos use a round crop (saved at up to 1024 px);

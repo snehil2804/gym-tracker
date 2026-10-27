@@ -127,7 +127,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
             value={date}
             max={today}
             onChange={(e) => e.target.value && setDate(e.target.value)}
-            className="h-8 rounded-full border border-line-strong bg-surface px-3 text-[13px] text-ink-2"
+            className="h-8 w-auto rounded-full border border-line-strong bg-surface px-3 text-[13px] text-ink-2"
           />
         </label>
       </div>
@@ -258,7 +258,7 @@ function QuickLogSheet({ initialMode, initialDate, onClose }: { initialMode: Mod
           <Choice selected={!gymToo} icon={<UserX className="size-5" />} title="I didn't go to the gym" onClick={() => setGymToo(false)} />
         </div>
         <Field label="Note (optional)" className="mt-4">
-          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Soham was unwell" />
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Trainer was unwell" />
         </Field>
         <p className="mt-3 text-xs text-muted">Trainer cancellations never count as a missed or forfeited session.</p>
       </>
